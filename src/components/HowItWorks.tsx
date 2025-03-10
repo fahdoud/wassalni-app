@@ -1,43 +1,41 @@
 
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import Button from "./Button";
 import GradientText from "./ui-components/GradientText";
-
-const steps = [
-  {
-    number: "01",
-    title: "Create Your Account",
-    description:
-      "Sign up in minutes with your email or social accounts. Verify your profile to build trust with other users.",
-  },
-  {
-    number: "02",
-    title: "Find or Offer a Ride",
-    description:
-      "Search for available rides or offer your own by setting your route, date, time, and available seats.",
-  },
-  {
-    number: "03",
-    title: "Connect & Confirm",
-    description:
-      "Chat with the driver or passengers through our secure messaging system and confirm your booking.",
-  },
-  {
-    number: "04",
-    title: "Travel Together",
-    description:
-      "Meet at the agreed pick-up point, enjoy your journey, and split travel costs through our secure payment system.",
-  },
-  {
-    number: "05",
-    title: "Rate Your Experience",
-    description:
-      "After the trip, rate your experience to help build our trusted community of carpoolers.",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const HowItWorks = () => {
+  const { t } = useLanguage();
   const stepsRef = useRef<HTMLDivElement>(null);
+
+  const steps = [
+    {
+      number: "01",
+      title: t('how.step1'),
+      description: t('how.step1Desc'),
+    },
+    {
+      number: "02",
+      title: t('how.step2'),
+      description: t('how.step2Desc'),
+    },
+    {
+      number: "03",
+      title: t('how.step3'),
+      description: t('how.step3Desc'),
+    },
+    {
+      number: "04",
+      title: t('how.step4'),
+      description: t('how.step4Desc'),
+    },
+    {
+      number: "05",
+      title: t('how.step5'),
+      description: t('how.step5Desc'),
+    },
+  ];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -61,13 +59,13 @@ const HowItWorks = () => {
   }, []);
 
   return (
-    <section id="how-it-works" className="section bg-gradient-to-b from-white to-blue-50/50">
+    <section id="how-it-works" className="section bg-gradient-to-b from-white to-blue-50/50 dark:from-gray-900 dark:to-gray-800/50">
       <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
         <h2 className="mb-4">
-          How <GradientText>Wassalni</GradientText> Works
+          {t('how.title')} <GradientText>Wassalni</GradientText> {t('nav.howItWorks')}
         </h2>
-        <p className="text-lg text-gray-600">
-          Follow these simple steps to start sharing rides and saving money
+        <p className="text-lg text-gray-600 dark:text-gray-300">
+          {t('how.subtitle')}
         </p>
       </div>
 
@@ -83,14 +81,16 @@ const HowItWorks = () => {
             </div>
             <div>
               <h3 className="text-2xl font-bold mb-2">{step.title}</h3>
-              <p className="text-gray-600">{step.description}</p>
+              <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
             </div>
           </div>
         ))}
       </div>
 
       <div className="text-center mt-12 animate-fade-in">
-        <Button size="lg">Start Your Journey</Button>
+        <Link to="/rides">
+          <Button size="lg">{t('how.startJourney')}</Button>
+        </Link>
       </div>
     </section>
   );

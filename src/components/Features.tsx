@@ -1,6 +1,7 @@
 
 import { Car, Clock, DollarSign, ShieldCheck, Users, Zap } from "lucide-react";
 import GradientText from "./ui-components/GradientText";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -18,52 +19,48 @@ const FeatureCard = ({ icon, title, description, delay }: FeatureCardProps) => (
       {icon}
     </div>
     <h3 className="text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-gray-600">{description}</p>
+    <p className="text-gray-600 dark:text-gray-300">{description}</p>
   </div>
 );
 
 const Features = () => {
+  const { t } = useLanguage();
+
   const features = [
     {
       icon: <Car size={24} />,
-      title: "Convenient Travel",
-      description:
-        "Find rides to your exact destination, no more transfers or waiting at stops.",
+      title: t('features.convenience'),
+      description: t('features.convenienceDesc'),
       delay: 0.1,
     },
     {
       icon: <DollarSign size={24} />,
-      title: "Cost Effective",
-      description:
-        "Save money by sharing fuel costs and tolls with fellow travelers.",
+      title: t('features.cost'),
+      description: t('features.costDesc'),
       delay: 0.2,
     },
     {
       icon: <Users size={24} />,
-      title: "Community Building",
-      description:
-        "Connect with like-minded travelers and build your own trusted network.",
+      title: t('features.community'),
+      description: t('features.communityDesc'),
       delay: 0.3,
     },
     {
       icon: <ShieldCheck size={24} />,
-      title: "Safe & Secure",
-      description:
-        "Verified profiles, ratings, and reviews ensure a safe experience for everyone.",
+      title: t('features.safety'),
+      description: t('features.safetyDesc'),
       delay: 0.4,
     },
     {
       icon: <Zap size={24} />,
-      title: "Fast & Flexible",
-      description:
-        "Book instantly or plan ahead with our easy-to-use platform.",
+      title: t('features.fast'),
+      description: t('features.fastDesc'),
       delay: 0.5,
     },
     {
       icon: <Clock size={24} />,
-      title: "Time Saving",
-      description:
-        "No rigid schedules. Travel when it suits you with our flexible options.",
+      title: t('features.time'),
+      description: t('features.timeDesc'),
       delay: 0.6,
     },
   ];
@@ -72,10 +69,10 @@ const Features = () => {
     <section id="features" className="section">
       <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
         <h2 className="mb-4">
-          Why Choose <GradientText>Wassalni</GradientText>
+          {t('features.title')} <GradientText>Wassalni</GradientText>
         </h2>
-        <p className="text-lg text-gray-600">
-          Our platform makes carpooling simple, safe, and enjoyable for everyone.
+        <p className="text-lg text-gray-600 dark:text-gray-300">
+          {t('features.subtitle')}
         </p>
       </div>
 

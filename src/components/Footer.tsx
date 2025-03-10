@@ -1,22 +1,27 @@
 
+import { Link } from "react-router-dom";
 import GradientText from "./ui-components/GradientText";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { t } = useLanguage();
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="bg-gray-50 pt-16 pb-8">
+    <footer className="bg-gray-50 pt-16 pb-8 dark:bg-gray-900">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div>
-            <a href="/" className="inline-block mb-4">
+            <Link to="/" className="inline-block mb-4">
               <h2 className="text-2xl font-bold">
                 <GradientText>Wassalni</GradientText>
               </h2>
-            </a>
-            <p className="text-gray-600 mb-4">
-              The smart way to share rides, save money, and meet new people.
+            </Link>
+            <p className="text-gray-600 mb-4 dark:text-gray-300">
+              {t('footer.description')}
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-600 hover:text-wassalni-blue">
+              <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-400 dark:hover:text-wassalni-lightBlue">
                 <span className="sr-only">Facebook</span>
                 <svg
                   className="h-6 w-6"
@@ -31,7 +36,7 @@ const Footer = () => {
                   />
                 </svg>
               </a>
-              <a href="#" className="text-gray-600 hover:text-wassalni-blue">
+              <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-400 dark:hover:text-wassalni-lightBlue">
                 <span className="sr-only">Instagram</span>
                 <svg
                   className="h-6 w-6"
@@ -46,7 +51,7 @@ const Footer = () => {
                   />
                 </svg>
               </a>
-              <a href="#" className="text-gray-600 hover:text-wassalni-blue">
+              <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-400 dark:hover:text-wassalni-lightBlue">
                 <span className="sr-only">Twitter</span>
                 <svg
                   className="h-6 w-6"
@@ -61,88 +66,86 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Company</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('footer.company')}</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-600 hover:text-wassalni-blue">
-                  About Us
+                <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue">
+                  {t('footer.about')}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-wassalni-blue">
-                  Careers
+                <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue">
+                  {t('footer.careers')}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-wassalni-blue">
-                  Blog
+                <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue">
+                  {t('footer.blog')}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-wassalni-blue">
-                  Press
+                <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue">
+                  {t('footer.press')}
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Resources</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('footer.resources')}</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-600 hover:text-wassalni-blue">
-                  Help Center
+                <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue">
+                  {t('footer.help')}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-wassalni-blue">
-                  Safety Guidelines
+                <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue">
+                  {t('footer.safety')}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-wassalni-blue">
-                  Community Rules
+                <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue">
+                  {t('footer.rules')}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-wassalni-blue">
-                  Terms of Service
+                <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue">
+                  {t('footer.terms')}
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Contact</h3>
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">{t('footer.contact')}</h3>
             <ul className="space-y-2">
-              <li className="text-gray-600">
-                123 Carpooling Street
-                <br />
-                Tunis, Tunisia
+              <li className="text-gray-600 dark:text-gray-300">
+                {t('footer.address')}
               </li>
               <li>
                 <a
                   href="mailto:info@wassalni.com"
-                  className="text-gray-600 hover:text-wassalni-blue"
+                  className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue"
                 >
                   info@wassalni.com
                 </a>
               </li>
               <li>
                 <a
-                  href="tel:+21612345678"
-                  className="text-gray-600 hover:text-wassalni-blue"
+                  href="tel:+21312345678"
+                  className="text-gray-600 hover:text-wassalni-blue dark:text-gray-300 dark:hover:text-wassalni-lightBlue"
                 >
-                  +216 12 345 678
+                  +213 12 345 678
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-8">
-          <p className="text-gray-500 text-center text-sm">
-            &copy; {new Date().getFullYear()} Wassalni. All rights reserved.
+        <div className="border-t border-gray-200 pt-8 dark:border-gray-700">
+          <p className="text-gray-500 text-center text-sm dark:text-gray-400">
+            &copy; {currentYear} Wassalni. {t('footer.rights')}
           </p>
         </div>
       </div>

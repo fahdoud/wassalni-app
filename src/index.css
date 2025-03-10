@@ -36,6 +36,36 @@
     --radius: 1rem;
   }
 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 160 70% 33%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+
   * {
     @apply border-border;
   }
@@ -44,6 +74,14 @@
     @apply bg-background text-foreground antialiased overflow-x-hidden;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
     scroll-behavior: smooth;
+  }
+
+  html.ar {
+    direction: rtl;
+  }
+
+  html.ar * {
+    text-align: right;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -69,11 +107,11 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-lg;
+    @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-lg dark:bg-black/50 dark:border-white/10;
   }
   
   .feature-card {
-    @apply relative overflow-hidden rounded-2xl glass-card p-6 transition-all duration-300 hover:shadow-xl;
+    @apply relative overflow-hidden rounded-2xl glass-card p-6 transition-all duration-300 hover:shadow-xl dark:hover:shadow-black/20;
   }
 
   .gradient-text {
@@ -85,7 +123,7 @@
   }
   
   .btn-outlined {
-    @apply relative overflow-hidden rounded-full bg-transparent border-2 border-wassalni-green text-wassalni-green font-medium py-3 px-6 shadow-sm transition-all duration-300 hover:shadow-md hover:bg-wassalni-green/5;
+    @apply relative overflow-hidden rounded-full bg-transparent border-2 border-wassalni-green text-wassalni-green font-medium py-3 px-6 shadow-sm transition-all duration-300 hover:shadow-md hover:bg-wassalni-green/5 dark:text-wassalni-lightGreen dark:border-wassalni-lightGreen;
   }
 
   .section {
