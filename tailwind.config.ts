@@ -65,9 +65,10 @@ export default {
 				},
 				// Wassalni custom colors
 				wassalni: {
-					blue: '#4F46E5',
-					purple: '#9333EA',
-					pink: '#DB2777',
+					green: '#00A693',
+					lightGreen: '#C7FFD6',
+					blue: '#94C5FF',
+					lightBlue: '#C3E1FF',
 					light: '#F9FAFB',
 					dark: '#1F2937',
 				}
@@ -142,9 +143,9 @@ export default {
 				'pulse-slow': 'pulse-slow 3s ease-in-out infinite'
 			},
 			backgroundImage: {
-				'gradient-primary': 'linear-gradient(to right, #4F46E5, #9333EA, #DB2777)',
-				'gradient-secondary': 'linear-gradient(to bottom right, #4F46E5, #9333EA)',
-				'gradient-radial': 'radial-gradient(circle, rgba(79,70,229,0.8) 0%, rgba(147,51,234,0.8) 50%, rgba(219,39,119,0.8) 100%)',
+				'gradient-primary': 'linear-gradient(to right, #C7FFD6, #94C5FF)',
+				'gradient-secondary': 'linear-gradient(to bottom right, #C7FFD6, #C3E1FF)',
+				'gradient-radial': 'radial-gradient(circle, rgba(199,255,214,0.8) 0%, rgba(195,225,255,0.8) 100%)',
 			}
 		}
 	},

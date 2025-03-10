@@ -14,10 +14,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 255 92% 76%;
+    --primary: 160 100% 33%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 215 27% 47%;
+    --secondary: 210 75% 60%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -81,11 +81,11 @@
   }
 
   .btn-gradient {
-    @apply relative overflow-hidden rounded-full bg-gradient-primary text-white font-medium py-3 px-6 shadow-md transition-all duration-300 hover:shadow-lg hover:translate-y-[-2px];
+    @apply relative overflow-hidden rounded-full bg-gradient-primary text-wassalni-dark font-medium py-3 px-6 shadow-md transition-all duration-300 hover:shadow-lg hover:translate-y-[-2px];
   }
   
   .btn-outlined {
-    @apply relative overflow-hidden rounded-full bg-transparent border-2 border-wassalni-blue text-wassalni-blue font-medium py-3 px-6 shadow-sm transition-all duration-300 hover:shadow-md hover:bg-wassalni-blue/5;
+    @apply relative overflow-hidden rounded-full bg-transparent border-2 border-wassalni-green text-wassalni-green font-medium py-3 px-6 shadow-sm transition-all duration-300 hover:shadow-md hover:bg-wassalni-green/5;
   }
 
   .section {

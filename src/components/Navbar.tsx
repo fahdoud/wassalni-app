@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Button from "./Button";
 import GradientText from "./ui-components/GradientText";
+import Logo from "./ui-components/Logo";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -33,6 +34,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2">
+          <Logo size="md" />
           <h1 className="text-2xl font-bold tracking-tight">
             <GradientText>Wassalni</GradientText>
           </h1>
@@ -44,7 +46,7 @@ const Navbar = () => {
             <li>
               <a
                 href="#features"
-                className="text-gray-700 hover:text-wassalni-blue transition-colors"
+                className="text-gray-700 hover:text-wassalni-green transition-colors"
               >
                 Features
               </a>
@@ -52,7 +54,7 @@ const Navbar = () => {
             <li>
               <a
                 href="#how-it-works"
-                className="text-gray-700 hover:text-wassalni-blue transition-colors"
+                className="text-gray-700 hover:text-wassalni-green transition-colors"
               >
                 How It Works
               </a>
@@ -60,7 +62,7 @@ const Navbar = () => {
             <li>
               <a
                 href="#testimonials"
-                className="text-gray-700 hover:text-wassalni-blue transition-colors"
+                className="text-gray-700 hover:text-wassalni-green transition-colors"
               >
                 Testimonials
               </a>
@@ -91,7 +93,7 @@ const Navbar = () => {
               <li>
                 <a
                   href="#features"
-                  className="block py-2 text-gray-700 hover:text-wassalni-blue transition-colors"
+                  className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors"
                   onClick={toggleMenu}
                 >
                   Features
@@ -100,7 +102,7 @@ const Navbar = () => {
               <li>
                 <a
                   href="#how-it-works"
-                  className="block py-2 text-gray-700 hover:text-wassalni-blue transition-colors"
+                  className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors"
                   onClick={toggleMenu}
                 >
                   How It Works
@@ -109,7 +111,7 @@ const Navbar = () => {
               <li>
                 <a
                   href="#testimonials"
-                  className="block py-2 text-gray-700 hover:text-wassalni-blue transition-colors"
+                  className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors"
                   onClick={toggleMenu}
                 >
                   Testimonials
