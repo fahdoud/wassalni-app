@@ -76,10 +76,14 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <ThemeToggle />
-            <Button variant="outlined" size="sm">
-              {t('nav.signIn')}
-            </Button>
-            <Button size="sm">{t('nav.signUp')}</Button>
+            <Link to="/passenger-signin">
+              <Button variant="outlined" size="sm">
+                {t('nav.signIn')}
+              </Button>
+            </Link>
+            <Link to="/passenger-signup">
+              <Button size="sm">{t('nav.signUp')}</Button>
+            </Link>
           </div>
         </nav>
 
@@ -129,10 +133,14 @@ const Navbar = () => {
                 </Link>
               </li>
               <li className="flex flex-col gap-2 pt-2">
-                <Button variant="outlined" className="w-full">
-                  {t('nav.signIn')}
-                </Button>
-                <Button className="w-full">{t('nav.signUp')}</Button>
+                <Link to="/passenger-signin" onClick={toggleMenu}>
+                  <Button variant="outlined" className="w-full">
+                    {t('nav.signIn')}
+                  </Button>
+                </Link>
+                <Link to="/passenger-signup" onClick={toggleMenu}>
+                  <Button className="w-full">{t('nav.signUp')}</Button>
+                </Link>
               </li>
             </ul>
           </nav>
