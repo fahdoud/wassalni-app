@@ -65,7 +65,7 @@ const DriverSignUp = () => {
         <div className="hidden md:w-2/5 md:flex bg-gradient-primary relative">
           <div className="absolute inset-0 bg-pattern opacity-10"></div>
           <div className="relative z-10 flex flex-col justify-center items-center text-wassalni-dark p-16">
-            <Logo size="xl" />
+            <Logo size="lg" />
             <h2 className="text-3xl font-bold mt-8 mb-4 text-center">{t('auth.joinAsDriver')}</h2>
             <p className="text-center max-w-md">
               {t('auth.driverBenefits')}
