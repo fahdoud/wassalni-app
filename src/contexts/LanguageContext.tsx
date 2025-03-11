@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 
 interface LanguageContextType {
@@ -7,14 +8,12 @@ interface LanguageContextType {
   dir: string;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
 interface LanguageProviderProps {
   children: ReactNode;
 }
 
 // Our translations object
-const translations = {
+const translations: Record<string, Record<string, string>> = {
   en: {
     // Navigation
     'nav.features': 'Features',
@@ -467,8 +466,9 @@ const translations = {
   }
 };
 
-const defaultLanguage: string = 'en';
+const defaultLanguage = 'en';
 
+// Define the context with proper typing
 const LanguageContext = createContext<LanguageContextType>({
   language: defaultLanguage,
   setLanguage: () => {},
@@ -478,14 +478,17 @@ const LanguageContext = createContext<LanguageContextType>({
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [language, setLanguage] = useState<string>(() => {
-    const savedLanguage = localStorage.getItem('language') as string;
+    const savedLanguage = localStorage.getItem('language');
     return savedLanguage || defaultLanguage;
   });
 
+  // Helper function to get translation string
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations[typeof language]] || key;
+    if (!language || !translations[language]) return key;
+    return translations[language][key] || key;
   };
 
+  // Determine text direction based on language
   const dir = useMemo(() => {
     return language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
@@ -509,4 +512,11 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   );
 };
 
-export const useLanguage = () => useContext(LanguageContext);
+// Hook to use the language context
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};
