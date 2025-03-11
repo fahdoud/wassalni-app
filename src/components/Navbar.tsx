@@ -66,10 +66,10 @@ const Navbar = () => {
             </li>
             <li>
               <Link
-                to="/rides"
+                to="/feedback"
                 className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
               >
-                {t('nav.testimonials')}
+                {t('nav.feedback')}
               </Link>
             </li>
           </ul>
@@ -125,11 +125,11 @@ const Navbar = () => {
               </li>
               <li>
                 <Link
-                  to="/rides"
+                  to="/feedback"
                   className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
                   onClick={toggleMenu}
                 >
-                  {t('nav.testimonials')}
+                  {t('nav.feedback')}
                 </Link>
               </li>
               <li className="flex flex-col gap-2 pt-2">

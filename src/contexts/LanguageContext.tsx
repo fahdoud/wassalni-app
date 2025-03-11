@@ -1,14 +1,19 @@
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-type Language = 'en' | 'fr' | 'ar';
-
-type LanguageContextType = {
-  language: Language;
-  setLanguage: (lang: Language) => void;
+interface LanguageContextType {
+  language: string;
+  setLanguage: (lang: string) => void;
   t: (key: string) => string;
-};
+  dir: string;
+}
 
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+interface LanguageProviderProps {
+  children: ReactNode;
+}
+
+// Our translations object
 const translations = {
   en: {
     // Navigation
@@ -67,6 +72,26 @@ const translations = {
     'how.step5Desc': 'After the trip, rate your experience to help build our trusted community of carpoolers.',
     'how.startJourney': 'Start Your Journey',
 
+    // Feedback
+    'nav.feedback': 'Feedback',
+    'feedback.title': 'We Value Your Feedback',
+    'feedback.subtitle': 'Help us improve Wassalni by sharing your thoughts, suggestions, or experience with our service.',
+    'feedback.generalFeedback': 'General Feedback',
+    'feedback.suggestion': 'Suggestion',
+    'feedback.rating': 'Rating',
+    'feedback.name': 'Your Name',
+    'feedback.email': 'Email Address',
+    'feedback.rateExperience': 'Rate your experience',
+    'feedback.yourFeedback': 'Your Feedback',
+    'feedback.submit': 'Submit Feedback',
+    'feedback.otherWaysTitle': 'Other Ways to Reach Us',
+    'feedback.emailUs': 'Email Us',
+    'feedback.emailDescription': 'Send your detailed feedback directly to our support team.',
+    'feedback.socialMedia': 'Social Media',
+    'feedback.socialDescription': 'Connect with us on social media platforms.',
+    'feedback.successTitle': 'Thank You for Your Feedback!',
+    'feedback.successDescription': 'We appreciate your input and will use it to improve our service.',
+    
     // Footer
     'footer.description': 'The smart way to share rides, save money, and meet new people.',
     'footer.company': 'Company',
@@ -197,6 +222,26 @@ const translations = {
     'how.step5Desc': 'Après le trajet, évaluez votre expérience pour aider à construire notre communauté de covoitureurs de confiance.',
     'how.startJourney': 'Commencez votre voyage',
 
+    // Feedback
+    'nav.feedback': 'Commentaires',
+    'feedback.title': 'Nous Valorisons Vos Commentaires',
+    'feedback.subtitle': 'Aidez-nous à améliorer Wassalni en partageant vos pensées, suggestions ou expérience avec notre service.',
+    'feedback.generalFeedback': 'Commentaire Général',
+    'feedback.suggestion': 'Suggestion',
+    'feedback.rating': 'Évaluation',
+    'feedback.name': 'Votre Nom',
+    'feedback.email': 'Adresse Email',
+    'feedback.rateExperience': 'Évaluez votre expérience',
+    'feedback.yourFeedback': 'Vos Commentaires',
+    'feedback.submit': 'Soumettre',
+    'feedback.otherWaysTitle': 'Autres Façons de Nous Contacter',
+    'feedback.emailUs': 'Envoyez-nous un Email',
+    'feedback.emailDescription': 'Envoyez vos commentaires détaillés directement à notre équipe de support.',
+    'feedback.socialMedia': 'Réseaux Sociaux',
+    'feedback.socialDescription': 'Connectez-vous avec nous sur les plateformes de médias sociaux.',
+    'feedback.successTitle': 'Merci pour Vos Commentaires!',
+    'feedback.successDescription': 'Nous apprécions votre contribution et l\'utiliserons pour améliorer notre service.',
+    
     // Footer
     'footer.description': 'La façon intelligente de partager des trajets, économiser de l\'argent et rencontrer de nouvelles personnes.',
     'footer.company': 'Entreprise',
@@ -327,6 +372,26 @@ const translations = {
     'how.step5Desc': 'بعد الرحلة، قيّم تجربتك للمساعدة في بناء مجتمع موثوق من مشاركي الرحلات.',
     'how.startJourney': 'ابدأ رحلتك',
 
+    // Feedback
+    'nav.feedback': 'الآراء',
+    'feedback.title': 'نحن نقدر آراءكم',
+    'feedback.subtitle': 'ساعدنا في تحسين وصلني من خلال مشاركة أفكارك أو اقتراحاتك أو تجربتك مع خدمتنا.',
+    'feedback.generalFeedback': 'رأي عام',
+    'feedback.suggestion': 'اقتراح',
+    'feedback.rating': 'تقييم',
+    'feedback.name': 'اسمك',
+    'feedback.email': 'البريد الإلكتروني',
+    'feedback.rateExperience': 'قيم تجربتك',
+    'feedback.yourFeedback': 'رأيك',
+    'feedback.submit': 'إرسال',
+    'feedback.otherWaysTitle': 'طرق أخرى للتواصل معنا',
+    'feedback.emailUs': 'راسلنا عبر البريد الإلكتروني',
+    'feedback.emailDescription': 'أرسل ملاحظاتك المفصلة مباشرة إلى فريق الدعم لدينا.',
+    'feedback.socialMedia': 'وسائل التواصل الاجتماعي',
+    'feedback.socialDescription': 'تواصل معنا على منصات التواصل الاجتماعي.',
+    'feedback.successTitle': 'شكراً على رأيك!',
+    'feedback.successDescription': 'نحن نقدر مساهمتك وسنستخدمها لتحسين خدمتنا.',
+    
     // Footer
     'footer.description': 'الطريقة الذكية لمشاركة الرحلات وتوفير المال ومقابلة أشخاص جدد.',
     'footer.company': 'الشركة',
@@ -402,17 +467,18 @@ const translations = {
   }
 };
 
-const defaultLanguage: Language = 'en';
+const defaultLanguage: string = 'en';
 
 const LanguageContext = createContext<LanguageContextType>({
   language: defaultLanguage,
   setLanguage: () => {},
   t: (key: string) => key,
+  dir: 'ltr',
 });
 
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>(() => {
-    const savedLanguage = localStorage.getItem('language') as Language;
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  const [language, setLanguage] = useState<string>(() => {
+    const savedLanguage = localStorage.getItem('language') as string;
     return savedLanguage || defaultLanguage;
   });
 
@@ -420,20 +486,24 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return translations[language][key as keyof typeof translations[typeof language]] || key;
   };
 
+  const dir = useMemo(() => {
+    return language === 'ar' ? 'rtl' : 'ltr';
+  }, [language]);
+
   useEffect(() => {
     localStorage.setItem('language', language);
     
     // Set direction for RTL support (Arabic)
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = dir;
     
     // Add language class to document for language-specific styles
     document.documentElement.lang = language;
     document.documentElement.classList.remove('en', 'fr', 'ar');
     document.documentElement.classList.add(language);
-  }, [language]);
+  }, [language, dir]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, dir }}>
       {children}
     </LanguageContext.Provider>
   );
