@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import Button from "./Button";
 import GradientText from "./ui-components/GradientText";
@@ -10,7 +9,6 @@ const Hero = () => {
 
   return (
     <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
-      {/* Background Elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] aspect-[1/0.5] bg-gradient-radial opacity-20"></div>
         <div className="absolute -top-[300px] -left-[300px] w-[600px] h-[600px] rounded-full bg-wassalni-lightGreen/20 blur-3xl"></div>
@@ -19,7 +17,7 @@ const Hero = () => {
 
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
-          <div className="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
+          <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
             <div className="inline-block px-3 py-1 bg-wassalni-green/10 text-wassalni-green text-sm font-medium rounded-full animate-fade-in dark:bg-wassalni-green/30 dark:text-wassalni-lightGreen">
               {t('hero.tagline')}
             </div>
@@ -28,7 +26,7 @@ const Hero = () => {
               <br />
               <GradientText>Wassalni</GradientText>
             </h1>
-            <p className="text-lg text-gray-600 md:text-xl max-w-2xl mx-auto lg:mx-0 animate-slide-up dark:text-gray-300" style={{ animationDelay: "0.2s" }}>
+            <p className="text-lg text-gray-600 md:text-xl max-w-2xl mx-auto lg:mx-0 animate-slide-up dark:text-gray-300 mt-6" style={{ animationDelay: "0.2s" }}>
               {t('hero.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-6 justify-center lg:justify-start animate-slide-up" style={{ animationDelay: "0.3s" }}>
