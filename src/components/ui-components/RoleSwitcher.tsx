@@ -9,12 +9,14 @@ interface RoleSwitcherProps {
   currentRole: "passenger" | "driver";
   passengerLink: string;
   driverLink: string;
+  isProfile?: boolean;
 }
 
 const RoleSwitcher = ({
   currentRole,
   passengerLink,
   driverLink,
+  isProfile = false,
 }: RoleSwitcherProps) => {
   const { t } = useLanguage();
 
@@ -30,7 +32,7 @@ const RoleSwitcher = ({
         )}
       >
         <User size={16} />
-        <span>{t("auth.asPassenger")}</span>
+        <span>{isProfile ? t("profile.passengerProfile") : t("auth.asPassenger")}</span>
       </Link>
       <Link
         to={driverLink}
@@ -42,7 +44,7 @@ const RoleSwitcher = ({
         )}
       >
         <Car size={16} />
-        <span>{t("auth.asDriver")}</span>
+        <span>{isProfile ? t("profile.driverProfile") : t("auth.asDriver")}</span>
       </Link>
     </div>
   );
