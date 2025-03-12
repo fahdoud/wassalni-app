@@ -31,35 +31,33 @@ const Hero = () => {
             <p className="text-lg text-gray-600 md:text-xl max-w-2xl mx-auto lg:mx-0 animate-slide-up dark:text-gray-300" style={{ animationDelay: "0.2s" }}>
               {t('hero.description')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start animate-slide-up" style={{ animationDelay: "0.3s" }}>
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 justify-center lg:justify-start animate-slide-up" style={{ animationDelay: "0.3s" }}>
               <Link to="/rides">
-                <Button>{t('hero.findRide')}</Button>
+                <Button className="group transition-all duration-300 transform hover:scale-105">
+                  <span className="flex items-center">
+                    {t('hero.findRide')}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </span>
+                </Button>
               </Link>
               <Link to="/offer-ride">
-                <Button variant="outlined">{t('hero.offerRide')}</Button>
+                <Button variant="outlined" className="group transition-all duration-300 transform hover:scale-105">
+                  <span className="flex items-center">
+                    {t('hero.offerRide')}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </span>
+                </Button>
               </Link>
-            </div>
-            <div className="flex items-center justify-center lg:justify-start gap-8 pt-6 animate-slide-up" style={{ animationDelay: "0.4s" }}>
-              <div className="flex flex-col items-center lg:items-start">
-                <span className="text-2xl font-bold text-wassalni-green dark:text-wassalni-lightGreen">500K+</span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">{t('hero.activeUsers')}</span>
-              </div>
-              <div className="h-10 w-px bg-gray-200 dark:bg-gray-700"></div>
-              <div className="flex flex-col items-center lg:items-start">
-                <span className="text-2xl font-bold text-wassalni-green dark:text-wassalni-lightGreen">10M+</span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">{t('hero.ridesShared')}</span>
-              </div>
-              <div className="h-10 w-px bg-gray-200 dark:bg-gray-700"></div>
-              <div className="flex flex-col items-center lg:items-start">
-                <span className="text-2xl font-bold text-wassalni-green dark:text-wassalni-lightGreen">95%</span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">{t('hero.satisfaction')}</span>
-              </div>
             </div>
           </div>
           <div className="w-full lg:w-1/2 relative animate-fade-in" style={{ animationDelay: "0.5s" }}>
             <div className="relative aspect-[4/3] max-w-xl mx-auto">
               <div className="absolute inset-0 bg-gradient-primary rounded-2xl opacity-10 blur-xl"></div>
-              <div className="relative glass-card rounded-2xl shadow-xl overflow-hidden">
+              <div className="relative glass-card rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300">
                 <div className="bg-gradient-to-br from-wassalni-lightGreen to-wassalni-lightBlue p-6 text-wassalni-dark">
                   <h3 className="text-xl font-semibold">{t('hero.findRide')}</h3>
                   <p className="text-wassalni-dark/80 text-sm mt-1">{t('location.constantine')}</p>
@@ -91,7 +89,14 @@ const Hero = () => {
                     />
                   </div>
                   <Link to="/rides">
-                    <Button className="w-full mt-2">{t('form.search')}</Button>
+                    <Button className="w-full mt-2 group transition-all duration-300">
+                      <span className="flex items-center justify-center">
+                        {t('form.search')}
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </span>
+                    </Button>
                   </Link>
                 </div>
               </div>

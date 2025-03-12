@@ -5,7 +5,7 @@ import { ButtonHTMLAttributes, ReactNode } from "react";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   variant?: "gradient" | "outlined" | "ghost";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   isLoading?: boolean;
 }
@@ -22,6 +22,7 @@ const Button = ({
     sm: "text-sm py-2 px-4",
     md: "py-3 px-6",
     lg: "text-lg py-4 px-8",
+    xl: "text-xl py-5 px-10",
   };
 
   const variantClasses = {
