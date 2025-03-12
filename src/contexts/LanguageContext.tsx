@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 
 interface LanguageContextType {
@@ -8,108 +7,59 @@ interface LanguageContextType {
   dir: string;
 }
 
+const LanguageContext = createContext<LanguageContextType>({
+  language: "en",
+  setLanguage: () => {},
+  t: (key: string) => key,
+  dir: "ltr",
+});
+
 interface LanguageProviderProps {
   children: ReactNode;
 }
 
 // Our translations object
-const translations: Record<string, Record<string, string>> = {
+const translations = {
   en: {
     // Navigation
     'nav.features': 'Features',
-    'nav.howItWorks': 'How It Works',
-    'nav.testimonials': 'Testimonials',
+    'nav.howItWorks': 'How it Works',
+    'nav.feedback': 'Feedback',
     'nav.signIn': 'Sign In',
     'nav.signUp': 'Sign Up',
-    
-    // Hero
-    'hero.tagline': 'The Smartest Way to Carpool',
-    'hero.title': 'Share Your Journey with',
-    'hero.description': 'Connect with fellow travelers, save money, reduce your carbon footprint, and make new friends along the way.',
+
+    // Hero Section
+    'hero.tagline': 'Your ride, your way!',
+    'hero.title': 'The best way to get around',
+    'hero.description': 'Wassalni is a ride-sharing app that connects you with drivers in Constantine. Find a ride or offer a ride today!',
     'hero.findRide': 'Find a Ride',
     'hero.offerRide': 'Offer a Ride',
-    'hero.activeUsers': 'Active Users',
-    'hero.ridesShared': 'Rides Shared',
-    'hero.satisfaction': 'Satisfaction',
-    
+
     // Form
     'form.from': 'From',
     'form.to': 'To',
     'form.when': 'When',
     'form.search': 'Search',
-    'form.departurePlaceholder': 'Departure city',
-    'form.destinationPlaceholder': 'Destination city',
-    
-    // Features
-    'features.title': 'Why Choose',
-    'features.subtitle': 'Our platform makes carpooling simple, safe, and enjoyable for everyone.',
-    'features.convenience': 'Convenient Travel',
-    'features.convenienceDesc': 'Find rides to your exact destination, no more transfers or waiting at stops.',
-    'features.cost': 'Cost Effective',
-    'features.costDesc': 'Save money by sharing fuel costs and tolls with fellow travelers.',
-    'features.community': 'Community Building',
-    'features.communityDesc': 'Connect with like-minded travelers and build your own trusted network.',
-    'features.safety': 'Safe & Secure',
-    'features.safetyDesc': 'Verified profiles, ratings, and reviews ensure a safe experience for everyone.',
-    'features.fast': 'Fast & Flexible',
-    'features.fastDesc': 'Book instantly or plan ahead with our easy-to-use platform.',
-    'features.time': 'Time Saving',
-    'features.timeDesc': 'No rigid schedules. Travel when it suits you with our flexible options.',
-    
-    // How It Works
-    'how.title': 'How',
-    'how.subtitle': 'Follow these simple steps to start sharing rides and saving money',
-    'how.step1': 'Create Your Account',
-    'how.step1Desc': 'Sign up in minutes with your email or social accounts. Verify your profile to build trust with other users.',
-    'how.step2': 'Find or Offer a Ride',
-    'how.step2Desc': 'Search for available rides or offer your own by setting your route, date, time, and available seats.',
-    'how.step3': 'Connect & Confirm',
-    'how.step3Desc': 'Chat with the driver or passengers through our secure messaging system and confirm your booking.',
-    'how.step4': 'Travel Together',
-    'how.step4Desc': 'Meet at the agreed pick-up point, enjoy your journey, and split travel costs through our secure payment system.',
-    'how.step5': 'Rate Your Experience',
-    'how.step5Desc': 'After the trip, rate your experience to help build our trusted community of carpoolers.',
-    'how.startJourney': 'Start Your Journey',
+    'form.departurePlaceholder': 'Enter departure location',
+    'form.destinationPlaceholder': 'Enter destination',
 
-    // Feedback
-    'nav.feedback': 'Feedback',
-    'feedback.title': 'We Value Your Feedback',
-    'feedback.subtitle': 'Help us improve Wassalni by sharing your thoughts, suggestions, or experience with our service.',
-    'feedback.generalFeedback': 'General Feedback',
-    'feedback.suggestion': 'Suggestion',
-    'feedback.rating': 'Rating',
-    'feedback.name': 'Your Name',
-    'feedback.email': 'Email Address',
-    'feedback.rateExperience': 'Rate your experience',
-    'feedback.yourFeedback': 'Your Feedback',
-    'feedback.submit': 'Submit Feedback',
-    'feedback.otherWaysTitle': 'Other Ways to Reach Us',
-    'feedback.emailUs': 'Email Us',
-    'feedback.emailDescription': 'Send your detailed feedback directly to our support team.',
-    'feedback.socialMedia': 'Social Media',
-    'feedback.socialDescription': 'Connect with us on social media platforms.',
-    'feedback.successTitle': 'Thank You for Your Feedback!',
-    'feedback.successDescription': 'We appreciate your input and will use it to improve our service.',
-    
-    // Footer
-    'footer.description': 'The smart way to share rides, save money, and meet new people.',
-    'footer.company': 'Company',
-    'footer.about': 'About Us',
-    'footer.careers': 'Careers',
-    'footer.blog': 'Blog',
-    'footer.press': 'Press',
-    'footer.resources': 'Resources',
-    'footer.help': 'Help Center',
-    'footer.safety': 'Safety Guidelines',
-    'footer.rules': 'Community Rules',
-    'footer.terms': 'Terms of Service',
-    'footer.contact': 'Contact',
-    'footer.address': 'Constantine, Algeria',
-    'footer.rights': 'All rights reserved.',
+    // Features Section
+    'features.title': 'Why Choose Wassalni?',
+    'features.card1.title': 'Affordable Rides',
+    'features.card1.description': 'Get access to low-cost rides that fit your budget.',
+    'features.card2.title': 'Safe and Reliable',
+    'features.card2.description': 'Verified drivers and real-time tracking for a secure journey.',
+    'features.card3.title': 'Easy to Use',
+    'features.card3.description': 'Simple interface for quick ride booking and ride offering.',
 
-    // Location & Currency
-    'location.constantine': 'Constantine, Algeria',
-    'currency.dzd': 'DZD',
+    // How It Works Section
+    'howItWorks.title': 'How Wassalni Works',
+    'howItWorks.step1.title': 'Find a Ride',
+    'howItWorks.step1.description': 'Enter your destination and preferred time to find available rides.',
+    'howItWorks.step2.title': 'Book a Ride',
+    'howItWorks.step2.description': 'Choose a ride that suits your needs and confirm your booking.',
+    'howItWorks.step3.title': 'Enjoy the Ride',
+    'howItWorks.step3.description': 'Meet your driver and enjoy a comfortable and safe journey to your destination.',
     
     // Authentication
     'auth.welcomeBack': 'Welcome Back',
@@ -163,105 +113,53 @@ const translations: Record<string, Record<string, string>> = {
     'auth.errorFields': 'Please fill in all required fields.',
     'auth.errorTerms': 'You must agree to the terms of service.',
     'auth.errorPasswordMatch': 'Passwords do not match.',
+    'auth.asPassenger': 'Passenger',
+    'auth.asDriver': 'Driver',
+    'auth.chooseRole': 'Choose your role',
+    'auth.switchRole': 'Switch role',
   },
   fr: {
     // Navigation
     'nav.features': 'Fonctionnalités',
     'nav.howItWorks': 'Comment ça marche',
-    'nav.testimonials': 'Témoignages',
-    'nav.signIn': 'Connexion',
-    'nav.signUp': 'Inscription',
-    
-    // Hero
-    'hero.tagline': 'La manière intelligente de covoiturer',
-    'hero.title': 'Partagez votre trajet avec',
-    'hero.description': 'Connectez-vous avec d\'autres voyageurs, économisez de l\'argent, réduisez votre empreinte carbone et faites de nouvelles rencontres en chemin.',
-    'hero.findRide': 'Trouver un trajet',
-    'hero.offerRide': 'Proposer un trajet',
-    'hero.activeUsers': 'Utilisateurs actifs',
-    'hero.ridesShared': 'Trajets partagés',
-    'hero.satisfaction': 'Satisfaction',
-    
+    'nav.feedback': 'Commentaires',
+    'nav.signIn': 'Se Connecter',
+    'nav.signUp': 'S\'inscrire',
+
+    // Hero Section
+    'hero.tagline': 'Votre trajet, à votre façon!',
+    'hero.title': 'La meilleure façon de se déplacer',
+    'hero.description': 'Wassalni est une application de covoiturage qui vous met en relation avec des conducteurs à Constantine. Trouvez un trajet ou proposez un trajet dès aujourd\'hui!',
+    'hero.findRide': 'Trouver un Trajet',
+    'hero.offerRide': 'Proposer un Trajet',
+
     // Form
     'form.from': 'De',
     'form.to': 'À',
     'form.when': 'Quand',
     'form.search': 'Rechercher',
-    'form.departurePlaceholder': 'Ville de départ',
-    'form.destinationPlaceholder': 'Ville de destination',
-    
-    // Features
-    'features.title': 'Pourquoi choisir',
-    'features.subtitle': 'Notre plateforme rend le covoiturage simple, sûr et agréable pour tous.',
-    'features.convenience': 'Voyage pratique',
-    'features.convenienceDesc': 'Trouvez des trajets vers votre destination exacte, plus de transferts ou d\'attente aux arrêts.',
-    'features.cost': 'Économique',
-    'features.costDesc': 'Économisez en partageant les frais de carburant et de péage avec d\'autres voyageurs.',
-    'features.community': 'Construction communautaire',
-    'features.communityDesc': 'Connectez-vous avec des voyageurs partageant les mêmes idées et créez votre propre réseau de confiance.',
-    'features.safety': 'Sûr et sécurisé',
-    'features.safetyDesc': 'Les profils vérifiés, les évaluations et les avis garantissent une expérience sûre pour tous.',
-    'features.fast': 'Rapide et flexible',
-    'features.fastDesc': 'Réservez instantanément ou planifiez à l\'avance avec notre plateforme facile à utiliser.',
-    'features.time': 'Gain de temps',
-    'features.timeDesc': 'Pas d\'horaires rigides. Voyagez quand cela vous convient avec nos options flexibles.',
-    
-    // How It Works
-    'how.title': 'Comment',
-    'how.subtitle': 'Suivez ces étapes simples pour commencer à partager des trajets et économiser',
-    'how.step1': 'Créez votre compte',
-    'how.step1Desc': 'Inscrivez-vous en quelques minutes avec votre email ou comptes sociaux. Vérifiez votre profil pour établir la confiance.',
-    'how.step2': 'Trouvez ou proposez un trajet',
-    'how.step2Desc': 'Recherchez des trajets disponibles ou proposez le vôtre en définissant votre itinéraire, date, heure et sièges disponibles.',
-    'how.step3': 'Connectez et confirmez',
-    'how.step3Desc': 'Discutez avec le conducteur ou les passagers via notre système de messagerie sécurisé et confirmez votre réservation.',
-    'how.step4': 'Voyagez ensemble',
-    'how.step4Desc': 'Rencontrez-vous au point de ramassage convenu, profitez de votre voyage et partagez les frais via notre système de paiement sécurisé.',
-    'how.step5': 'Évaluez votre expérience',
-    'how.step5Desc': 'Après le trajet, évaluez votre expérience pour aider à construire notre communauté de covoitureurs de confiance.',
-    'how.startJourney': 'Commencez votre voyage',
+    'form.departurePlaceholder': 'Entrez le lieu de départ',
+    'form.destinationPlaceholder': 'Entrez la destination',
 
-    // Feedback
-    'nav.feedback': 'Commentaires',
-    'feedback.title': 'Nous Valorisons Vos Commentaires',
-    'feedback.subtitle': 'Aidez-nous à améliorer Wassalni en partageant vos pensées, suggestions ou expérience avec notre service.',
-    'feedback.generalFeedback': 'Commentaire Général',
-    'feedback.suggestion': 'Suggestion',
-    'feedback.rating': 'Évaluation',
-    'feedback.name': 'Votre Nom',
-    'feedback.email': 'Adresse Email',
-    'feedback.rateExperience': 'Évaluez votre expérience',
-    'feedback.yourFeedback': 'Vos Commentaires',
-    'feedback.submit': 'Soumettre',
-    'feedback.otherWaysTitle': 'Autres Façons de Nous Contacter',
-    'feedback.emailUs': 'Envoyez-nous un Email',
-    'feedback.emailDescription': 'Envoyez vos commentaires détaillés directement à notre équipe de support.',
-    'feedback.socialMedia': 'Réseaux Sociaux',
-    'feedback.socialDescription': 'Connectez-vous avec nous sur les plateformes de médias sociaux.',
-    'feedback.successTitle': 'Merci pour Vos Commentaires!',
-    'feedback.successDescription': 'Nous apprécions votre contribution et l\'utiliserons pour améliorer notre service.',
-    
-    // Footer
-    'footer.description': 'La façon intelligente de partager des trajets, économiser de l\'argent et rencontrer de nouvelles personnes.',
-    'footer.company': 'Entreprise',
-    'footer.about': 'À propos de nous',
-    'footer.careers': 'Carrières',
-    'footer.blog': 'Blog',
-    'footer.press': 'Presse',
-    'footer.resources': 'Ressources',
-    'footer.help': 'Centre d\'aide',
-    'footer.safety': 'Consignes de sécurité',
-    'footer.rules': 'Règles communautaires',
-    'footer.terms': 'Conditions d\'utilisation',
-    'footer.contact': 'Contact',
-    'footer.address': 'Constantine, Algérie',
-    'footer.rights': 'Tous droits réservés.',
+    // Features Section
+    'features.title': 'Pourquoi Choisir Wassalni?',
+    'features.card1.title': 'Trajets Abordables',
+    'features.card1.description': 'Accédez à des trajets à faible coût qui correspondent à votre budget.',
+    'features.card2.title': 'Sûr et Fiable',
+    'features.card2.description': 'Conducteurs vérifiés et suivi en temps réel pour un voyage sécurisé.',
+    'features.card3.title': 'Facile à Utiliser',
+    'features.card3.description': 'Interface simple pour une réservation rapide de trajets et une offre de trajets.',
 
-    // Location & Currency
-    'location.constantine': 'Constantine, Algérie',
-    'currency.dzd': 'DZD',
+    // How It Works Section
+    'howItWorks.title': 'Comment Fonctionne Wassalni',
+    'howItWorks.step1.title': 'Trouver un Trajet',
+    'howItWorks.step1.description': 'Entrez votre destination et l\'heure préférée pour trouver les trajets disponibles.',
+    'howItWorks.step2.title': 'Réserver un Trajet',
+    'howItWorks.step2.description': 'Choisissez un trajet qui correspond à vos besoins et confirmez votre réservation.',
+    'howItWorks.step3.title': 'Profitez du Trajet',
+    'howItWorks.step3.description': 'Rencontrez votre chauffeur et profitez d\'un voyage confortable et sûr vers votre destination.',
     
-    // Authentication
+    // Authentication (add new keys to French translations)
     'auth.welcomeBack': 'Bon Retour',
     'auth.welcomeBackDriver': 'Bon Retour Chauffeur',
     'auth.passengerSignInDesc': 'Connectez-vous à votre compte passager pour réserver des trajets à Constantine',
@@ -272,7 +170,7 @@ const translations: Record<string, Record<string, string>> = {
     'auth.passwordPlaceholder': 'Entrez votre mot de passe',
     'auth.rememberMe': 'Se souvenir de moi',
     'auth.forgotPassword': 'Mot de passe oublié?',
-    'auth.signIn': 'Se connecter',
+    'auth.signIn': 'Se Connecter',
     'auth.noAccount': 'Vous n\'avez pas de compte?',
     'auth.createAccount': 'Créer un compte',
     'auth.createDriverAccount': 'Créer un compte chauffeur',
@@ -282,146 +180,94 @@ const translations: Record<string, Record<string, string>> = {
     'auth.signInAsPassenger': 'Se connecter en tant que passager',
     'auth.passengerSignUpDesc': 'Créez un compte passager pour commencer à réserver des trajets à Constantine',
     'auth.driverSignUpDesc': 'Créez un compte chauffeur pour commencer à proposer des trajets à Constantine',
-    'auth.fullName': 'Nom complet',
+    'auth.fullName': 'Nom Complet',
     'auth.fullNamePlaceholder': 'Entrez votre nom complet',
-    'auth.phone': 'Numéro de téléphone',
+    'auth.phone': 'Numéro de Téléphone',
     'auth.phonePlaceholder': 'Entrez votre numéro de téléphone',
-    'auth.confirmPassword': 'Confirmer le mot de passe',
+    'auth.confirmPassword': 'Confirmer le Mot de Passe',
     'auth.confirmPasswordPlaceholder': 'Confirmez votre mot de passe',
     'auth.agreeTerms': 'J\'accepte les',
     'auth.alreadyAccount': 'Vous avez déjà un compte?',
-    'auth.wantToBeDriver': 'Vous voulez être chauffeur?',
-    'auth.wantToBePassenger': 'Vous voulez être passager?',
+    'auth.wantToBeDriver': 'Vous voulez devenir chauffeur?',
+    'auth.wantToBePassenger': 'Vous voulez être un passager?',
     'auth.signUp': 'S\'inscrire',
     'auth.signUpAsDriver': 'S\'inscrire en tant que chauffeur',
     'auth.signUpAsPassenger': 'S\'inscrire en tant que passager',
-    'auth.carModel': 'Modèle de voiture',
+    'auth.carModel': 'Modèle de Voiture',
     'auth.carModelPlaceholder': 'Entrez le modèle de votre voiture',
-    'auth.carYear': 'Année de la voiture',
-    'auth.carYearPlaceholder': 'Entrez l\'année de la voiture',
-    'auth.licenseNumber': 'Numéro de permis',
+    'auth.carYear': 'Année de Voiture',
+    'auth.carYearPlaceholder': 'Entrez l\'année de votre voiture',
+    'auth.licenseNumber': 'Numéro de Permis',
     'auth.licenseNumberPlaceholder': 'Entrez votre numéro de permis',
-    'auth.joinAsPassenger': 'Rejoignez en tant que passager',
-    'auth.joinAsDriver': 'Rejoignez en tant que chauffeur',
-    'auth.passengerBenefits': 'Trouvez des trajets abordables, voyagez confortablement et connectez-vous avec des chauffeurs de confiance à Constantine.',
-    'auth.driverBenefits': 'Gagnez un revenu supplémentaire, choisissez votre horaire et rencontrez de nouvelles personnes tout en aidant à réduire le trafic à Constantine.',
+    'auth.joinAsPassenger': 'Rejoindre en tant que Passager',
+    'auth.joinAsDriver': 'Rejoindre en tant que Chauffeur',
+    'auth.passengerBenefits': 'Trouvez des trajets abordables, voyagez confortablement et connectez-vous avec des conducteurs de confiance à Constantine.',
+    'auth.driverBenefits': 'Gagnez un revenu supplémentaire, choisissez votre emploi du temps et rencontrez de nouvelles personnes tout en contribuant à réduire la circulation à Constantine.',
     'auth.successTitle': 'Succès!',
     'auth.successSignIn': 'Vous vous êtes connecté avec succès.',
     'auth.successSignUp': 'Votre compte a été créé avec succès.',
     'auth.successDriverSignUp': 'Votre compte chauffeur a été créé avec succès.',
     'auth.errorTitle': 'Erreur',
-    'auth.errorFields': 'Veuillez remplir tous les champs requis.',
-    'auth.errorTerms': 'Vous devez accepter les conditions de service.',
+    'auth.errorFields': 'Veuillez remplir tous les champs obligatoires.',
+    'auth.errorTerms': 'Vous devez accepter les conditions d\'utilisation.',
     'auth.errorPasswordMatch': 'Les mots de passe ne correspondent pas.',
+    'auth.asPassenger': 'Passager',
+    'auth.asDriver': 'Chauffeur',
+    'auth.chooseRole': 'Choisissez votre rôle',
+    'auth.switchRole': 'Changer de rôle',
   },
   ar: {
     // Navigation
-    'nav.features': 'المميزات',
-    'nav.howItWorks': 'كيف يعمل',
-    'nav.testimonials': 'الشهادات',
+    'nav.features': 'الميزات',
+    'nav.howItWorks': 'كيف تعمل',
+    'nav.feedback': 'ملاحظات',
     'nav.signIn': 'تسجيل الدخول',
-    'nav.signUp': 'إنشاء حساب',
-    
-    // Hero
-    'hero.tagline': 'الطريقة الأذكى للمشاركة في الرحلات',
-    'hero.title': 'شارك رحلتك مع',
-    'hero.description': 'تواصل مع المسافرين الآخرين، وفر المال، قلل من بصمتك الكربونية، وكوّن صداقات جديدة على طول الطريق.',
-    'hero.findRide': 'ابحث عن رحلة',
-    'hero.offerRide': 'اقترح رحلة',
-    'hero.activeUsers': 'مستخدم نشط',
-    'hero.ridesShared': 'رحلة مشتركة',
-    'hero.satisfaction': 'نسبة الرضا',
-    
+    'nav.signUp': 'اشتراك',
+
+    // Hero Section
+    'hero.tagline': 'رحلتك، على طريقتك!',
+    'hero.title': 'أفضل طريقة للتنقل',
+    'hero.description': 'وصلني هو تطبيق لمشاركة الركوب يربطك بالسائقين في قسنطينة. ابحث عن رحلة أو قدم رحلة اليوم!',
+    'hero.findRide': 'البحث عن رحلة',
+    'hero.offerRide': 'عرض رحلة',
+
     // Form
     'form.from': 'من',
     'form.to': 'إلى',
     'form.when': 'متى',
     'form.search': 'بحث',
-    'form.departurePlaceholder': 'مدينة المغادرة',
-    'form.destinationPlaceholder': 'مدينة الوصول',
-    
-    // Features
-    'features.title': 'لماذا تختار',
-    'features.subtitle': 'منصتنا تجعل مشاركة الرحلات بسيطة وآمنة وممتعة للجميع.',
-    'features.convenience': 'سفر مريح',
-    'features.convenienceDesc': 'ابحث عن رحلات إلى وجهتك المحددة، بدون تحويلات أو انتظار في المحطات.',
-    'features.cost': 'توفير التكاليف',
-    'features.costDesc': 'وفر المال من خلال مشاركة تكاليف الوقود والرسوم مع المسافرين الآخرين.',
-    'features.community': 'بناء المجتمع',
-    'features.communityDesc': 'تواصل مع مسافرين يشاركونك نفس الاهتمامات وابنِ شبكتك الخاصة الموثوقة.',
-    'features.safety': 'آمن ومضمون',
-    'features.safetyDesc': 'الملفات الشخصية المُتحقق منها والتقييمات والمراجعات تضمن تجربة آمنة للجميع.',
-    'features.fast': 'سريع ومرن',
-    'features.fastDesc': 'احجز فوراً أو خطط مسبقاً باستخدام منصتنا سهلة الاستخدام.',
-    'features.time': 'توفير الوقت',
-    'features.timeDesc': 'لا جداول صارمة. سافر عندما يناسبك مع خياراتنا المرنة.',
-    
-    // How It Works
-    'how.title': 'كيف يعمل',
-    'how.subtitle': 'اتبع هذه الخطوات البسيطة لبدء مشاركة الرحلات وتوفير المال',
-    'how.step1': 'أنشئ حسابك',
-    'how.step1Desc': 'سجل في دقائق باستخدام بريدك الإلكتروني أو حسابات التواصل الاجتماعي. تحقق من ملفك الشخصي لبناء الثقة مع المستخدمين الآخرين.',
-    'how.step2': 'ابحث أو اقترح رحلة',
-    'how.step2Desc': 'ابحث عن الرحلات المتاحة أو اقترح رحلتك الخاصة عن طريق تحديد مسارك والتاريخ والوقت والمقاعد المتاحة.',
-    'how.step3': 'تواصل وأكد',
-    'how.step3Desc': 'تحدث مع السائق أو الركاب من خلال نظام المراسلة الآمن لدينا وأكد حجزك.',
-    'how.step4': 'سافر معاً',
-    'how.step4Desc': 'التقِ في نقطة الالتقاء المتفق عليها، استمتع برحلتك، وشارك تكاليف السفر من خلال نظام الدفع الآمن لدينا.',
-    'how.step5': 'قيّم تجربتك',
-    'how.step5Desc': 'بعد الرحلة، قيّم تجربتك للمساعدة في بناء مجتمع موثوق من مشاركي الرحلات.',
-    'how.startJourney': 'ابدأ رحلتك',
+    'form.departurePlaceholder': 'أدخل موقع المغادرة',
+    'form.destinationPlaceholder': 'أدخل الوجهة',
 
-    // Feedback
-    'nav.feedback': 'الآراء',
-    'feedback.title': 'نحن نقدر آراءكم',
-    'feedback.subtitle': 'ساعدنا في تحسين وصلني من خلال مشاركة أفكارك أو اقتراحاتك أو تجربتك مع خدمتنا.',
-    'feedback.generalFeedback': 'رأي عام',
-    'feedback.suggestion': 'اقتراح',
-    'feedback.rating': 'تقييم',
-    'feedback.name': 'اسمك',
-    'feedback.email': 'البريد الإلكتروني',
-    'feedback.rateExperience': 'قيم تجربتك',
-    'feedback.yourFeedback': 'رأيك',
-    'feedback.submit': 'إرسال',
-    'feedback.otherWaysTitle': 'طرق أخرى للتواصل معنا',
-    'feedback.emailUs': 'راسلنا عبر البريد الإلكتروني',
-    'feedback.emailDescription': 'أرسل ملاحظاتك المفصلة مباشرة إلى فريق الدعم لدينا.',
-    'feedback.socialMedia': 'وسائل التواصل الاجتماعي',
-    'feedback.socialDescription': 'تواصل معنا على منصات التواصل الاجتماعي.',
-    'feedback.successTitle': 'شكراً على رأيك!',
-    'feedback.successDescription': 'نحن نقدر مساهمتك وسنستخدمها لتحسين خدمتنا.',
-    
-    // Footer
-    'footer.description': 'الطريقة الذكية لمشاركة الرحلات وتوفير المال ومقابلة أشخاص جدد.',
-    'footer.company': 'الشركة',
-    'footer.about': 'من نحن',
-    'footer.careers': 'وظائف',
-    'footer.blog': 'المدونة',
-    'footer.press': 'الصحافة',
-    'footer.resources': 'الموارد',
-    'footer.help': 'مركز المساعدة',
-    'footer.safety': 'إرشادات السلامة',
-    'footer.rules': 'قواعد المجتمع',
-    'footer.terms': 'شروط الخدمة',
-    'footer.contact': 'اتصل بنا',
-    'footer.address': 'قسنطينة، الجزائر',
-    'footer.rights': 'جميع الحقوق محفوظة.',
+    // Features Section
+    'features.title': 'لماذا تختار وصلني؟',
+    'features.card1.title': 'رحلات بأسعار معقولة',
+    'features.card1.description': 'احصل على رحلات منخفضة التكلفة تناسب ميزانيتك.',
+    'features.card2.title': 'آمن وموثوق',
+    'features.card2.description': 'سائقون تم التحقق منهم وتتبع في الوقت الفعلي لرحلة آمنة.',
+    'features.card3.title': 'سهل الاستخدام',
+    'features.card3.description': 'واجهة بسيطة لحجز الركوب السريع وتقديم الركوب.',
 
-    // Location & Currency
-    'location.constantine': 'قسنطينة، الجزائر',
-    'currency.dzd': 'د.ج',
+    // How It Works Section
+    'howItWorks.title': 'كيف يعمل وصلني',
+    'howItWorks.step1.title': 'البحث عن رحلة',
+    'howItWorks.step1.description': 'أدخل وجهتك والوقت المفضل للعثور على الرحلات المتاحة.',
+    'howItWorks.step2.title': 'حجز رحلة',
+    'howItWorks.step2.description': 'اختر رحلة تناسب احتياجاتك وقم بتأكيد حجزك.',
+    'howItWorks.step3.title': 'استمتع بالرحلة',
+    'howItWorks.step3.description': 'قابل سائقك واستمتع برحلة مريحة وآمنة إلى وجهتك.',
     
-    // Authentication
+    // Authentication (add new keys to Arabic translations)
     'auth.welcomeBack': 'مرحبًا بعودتك',
     'auth.welcomeBackDriver': 'مرحبًا بعودتك أيها السائق',
-    'auth.passengerSignInDesc': 'سجل دخول إلى حساب الراكب الخاص بك لحجز رحلات في قسنطينة',
-    'auth.driverSignInDesc': 'سجل دخول إلى حساب السائق الخاص بك لتقديم رحلات في قسنطينة',
+    'auth.passengerSignInDesc': 'سجل الدخول إلى حسابك كراكب لحجز رحلات في قسنطينة',
+    'auth.driverSignInDesc': 'سجل الدخول إلى حسابك كسائق لتقديم رحلات في قسنطينة',
     'auth.email': 'البريد الإلكتروني',
     'auth.emailPlaceholder': 'أدخل بريدك الإلكتروني',
     'auth.password': 'كلمة المرور',
     'auth.passwordPlaceholder': 'أدخل كلمة المرور الخاصة بك',
     'auth.rememberMe': 'تذكرني',
-    'auth.forgotPassword': 'نسيت كلمة المرور؟',
+    'auth.forgotPassword': 'هل نسيت كلمة المرور؟',
     'auth.signIn': 'تسجيل الدخول',
     'auth.noAccount': 'ليس لديك حساب؟',
     'auth.createAccount': 'إنشاء حساب',
@@ -430,93 +276,84 @@ const translations: Record<string, Record<string, string>> = {
     'auth.areYouPassenger': 'هل أنت راكب؟',
     'auth.signInAsDriver': 'تسجيل الدخول كسائق',
     'auth.signInAsPassenger': 'تسجيل الدخول كراكب',
-    'auth.passengerSignUpDesc': 'أنشئ حساب راكب للبدء في حجز الرحلات في قسنطينة',
-    'auth.driverSignUpDesc': 'أنشئ حساب سائق للبدء في تقديم الرحلات في قسنطينة',
+    'auth.passengerSignUpDesc': 'أنشئ حساب راكب لتبدأ في حجز الرحلات في قسنطينة',
+    'auth.driverSignUpDesc': 'أنشئ حساب سائق لتبدأ في تقديم الرحلات في قسنطينة',
     'auth.fullName': 'الاسم الكامل',
     'auth.fullNamePlaceholder': 'أدخل اسمك الكامل',
     'auth.phone': 'رقم الهاتف',
     'auth.phonePlaceholder': 'أدخل رقم هاتفك',
     'auth.confirmPassword': 'تأكيد كلمة المرور',
-    'auth.confirmPasswordPlaceholder': 'تأكيد كلمة المرور الخاصة بك',
+    'auth.confirmPasswordPlaceholder': 'أكد كلمة مرورك',
     'auth.agreeTerms': 'أوافق على',
-    'auth.alreadyAccount': 'لديك حساب بالفعل؟',
+    'auth.alreadyAccount': 'هل لديك حساب بالفعل؟',
     'auth.wantToBeDriver': 'هل تريد أن تكون سائقًا؟',
     'auth.wantToBePassenger': 'هل تريد أن تكون راكبًا؟',
-    'auth.signUp': 'إنشاء حساب',
-    'auth.signUpAsDriver': 'التسجيل كسائق',
-    'auth.signUpAsPassenger': 'التسجيل كراكب',
-    'auth.carModel': 'طراز السيارة',
-    'auth.carModelPlaceholder': 'أدخل طراز سيارتك',
-    'auth.carYear': 'سنة السيارة',
-    'auth.carYearPlaceholder': 'أدخل سنة السيارة',
-    'auth.licenseNumber': 'رقم رخصة القيادة',
-    'auth.licenseNumberPlaceholder': 'أدخل رقم رخصة القيادة الخاصة بك',
+    'auth.signUp': 'اشتراك',
+    'auth.signUpAsDriver': 'الاشتراك كسائق',
+    'auth.signUpAsPassenger': 'الاشتراك كراكب',
+    'auth.carModel': 'موديل السيارة',
+    'auth.carModelPlaceholder': 'أدخل موديل سيارتك',
+    'auth.carYear': 'سنة الصنع',
+    'auth.carYearPlaceholder': 'أدخل سنة صنع سيارتك',
+    'auth.licenseNumber': 'رقم الرخصة',
+    'auth.licenseNumberPlaceholder': 'أدخل رقم رخصتك',
     'auth.joinAsPassenger': 'انضم كراكب',
     'auth.joinAsDriver': 'انضم كسائق',
     'auth.passengerBenefits': 'ابحث عن رحلات بأسعار معقولة، وسافر براحة وتواصل مع سائقين موثوقين في قسنطينة.',
-    'auth.driverBenefits': 'اكسب دخلاً إضافيًا، واختر جدولك الزمني، وقابل أشخاصًا جددًا مع المساعدة في تقليل حركة المرور في قسنطينة.',
-    'auth.successTitle': 'تم بنجاح!',
+    'auth.driverBenefits': 'اربح دخلًا إضافيًا، واختر جدولك الزمني، وقابل أشخاصًا جدد مع المساعدة في تقليل حركة المرور في قسنطينة.',
+    'auth.successTitle': '!نجاح',
     'auth.successSignIn': 'لقد قمت بتسجيل الدخول بنجاح.',
     'auth.successSignUp': 'تم إنشاء حسابك بنجاح.',
     'auth.successDriverSignUp': 'تم إنشاء حساب السائق الخاص بك بنجاح.',
     'auth.errorTitle': 'خطأ',
-    'auth.errorFields': 'يرجى ملء جميع الحقول المطلوبة.',
+    'auth.errorFields': 'الرجاء ملء جميع الحقول المطلوبة.',
     'auth.errorTerms': 'يجب أن توافق على شروط الخدمة.',
     'auth.errorPasswordMatch': 'كلمات المرور غير متطابقة.',
+    'auth.asPassenger': 'راكب',
+    'auth.asDriver': 'سائق',
+    'auth.chooseRole': 'اختر دورك',
+    'auth.switchRole': 'تبديل الدور',
   }
 };
 
-const defaultLanguage = 'en';
+const defaultLanguage: string = 'en';
 
-// Define the context with proper typing
-const LanguageContext = createContext<LanguageContextType>({
-  language: defaultLanguage,
-  setLanguage: () => {},
-  t: (key: string) => key,
-  dir: 'ltr',
-});
+const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  const [language, setLanguage] = useState<string>(defaultLanguage);
+  const [dir, setDir] = useState<string>('ltr');
 
-export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguage] = useState<string>(() => {
-    const savedLanguage = localStorage.getItem('language');
-    return savedLanguage || defaultLanguage;
-  });
-
-  // Helper function to get translation string
-  const t = (key: string): string => {
-    if (!language || !translations[language]) return key;
-    return translations[language][key] || key;
-  };
-
-  // Determine text direction based on language
-  const dir = useMemo(() => {
-    return language === 'ar' ? 'rtl' : 'ltr';
-  }, [language]);
+  useEffect(() => {
+    const storedLanguage = localStorage.getItem('language') || defaultLanguage;
+    setLanguage(storedLanguage);
+    setDir(storedLanguage === 'ar' ? 'rtl' : 'ltr');
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('language', language);
-    
-    // Set direction for RTL support (Arabic)
-    document.documentElement.dir = dir;
-    
-    // Add language class to document for language-specific styles
-    document.documentElement.lang = language;
-    document.documentElement.classList.remove('en', 'fr', 'ar');
-    document.documentElement.classList.add(language);
+    setDir(language === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', language);
+    document.documentElement.setAttribute('dir', dir);
   }, [language, dir]);
 
+  const t = (key: string) => {
+    return translations[language as keyof typeof translations][key] || key;
+  };
+
+  const value = useMemo(() => ({ language, setLanguage, t, dir }), [language, t, dir]);
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, dir }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
 };
 
-// Hook to use the language context
-export const useLanguage = () => {
+const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
 };
+
+export { LanguageProvider, useLanguage };

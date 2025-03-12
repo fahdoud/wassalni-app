@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,6 +6,7 @@ import { Mail, Lock, User, Eye, EyeOff, Phone } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
+import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
 
 const PassengerSignUp = () => {
   const { t } = useLanguage();
@@ -67,6 +67,12 @@ const PassengerSignUp = () => {
                 <GradientText>Wassalni</GradientText>
               </h1>
             </Link>
+            
+            <RoleSwitcher 
+              currentRole="passenger" 
+              passengerLink="/passenger-signup" 
+              driverLink="/driver-signup" 
+            />
             
             <h2 className="text-3xl font-bold mb-2">{t('auth.createAccount')}</h2>
             <p className="text-gray-600 mb-8 dark:text-gray-300">
@@ -187,12 +193,6 @@ const PassengerSignUp = () => {
                   {t('auth.alreadyAccount')}{' '}
                   <Link to="/passenger-signin" className="text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
                     {t('auth.signIn')}
-                  </Link>
-                </p>
-                <p className="text-sm text-gray-600 mt-2 dark:text-gray-300">
-                  {t('auth.wantToBeDriver')}{' '}
-                  <Link to="/driver-signup" className="text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
-                    {t('auth.signUpAsDriver')}
                   </Link>
                 </p>
               </div>

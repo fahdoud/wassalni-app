@@ -3,10 +3,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/Button";
-import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
+import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
 
 const PassengerSignIn = () => {
   const { t } = useLanguage();
@@ -45,6 +46,12 @@ const PassengerSignIn = () => {
                 <GradientText>Wassalni</GradientText>
               </h1>
             </Link>
+            
+            <RoleSwitcher 
+              currentRole="passenger" 
+              passengerLink="/passenger-signin" 
+              driverLink="/driver-signin" 
+            />
             
             <h2 className="text-3xl font-bold mb-2">{t('auth.welcomeBack')}</h2>
             <p className="text-gray-600 mb-8 dark:text-gray-300">
@@ -121,12 +128,6 @@ const PassengerSignIn = () => {
                   {t('auth.noAccount')}{' '}
                   <Link to="/passenger-signup" className="text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
                     {t('auth.createAccount')}
-                  </Link>
-                </p>
-                <p className="text-sm text-gray-600 mt-2 dark:text-gray-300">
-                  {t('auth.areYouDriver')}{' '}
-                  <Link to="/driver-signin" className="text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
-                    {t('auth.signInAsDriver')}
                   </Link>
                 </p>
               </div>

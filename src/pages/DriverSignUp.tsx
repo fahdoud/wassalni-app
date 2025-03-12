@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,6 +6,7 @@ import { Mail, Lock, User, Eye, EyeOff, Phone, Car, Calendar } from "lucide-reac
 import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
+import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
 
 const DriverSignUp = () => {
   const { t } = useLanguage();
@@ -60,7 +60,7 @@ const DriverSignUp = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex-1 flex flex-col md:flex-row">
+      <div className="flex-1 flex flex-col md:flex-row-reverse">
         {/* Left Side - Image for driver */}
         <div className="hidden md:w-2/5 md:flex bg-gradient-primary relative">
           <div className="absolute inset-0 bg-pattern opacity-10"></div>
@@ -82,6 +82,12 @@ const DriverSignUp = () => {
                 <GradientText>Wassalni</GradientText>
               </h1>
             </Link>
+            
+            <RoleSwitcher 
+              currentRole="driver" 
+              passengerLink="/passenger-signup" 
+              driverLink="/driver-signup" 
+            />
             
             <h2 className="text-3xl font-bold mb-2">{t('auth.createDriverAccount')}</h2>
             <p className="text-gray-600 mb-8 dark:text-gray-300">
@@ -254,12 +260,6 @@ const DriverSignUp = () => {
                   {t('auth.alreadyAccount')}{' '}
                   <Link to="/driver-signin" className="text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
                     {t('auth.signIn')}
-                  </Link>
-                </p>
-                <p className="text-sm text-gray-600 mt-2 dark:text-gray-300">
-                  {t('auth.wantToBePassenger')}{' '}
-                  <Link to="/passenger-signup" className="text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
-                    {t('auth.signUpAsPassenger')}
                   </Link>
                 </p>
               </div>
