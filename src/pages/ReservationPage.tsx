@@ -6,7 +6,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
-import { Check, MapPin, Calendar, Clock, User, CreditCard, ChevronLeft } from "lucide-react";
+import { Check, MapPin, Calendar, Clock, User, ChevronLeft } from "lucide-react";
+import { toast } from "sonner";
 
 interface Ride {
   id: number;
@@ -103,11 +104,25 @@ const ReservationPage = () => {
   const handleReservation = () => {
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      setStep(3); // Move to success step
-    }, 1500);
+    // Update available seats in the "database"
+    if (ride) {
+      // Simulate API call to update seats
+      setTimeout(() => {
+        setRide(prev => {
+          if (prev) {
+            return {
+              ...prev,
+              seats: prev.seats - passengerCount
+            };
+          }
+          return prev;
+        });
+        
+        setLoading(false);
+        setStep(3); // Move to success step
+        toast.success(t('reservation.successMessage'));
+      }, 1500);
+    }
   };
 
   if (!ride) return null;
@@ -122,7 +137,7 @@ const ReservationPage = () => {
             className="flex items-center text-gray-600 hover:text-wassalni-green mb-6 transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
           >
             <ChevronLeft size={18} />
-            <span>{t('reservation.backToRides')}</span>
+            <span>{t('rides.title')}</span>
           </button>
 
           <div className="mb-8">
@@ -136,7 +151,7 @@ const ReservationPage = () => {
             <div className="flex-grow">
               {step === 1 && (
                 <div className="glass-card p-8 rounded-xl mb-6">
-                  <h2 className="text-xl font-semibold mb-6">{t('reservation.tripDetails')}</h2>
+                  <h2 className="text-xl font-semibold mb-6">{t('reservation.details')}</h2>
                   
                   <div className="mb-6">
                     <div className="flex items-center mb-4">
@@ -197,7 +212,7 @@ const ReservationPage = () => {
                       className="w-full"
                       onClick={() => setStep(2)}
                     >
-                      {t('reservation.continueToPayment')}
+                      {t('reservation.payment')}
                     </Button>
                   </div>
                 </div>
@@ -205,11 +220,11 @@ const ReservationPage = () => {
               
               {step === 2 && (
                 <div className="glass-card p-8 rounded-xl mb-6">
-                  <h2 className="text-xl font-semibold mb-6">{t('reservation.paymentDetails')}</h2>
+                  <h2 className="text-xl font-semibold mb-6">{t('reservation.payment')}</h2>
                   
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                      {t('reservation.numberOfPassengers')}
+                      {t('reservation.passengers')}
                     </label>
                     <div className="flex items-center">
                       <button
@@ -253,7 +268,7 @@ const ReservationPage = () => {
                           )}
                         </div>
                         <div className="flex-grow">
-                          <p className="font-medium">{t('reservation.cashPayment')}</p>
+                          <p className="font-medium">{t('reservation.cash')}</p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">{t('reservation.payDriver')}</p>
                         </div>
                       </div>
@@ -300,9 +315,9 @@ const ReservationPage = () => {
                     <Check size={40} className="text-green-500 dark:text-green-400" />
                   </div>
                   
-                  <h2 className="text-2xl font-semibold mb-4">{t('reservation.reservationConfirmed')}</h2>
+                  <h2 className="text-2xl font-semibold mb-4">{t('reservation.successTitle')}</h2>
                   <p className="text-gray-600 mb-8 max-w-md mx-auto dark:text-gray-300">
-                    {t('reservation.confirmationMessage')}
+                    {t('reservation.successMessage')}
                   </p>
                   
                   <div className="glass-card border border-gray-200 p-6 rounded-lg mb-8 max-w-md mx-auto text-left dark:border-gray-700">
@@ -343,7 +358,7 @@ const ReservationPage = () => {
                       className="flex-1" 
                       onClick={() => navigate('/rides')}
                     >
-                      {t('reservation.backToRides')}
+                      {t('rides.title')}
                     </Button>
                   </div>
                 </div>
@@ -353,7 +368,7 @@ const ReservationPage = () => {
             {(step === 1 || step === 2) && (
               <div className="lg:w-80">
                 <div className="glass-card p-6 rounded-xl sticky top-28">
-                  <h3 className="font-semibold mb-4">{t('reservation.tripSummary')}</h3>
+                  <h3 className="font-semibold mb-4">{t('reservation.title')}</h3>
                   
                   <div className="flex items-center gap-3 mb-4">
                     <MapPin size={18} className="text-wassalni-green shrink-0 dark:text-wassalni-lightGreen" />

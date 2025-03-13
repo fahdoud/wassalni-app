@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 
 interface LanguageContextType {
@@ -185,7 +184,8 @@ const translations = {
     
     // Reservation
     'reservation.title': 'Ride Reservation',
-    'reservation.details': 'Ride Details',
+    'reservation.subtitle': 'Complete your booking details and confirm your ride',
+    'reservation.details': 'Trip Details',
     'reservation.passenger': 'Passenger Details',
     'reservation.payment': 'Payment Details',
     'reservation.driver': 'Driver',
@@ -193,24 +193,19 @@ const translations = {
     'reservation.to': 'To',
     'reservation.date': 'Date',
     'reservation.time': 'Time',
+    'reservation.estimatedArrival': 'Estimated arrival',
     'reservation.price': 'Price',
     'reservation.seats': 'Available Seats',
-    'reservation.bookSeats': 'Number of Seats to Book',
-    'reservation.totalPrice': 'Total Price',
-    'reservation.name': 'Full Name',
-    'reservation.phone': 'Phone Number',
-    'reservation.notes': 'Special Notes',
-    'reservation.notesPlaceholder': 'Any information the driver should know',
-    'reservation.paymentMethod': 'Payment Method',
-    'reservation.cash': 'Cash on Pickup',
-    'reservation.mobile': 'Mobile Payment',
-    'reservation.terms': 'I agree to the terms and conditions',
-    'reservation.confirmBooking': 'Confirm Booking',
-    'reservation.contactDriver': 'Contact Driver',
-    'reservation.successTitle': 'Booking Successful!',
-    'reservation.successMessage': 'Your ride has been booked successfully. The driver will be notified.',
-    'reservation.errorTitle': 'Booking Error',
-    'reservation.errorMessage': 'There was an error processing your booking. Please try again.'
+    'reservation.passengers': 'Passengers',
+    'reservation.baseFare': 'Base fare',
+    'reservation.total': 'Total',
+    'reservation.back': 'Back',
+    'reservation.confirmReservation': 'Confirm Reservation',
+    'reservation.payDriver': 'Pay the driver directly',
+    'reservation.successTitle': 'Reservation Confirmed',
+    'reservation.successMessage': 'Your ride has been successfully booked. The driver has been notified.',
+    'reservation.reservationId': 'Reservation ID',
+    'reservation.cashPayment': 'Cash Payment',
   },
   fr: {
     // Navigation
@@ -274,8 +269,8 @@ const translations = {
     // Rides Page
     'rides.title': 'Trajets Disponibles',
     'rides.subtitle': 'Trouvez et réservez des trajets à Constantine et dans les environs',
-    'rides.seat': 'siège',
-    'rides.seats': 'sièges',
+    'rides.seat': 'place',
+    'rides.seats': 'places',
     'rides.reserve': 'Réserver',
     
     // Footer
@@ -376,32 +371,28 @@ const translations = {
     
     // Reservation
     'reservation.title': 'Réservation de Trajet',
+    'reservation.subtitle': 'Complétez vos informations et confirmez votre réservation',
     'reservation.details': 'Détails du Trajet',
-    'reservation.passenger': 'Détails du Passager',
+    'reservation.passenger': 'Informations Passager',
     'reservation.payment': 'Détails du Paiement',
     'reservation.driver': 'Conducteur',
-    'reservation.from': 'De',
-    'reservation.to': 'À',
+    'reservation.from': 'Départ',
+    'reservation.to': 'Destination',
     'reservation.date': 'Date',
     'reservation.time': 'Heure',
+    'reservation.estimatedArrival': 'Arrivée estimée',
     'reservation.price': 'Prix',
-    'reservation.seats': 'Sièges Disponibles',
-    'reservation.bookSeats': 'Nombre de Sièges à Réserver',
-    'reservation.totalPrice': 'Prix Total',
-    'reservation.name': 'Nom Complet',
-    'reservation.phone': 'Numéro de Téléphone',
-    'reservation.notes': 'Notes Spéciales',
-    'reservation.notesPlaceholder': 'Toute information que le conducteur devrait savoir',
-    'reservation.paymentMethod': 'Méthode de Paiement',
-    'reservation.cash': 'Espèces au Ramassage',
-    'reservation.mobile': 'Paiement Mobile',
-    'reservation.terms': 'J\'accepte les termes et conditions',
-    'reservation.confirmBooking': 'Confirmer la Réservation',
-    'reservation.contactDriver': 'Contacter le Conducteur',
-    'reservation.successTitle': 'Réservation Réussie!',
-    'reservation.successMessage': 'Votre trajet a été réservé avec succès. Le conducteur sera notifié.',
-    'reservation.errorTitle': 'Erreur de Réservation',
-    'reservation.errorMessage': 'Une erreur s\'est produite lors du traitement de votre réservation. Veuillez réessayer.'
+    'reservation.seats': 'Places Disponibles',
+    'reservation.passengers': 'Passagers',
+    'reservation.baseFare': 'Tarif de base',
+    'reservation.total': 'Total',
+    'reservation.back': 'Retour',
+    'reservation.confirmReservation': 'Confirmer la Réservation',
+    'reservation.payDriver': 'Payer directement au conducteur',
+    'reservation.successTitle': 'Réservation Confirmée',
+    'reservation.successMessage': 'Votre trajet a été réservé avec succès. Le conducteur a été notifié.',
+    'reservation.reservationId': 'Numéro de Réservation',
+    'reservation.cashPayment': 'Paiement en Espèces',
   },
   ar: {
     // Navigation
@@ -567,32 +558,28 @@ const translations = {
     
     // Reservation
     'reservation.title': 'حجز رحلة',
+    'reservation.subtitle': 'أكمل بيانات الحجز وأكد رحلتك',
     'reservation.details': 'تفاصيل الرحلة',
-    'reservation.passenger': 'تفاصيل الراكب',
+    'reservation.passenger': 'بيانات الراكب',
     'reservation.payment': 'تفاصيل الدفع',
     'reservation.driver': 'السائق',
     'reservation.from': 'من',
     'reservation.to': 'إلى',
     'reservation.date': 'التاريخ',
     'reservation.time': 'الوقت',
+    'reservation.estimatedArrival': 'وقت الوصول المتوقع',
     'reservation.price': 'السعر',
     'reservation.seats': 'المقاعد المتاحة',
-    'reservation.bookSeats': 'عدد المقاعد للحجز',
-    'reservation.totalPrice': 'السعر الإجمالي',
-    'reservation.name': 'الاسم الكامل',
-    'reservation.phone': 'رقم الهاتف',
-    'reservation.notes': 'ملاحظات خاصة',
-    'reservation.notesPlaceholder': 'أي معلومات يجب أن يعرفها السائق',
-    'reservation.paymentMethod': 'طريقة الدفع',
-    'reservation.cash': 'نقدًا عند الالتقاط',
-    'reservation.mobile': 'دفع بالهاتف المحمول',
-    'reservation.terms': 'أوافق على الشروط والأحكام',
-    'reservation.confirmBooking': 'تأكيد الحجز',
-    'reservation.contactDriver': 'الاتصال بالسائق',
-    'reservation.successTitle': 'تم الحجز بنجاح!',
-    'reservation.successMessage': 'تم حجز رحلتك بنجاح. سيتم إخطار السائق.',
-    'reservation.errorTitle': 'خطأ في الحجز',
-    'reservation.errorMessage': 'حدث خطأ أثناء معالجة حجزك. يرجى المحاولة مرة أخرى.'
+    'reservation.passengers': 'الركاب',
+    'reservation.baseFare': 'السعر الأساسي',
+    'reservation.total': 'المجموع',
+    'reservation.back': 'رجوع',
+    'reservation.confirmReservation': 'تأكيد الحجز',
+    'reservation.payDriver': 'ادفع للسائق مباشرة',
+    'reservation.successTitle': 'تم تأكيد الحجز',
+    'reservation.successMessage': 'تم حجز رحلتك بنجاح. تم إخطار السائق.',
+    'reservation.reservationId': 'رقم الحجز',
+    'reservation.cashPayment': 'الدفع نقدًا',
   }
 };
 
@@ -632,20 +619,3 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
       dir,
     }),
     [language, dir]
-  );
-
-  return (
-    <LanguageContext.Provider value={contextValue}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
-
-// Custom hook to use the language context
-export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
-  return context;
-};
