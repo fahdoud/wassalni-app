@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
@@ -97,39 +98,39 @@ const RidesPage = () => {
         <section className="section">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h1 className="mb-4">
-              <GradientText>Constantine</GradientText> Rides
+              <GradientText>Constantine</GradientText> {t('rides.title')}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              Find and share rides in Constantine and surrounding areas
+              {t('rides.subtitle')}
             </p>
           </div>
 
           <div className="mb-10 bg-gray-50 p-6 rounded-xl dark:bg-gray-800/50">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">From</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{t('form.from')}</label>
                 <select 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
-                  <option value="">Select location</option>
+                  <option value="">{t('form.selectLocation')}</option>
                   {constantineAreas.map(area => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">To</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{t('form.to')}</label>
                 <select 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
-                  <option value="">Select location</option>
+                  <option value="">{t('form.selectLocation')}</option>
                   {constantineAreas.map(area => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{t('form.date')}</label>
                 <input 
                   type="date" 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -137,7 +138,7 @@ const RidesPage = () => {
               </div>
             </div>
             <div className="mt-4 flex justify-center">
-              <Button className="px-8">Search Rides</Button>
+              <Button className="px-8">{t('form.search')}</Button>
             </div>
           </div>
 
@@ -175,7 +176,7 @@ const RidesPage = () => {
                   </div>
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="px-3 py-1 bg-gray-100 rounded-full dark:bg-gray-700">
-                      {new Date(ride.date).toLocaleDateString('en-US', {
+                      {new Date(ride.date).toLocaleDateString('fr-FR', {
                         month: 'short',
                         day: 'numeric',
                       })}
@@ -184,7 +185,7 @@ const RidesPage = () => {
                       {ride.time}
                     </div>
                     <div className="px-3 py-1 bg-gray-100 rounded-full dark:bg-gray-700">
-                      {ride.seats} {ride.seats === 1 ? 'seat' : 'seats'} available
+                      {ride.seats} {ride.seats === 1 ? t('rides.seat') : t('rides.seats')}
                     </div>
                   </div>
                 </div>
@@ -192,7 +193,9 @@ const RidesPage = () => {
                   <p className="text-2xl font-bold text-wassalni-green dark:text-wassalni-lightGreen">
                     {ride.price} <span className="text-sm">DZD</span>
                   </p>
-                  <Button size="sm">Book Now</Button>
+                  <Link to={`/reservation/${ride.id}`}>
+                    <Button size="sm">{t('rides.reserve')}</Button>
+                  </Link>
                 </div>
               </div>
             ))}

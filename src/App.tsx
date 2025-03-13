@@ -14,6 +14,7 @@ import PassengerSignUp from "./pages/PassengerSignUp";
 import DriverSignIn from "./pages/DriverSignIn";
 import DriverSignUp from "./pages/DriverSignUp";
 import FeedbackPage from "./pages/FeedbackPage";
+import ReservationPage from "./pages/ReservationPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/driver-signin" element={<DriverSignIn />} />
               <Route path="/driver-signup" element={<DriverSignUp />} />
               <Route path="/feedback" element={<FeedbackPage />} />
+              <Route path="/reservation/:rideId" element={<ReservationPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

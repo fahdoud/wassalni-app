@@ -8,7 +8,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: "en",
+  language: "fr",
   setLanguage: () => {},
   t: (key: string) => key,
   dir: "ltr",
@@ -316,44 +316,7 @@ const translations = {
   }
 };
 
-const defaultLanguage: string = 'en';
+const defaultLanguage: string = 'fr';
 
-const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguage] = useState<string>(defaultLanguage);
-  const [dir, setDir] = useState<string>('ltr');
 
-  useEffect(() => {
-    const storedLanguage = localStorage.getItem('language') || defaultLanguage;
-    setLanguage(storedLanguage);
-    setDir(storedLanguage === 'ar' ? 'rtl' : 'ltr');
-  }, []);
 
-  useEffect(() => {
-    localStorage.setItem('language', language);
-    setDir(language === 'ar' ? 'rtl' : 'ltr');
-    document.documentElement.setAttribute('lang', language);
-    document.documentElement.setAttribute('dir', dir);
-  }, [language, dir]);
-
-  const t = (key: string) => {
-    return translations[language as keyof typeof translations][key] || key;
-  };
-
-  const value = useMemo(() => ({ language, setLanguage, t, dir }), [language, t, dir]);
-
-  return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
-
-const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
-  return context;
-};
-
-export { LanguageProvider, useLanguage };

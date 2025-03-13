@@ -2,6 +2,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 interface LanguageSwitcherProps {
   className?: string;
@@ -9,6 +10,13 @@ interface LanguageSwitcherProps {
 
 const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
   const { language, setLanguage } = useLanguage();
+
+  // Set French as the default language when component mounts
+  useEffect(() => {
+    if (language !== 'fr') {
+      setLanguage('fr');
+    }
+  }, []);
 
   return (
     <div className={cn("relative group", className)}>
