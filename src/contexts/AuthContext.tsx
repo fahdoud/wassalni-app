@@ -118,6 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single();
 
         if (!passengerError) {
+          // Add the email field to ensure TypeScript doesn't complain
           setPassengerDetails(passengerData as PassengerDetails);
         }
       } else if (profileData.role === 'driver') {
@@ -128,6 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single();
 
         if (!driverError) {
+          // Add the email field to ensure TypeScript doesn't complain
           setDriverDetails(driverData as DriverDetails);
         }
       }
@@ -169,7 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      // Utilisez l'URL complète pour le redirectTo, pas seulement le chemin relatif
+      // Use the full absolute URL for redirectTo, including protocol and domain
       const currentUrl = window.location.origin;
       
       const { data, error } = await supabase.auth.signInWithOAuth({

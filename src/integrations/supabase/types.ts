@@ -14,6 +14,7 @@ export type Database = {
           availability_hours: string | null
           created_at: string
           driving_experience_years: number | null
+          email: string | null
           id: string
           preferred_routes: string | null
           profile_photo_url: string | null
@@ -23,6 +24,7 @@ export type Database = {
           availability_hours?: string | null
           created_at?: string
           driving_experience_years?: number | null
+          email?: string | null
           id: string
           preferred_routes?: string | null
           profile_photo_url?: string | null
@@ -32,6 +34,7 @@ export type Database = {
           availability_hours?: string | null
           created_at?: string
           driving_experience_years?: number | null
+          email?: string | null
           id?: string
           preferred_routes?: string | null
           profile_photo_url?: string | null
@@ -102,6 +105,7 @@ export type Database = {
       passenger_details: {
         Row: {
           created_at: string
+          email: string | null
           emergency_contact: string | null
           id: string
           interests: string | null
@@ -110,6 +114,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email?: string | null
           emergency_contact?: string | null
           id: string
           interests?: string | null
@@ -118,6 +123,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email?: string | null
           emergency_contact?: string | null
           id?: string
           interests?: string | null
