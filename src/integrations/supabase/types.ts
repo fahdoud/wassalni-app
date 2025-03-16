@@ -9,6 +9,58 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          from_user_id: string
+          id: string
+          rating: number
+          to_user_id: string
+          trip_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          from_user_id: string
+          id?: string
+          rating: number
+          to_user_id: string
+          trip_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          rating?: number
+          to_user_id?: string
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -35,6 +87,145 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      reservations: {
+        Row: {
+          created_at: string
+          id: string
+          passenger_id: string
+          seats_reserved: number
+          status: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          passenger_id: string
+          seats_reserved?: number
+          status?: string
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          passenger_id?: string
+          seats_reserved?: number
+          status?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_passenger_id_fkey"
+            columns: ["passenger_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          available_seats: number
+          created_at: string
+          departure_time: string
+          destination: string
+          driver_id: string
+          id: string
+          notes: string | null
+          origin: string
+          price: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          available_seats: number
+          created_at?: string
+          departure_time: string
+          destination: string
+          driver_id: string
+          id?: string
+          notes?: string | null
+          origin: string
+          price: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string
+          departure_time?: string
+          destination?: string
+          driver_id?: string
+          id?: string
+          notes?: string | null
+          origin?: string
+          price?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          car_model: string
+          car_year: string
+          created_at: string
+          driver_id: string
+          id: string
+          license_number: string
+          registration_number: string
+          updated_at: string
+          vehicle_photo_url: string | null
+        }
+        Insert: {
+          car_model: string
+          car_year: string
+          created_at?: string
+          driver_id: string
+          id?: string
+          license_number: string
+          registration_number: string
+          updated_at?: string
+          vehicle_photo_url?: string | null
+        }
+        Update: {
+          car_model?: string
+          car_year?: string
+          created_at?: string
+          driver_id?: string
+          id?: string
+          license_number?: string
+          registration_number?: string
+          updated_at?: string
+          vehicle_photo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

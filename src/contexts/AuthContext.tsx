@@ -19,6 +19,7 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, userData: Partial<Profile>) => Promise<void>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   loading: boolean;
   isDriver: boolean;
 };
@@ -105,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: 'Welcome back!',
       });
 
-      const redirectPath = profile?.role === 'driver' ? '/driver-dashboard' : '/rides';
+      const redirectPath = profile?.role === 'driver' ? '/offer-ride' : '/rides';
       navigate(redirectPath);
     } catch (error: any) {
       toast({
@@ -114,6 +115,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error.message || 'Please check your credentials',
       });
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: 'Redirecting to Google',
+        description: 'Please complete the Google sign in process',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Google sign in failed',
+        description: error.message || 'Failed to initialize Google sign in',
+      });
       setLoading(false);
     }
   };
@@ -193,6 +222,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signUp,
         signOut,
+        signInWithGoogle,
         loading,
         isDriver
       }}
