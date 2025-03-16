@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single();
 
         if (!passengerError) {
-          // Add the email field to ensure TypeScript doesn't complain
+          // Ensure email is included when setting passenger details
           setPassengerDetails(passengerData as PassengerDetails);
         }
       } else if (profileData.role === 'driver') {
@@ -129,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single();
 
         if (!driverError) {
-          // Add the email field to ensure TypeScript doesn't complain
+          // Ensure email is included when setting driver details
           setDriverDetails(driverData as DriverDetails);
         }
       }
