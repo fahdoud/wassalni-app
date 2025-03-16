@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      driver_details: {
+        Row: {
+          availability_hours: string | null
+          created_at: string
+          driving_experience_years: number | null
+          id: string
+          preferred_routes: string | null
+          profile_photo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          availability_hours?: string | null
+          created_at?: string
+          driving_experience_years?: number | null
+          id: string
+          preferred_routes?: string | null
+          profile_photo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          availability_hours?: string | null
+          created_at?: string
+          driving_experience_years?: number | null
+          id?: string
+          preferred_routes?: string | null
+          profile_photo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_details_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           comment: string | null
@@ -57,6 +95,41 @@ export type Database = {
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      passenger_details: {
+        Row: {
+          created_at: string
+          emergency_contact: string | null
+          id: string
+          interests: string | null
+          preferred_payment_method: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          emergency_contact?: string | null
+          id: string
+          interests?: string | null
+          preferred_payment_method?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          emergency_contact?: string | null
+          id?: string
+          interests?: string | null
+          preferred_payment_method?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passenger_details_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,12 +11,29 @@ type Profile = {
   role: 'passenger' | 'driver';
 };
 
+type PassengerDetails = {
+  id: string;
+  interests: string | null;
+  preferred_payment_method: string | null;
+  emergency_contact: string | null;
+};
+
+type DriverDetails = {
+  id: string;
+  driving_experience_years: number | null;
+  preferred_routes: string | null;
+  availability_hours: string | null;
+  profile_photo_url: string | null;
+};
+
 type AuthContextType = {
   session: Session | null;
   user: User | null;
   profile: Profile | null;
+  passengerDetails: PassengerDetails | null;
+  driverDetails: DriverDetails | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, userData: Partial<Profile>) => Promise<void>;
+  signUp: (email: string, password: string, userData: Partial<Profile> & Partial<PassengerDetails> & Partial<DriverDetails>) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   loading: boolean;
@@ -30,6 +46,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [passengerDetails, setPassengerDetails] = useState<PassengerDetails | null>(null);
+  const [driverDetails, setDriverDetails] = useState<DriverDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -43,9 +61,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
 
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          await fetchUserData(session.user.id);
         } else {
           setProfile(null);
+          setPassengerDetails(null);
+          setDriverDetails(null);
         }
       }
     );
@@ -57,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        await fetchUserData(session.user.id);
       }
       
       setLoading(false);
@@ -70,22 +90,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchUserData = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch basic profile
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
         return;
       }
 
-      setProfile(data as Profile);
+      setProfile(profileData as Profile);
+
+      // Based on role, fetch additional details
+      if (profileData.role === 'passenger') {
+        const { data: passengerData, error: passengerError } = await supabase
+          .from('passenger_details')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (!passengerError) {
+          setPassengerDetails(passengerData as PassengerDetails);
+        }
+      } else if (profileData.role === 'driver') {
+        const { data: driverData, error: driverError } = await supabase
+          .from('driver_details')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (!driverError) {
+          setDriverDetails(driverData as DriverDetails);
+        }
+      }
     } catch (error) {
-      console.error('Failed to fetch profile:', error);
+      console.error('Failed to fetch user data:', error);
     }
   };
 
@@ -147,7 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string, userData: Partial<Profile>) => {
+  const signUp = async (email: string, password: string, userData: Partial<Profile> & Partial<PassengerDetails> & Partial<DriverDetails>) => {
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({
@@ -157,7 +201,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data: {
             full_name: userData.full_name,
             phone: userData.phone,
-            role: userData.role || 'passenger'
+            role: userData.role || 'passenger',
+            ...(userData.role === 'passenger' ? {
+              interests: userData.interests,
+              preferred_payment_method: userData.preferred_payment_method,
+              emergency_contact: userData.emergency_contact,
+            } : {
+              driving_experience_years: userData.driving_experience_years,
+              preferred_routes: userData.preferred_routes,
+              availability_hours: userData.availability_hours,
+              profile_photo_url: userData.profile_photo_url,
+            }),
           },
         },
       });
@@ -171,7 +225,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: 'Please check your email to confirm your registration',
       });
 
-      // Navigate based on role
       const redirectPath = userData.role === 'driver' ? '/driver-signin' : '/passenger-signin';
       navigate(redirectPath);
     } catch (error: any) {
@@ -219,6 +272,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         user,
         profile,
+        passengerDetails,
+        driverDetails,
         signIn,
         signUp,
         signOut,
