@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +17,7 @@ type PassengerDetails = {
   interests: string | null;
   preferred_payment_method: string | null;
   emergency_contact: string | null;
+  email: string | null;
 };
 
 type DriverDetails = {
@@ -24,6 +26,7 @@ type DriverDetails = {
   preferred_routes: string | null;
   availability_hours: string | null;
   profile_photo_url: string | null;
+  email: string | null;
 };
 
 type AuthContextType = {
@@ -166,10 +169,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
+      // Utilisez l'URL complète pour le redirectTo, pas seulement le chemin relatif
+      const currentUrl = window.location.origin;
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${currentUrl}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
 
