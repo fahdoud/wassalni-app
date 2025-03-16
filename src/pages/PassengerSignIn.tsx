@@ -1,7 +1,8 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import Button from "@/components/Button";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -11,26 +12,38 @@ import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
 
 const PassengerSignIn = () => {
   const { t } = useLanguage();
+  const { signIn, user, loading, profile } = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if already logged in as a passenger
+  if (user && profile?.role === 'passenger') {
+    return <Navigate to="/rides" />;
+  }
+
+  // Redirect if logged in as a driver
+  if (user && profile?.role === 'driver') {
+    return <Navigate to="/offer-ride" />;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // This would connect to authentication in a real app
-    if (email && password) {
-      toast({
-        title: t('auth.successTitle'),
-        description: t('auth.successSignIn'),
-      });
-    } else {
+    if (!email || !password) {
       toast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorFields'),
       });
+      return;
+    }
+    
+    try {
+      await signIn(email, password);
+    } catch (error) {
+      // Error handling is done in the AuthContext
     }
   };
 
@@ -119,7 +132,7 @@ const PassengerSignIn = () => {
                 </a>
               </div>
               
-              <Button type="submit" className="w-full mt-2">
+              <Button type="submit" className="w-full mt-2" isLoading={loading}>
                 {t('auth.signIn')}
               </Button>
               

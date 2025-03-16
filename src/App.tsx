@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import RidesPage from "./pages/RidesPage";
 import OfferRidePage from "./pages/OfferRidePage";
@@ -23,25 +24,27 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/rides" element={<RidesPage />} />
-              <Route path="/offer-ride" element={<OfferRidePage />} />
-              <Route path="/passenger-signin" element={<PassengerSignIn />} />
-              <Route path="/passenger-signup" element={<PassengerSignUp />} />
-              <Route path="/driver-signin" element={<DriverSignIn />} />
-              <Route path="/driver-signup" element={<DriverSignUp />} />
-              <Route path="/feedback" element={<FeedbackPage />} />
-              <Route path="/reservation/:rideId" element={<ReservationPage />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/rides" element={<RidesPage />} />
+                <Route path="/offer-ride" element={<OfferRidePage />} />
+                <Route path="/passenger-signin" element={<PassengerSignIn />} />
+                <Route path="/passenger-signup" element={<PassengerSignUp />} />
+                <Route path="/driver-signin" element={<DriverSignIn />} />
+                <Route path="/driver-signup" element={<DriverSignUp />} />
+                <Route path="/feedback" element={<FeedbackPage />} />
+                <Route path="/reservation/:rideId" element={<ReservationPage />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </LanguageProvider>
     </ThemeProvider>
   </QueryClientProvider>
