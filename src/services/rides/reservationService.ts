@@ -40,7 +40,8 @@ export const createReservation = async (
     }
     
     // Using generic arguments correctly for the rpc call
-    const { error: updateError } = await supabase.rpc<DecreaseSeatsParams, null>(
+    // The first type parameter is for the params, the second is for the return type
+    const { error: updateError } = await supabase.rpc<any, null>(
       'decrease_available_seats', 
       {
         trip_id: tripId,
