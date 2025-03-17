@@ -1,13 +1,10 @@
 
 import { Link } from "react-router-dom";
-import Button from "../Button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
 import UserControls from "./UserControls";
 
 const DesktopNavigation = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
 
   return (
     <nav className="hidden md:flex items-center gap-8">
@@ -38,20 +35,7 @@ const DesktopNavigation = () => {
         </li>
       </ul>
       <div className="flex items-center gap-3">
-        {user ? (
-          <UserControls />
-        ) : (
-          <div className="flex items-center gap-2">
-            <Link to="/passenger-signin">
-              <Button variant="outlined" size="sm">
-                {t('nav.signIn')}
-              </Button>
-            </Link>
-            <Link to="/passenger-signup">
-              <Button size="sm">{t('nav.signUp')}</Button>
-            </Link>
-          </div>
-        )}
+        <UserControls />
       </div>
     </nav>
   );

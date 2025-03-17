@@ -1,10 +1,10 @@
 
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "../Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import UserControls from "./UserControls";
 
 interface MobileNavigationProps {
   toggleMenu: () => void;
@@ -17,14 +17,12 @@ const MobileNavigation = ({ toggleMenu, isMenuOpen }: MobileNavigationProps) => 
 
   return (
     <div className="md:hidden flex items-center gap-2">
-      {!user && (
-        <button
-          className="text-gray-700 focus:outline-none dark:text-gray-300"
-          onClick={toggleMenu}
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      )}
+      <button
+        className="text-gray-700 focus:outline-none dark:text-gray-300"
+        onClick={toggleMenu}
+      >
+        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
@@ -58,22 +56,11 @@ const MobileNavigation = ({ toggleMenu, isMenuOpen }: MobileNavigationProps) => 
                   {t('nav.feedback')}
                 </Link>
               </li>
-              {!user && (
-                <>
-                  <li className="pt-2">
-                    <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
-                      <Button variant="outlined" className="w-full">
-                        {t('nav.signIn')}
-                      </Button>
-                    </Link>
-                  </li>
-                  <li className="pt-2">
-                    <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
-                      <Button className="w-full">{t('nav.signUp')}</Button>
-                    </Link>
-                  </li>
-                </>
-              )}
+              <li className="pt-2">
+                <div className="w-full" onClick={toggleMenu}>
+                  <UserControls />
+                </div>
+              </li>
             </ul>
           </nav>
         </div>

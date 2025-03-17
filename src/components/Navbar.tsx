@@ -1,24 +1,15 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import LanguageSwitcher from "./ui-components/LanguageSwitcher";
 import ThemeToggle from "./ui-components/ThemeToggle";
 import NavbarBrand from "./navigation/NavbarBrand";
 import DesktopNavigation from "./navigation/DesktopNavigation";
 import MobileNavigation from "./navigation/MobileNavigation";
-import UserProfile from "./UserProfile";
-import { LogOut } from "lucide-react";
-import Button from "./Button";
-import { useAuth } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
-  const { t } = useLanguage();
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -36,12 +27,6 @@ const Navbar = () => {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-    setIsMenuOpen(false);
-  };
-
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -56,25 +41,11 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <DesktopNavigation />
 
-        {/* Controls and Mobile Navigation */}
+        {/* Mobile Navigation and Controls */}
         <div className="md:hidden flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
-          {user ? (
-            <div className="flex items-center gap-2">
-              <UserProfile />
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="flex items-center gap-1 p-1"
-              >
-                <LogOut size={16} />
-              </Button>
-            </div>
-          ) : (
-            <MobileNavigation toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} />
-          )}
+          <MobileNavigation toggleMenu={toggleMenu} isMenuOpen={isMenuOpen} />
         </div>
 
         {/* Language and Theme Controls - Desktop */}
