@@ -9,13 +9,192 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      feedback: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          from_user_id: string | null
+          id: string
+          rating: number
+          to_user_id: string | null
+          trip_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          from_user_id?: string | null
+          id?: string
+          rating: number
+          to_user_id?: string | null
+          trip_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          from_user_id?: string | null
+          id?: string
+          rating?: number
+          to_user_id?: string | null
+          trip_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reservations: {
+        Row: {
+          created_at: string | null
+          id: string
+          passenger_id: string | null
+          seats_reserved: number
+          status: string | null
+          trip_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          passenger_id?: string | null
+          seats_reserved: number
+          status?: string | null
+          trip_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          passenger_id?: string | null
+          seats_reserved?: number
+          status?: string | null
+          trip_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_passenger_id_fkey"
+            columns: ["passenger_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          available_seats: number
+          created_at: string | null
+          departure_time: string
+          destination: string
+          driver_id: string | null
+          id: string
+          origin: string
+          price: number
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          available_seats: number
+          created_at?: string | null
+          departure_time: string
+          destination: string
+          driver_id?: string | null
+          id?: string
+          origin: string
+          price: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string | null
+          departure_time?: string
+          destination?: string
+          driver_id?: string | null
+          id?: string
+          origin?: string
+          price?: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      decrease_available_seats: {
+        Args: {
+          trip_id: string
+          seats_count: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
