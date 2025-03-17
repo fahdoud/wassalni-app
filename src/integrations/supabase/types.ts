@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           comment: string | null
           created_at: string | null
+          feedback_type: string | null
           from_user_id: string | null
           id: string
           rating: number
@@ -23,6 +24,7 @@ export type Database = {
         Insert: {
           comment?: string | null
           created_at?: string | null
+          feedback_type?: string | null
           from_user_id?: string | null
           id?: string
           rating: number
@@ -33,6 +35,7 @@ export type Database = {
         Update: {
           comment?: string | null
           created_at?: string | null
+          feedback_type?: string | null
           from_user_id?: string | null
           id?: string
           rating?: number

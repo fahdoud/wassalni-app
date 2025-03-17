@@ -7,6 +7,7 @@ export interface FeedbackInput {
   rating: number;
   comment?: string;
   tripId?: string;
+  feedbackType?: string;
 }
 
 export const submitFeedback = async (feedback: FeedbackInput) => {
@@ -37,6 +38,7 @@ export const submitFeedback = async (feedback: FeedbackInput) => {
             rating: feedback.rating,
             comment: feedback.comment,
             trip_id: feedback.tripId,
+            feedback_type: feedback.feedbackType || "general"
           })
           .select();
 
@@ -58,6 +60,7 @@ export const submitFeedback = async (feedback: FeedbackInput) => {
         rating: feedback.rating,
         comment: feedback.comment,
         trip_id: feedback.tripId,
+        feedback_type: feedback.feedbackType || "general"
       })
       .select();
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MessageSquare, Star, Send, ThumbsUp, AlertTriangle, Flag, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,7 +11,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
-// Example suggestions for different feedback types
 const FEEDBACK_EXAMPLES = {
   general: [
     "I really enjoy using this service for my daily commute.",
@@ -73,7 +71,6 @@ const FeedbackPage = () => {
   const [exampleSuggestions, setExampleSuggestions] = useState<string[]>(FEEDBACK_EXAMPLES.general);
   
   useEffect(() => {
-    // Update example suggestions when feedback type changes
     switch (feedbackType) {
       case "general":
         setExampleSuggestions(FEEDBACK_EXAMPLES.general);
@@ -168,22 +165,20 @@ const FeedbackPage = () => {
             toUserId: toUserId!,
             rating,
             comment: message,
-            tripId
+            tripId,
+            feedbackType: "rating"
           });
         } else {
-          // For all non-rating feedback types, use a consistent approach
           const { data: adminData } = await supabase
             .from("profiles")
             .select("id")
             .eq("role", "admin")
             .limit(1);
           
-          // Use system feedback with no target user if no admin is found
           const adminId = adminData && adminData.length > 0 
             ? adminData[0].id 
             : null;
           
-          // Use rating 0 for general feedback, 1-5 for others based on type
           const feedbackRating = feedbackType === "general" ? 0 : 
                                feedbackType === "suggestion" ? 4 : 
                                feedbackType === "complaint" ? 2 : 
@@ -192,9 +187,10 @@ const FeedbackPage = () => {
                                feedbackType === "problems" ? 1 : 3;
           
           await submitFeedback({
-            toUserId: adminId!,
+            toUserId: adminId,
             rating: feedbackRating,
-            comment: `[${feedbackType.toUpperCase()}] ${message}`
+            comment: message,
+            feedbackType: feedbackType
           });
         }
         
