@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,8 +8,9 @@ import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
 import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, sendEmailVerification, sendSMSNotification } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { sendCustomNotification } from "@/services/notifications/notificationService";
 
 const DriverSignUp = () => {
   const { t } = useLanguage();
@@ -170,7 +172,8 @@ const DriverSignUp = () => {
             car_year: carYear,
             license_number: licenseNumber,
             registration_number: registrationNumber
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/verify-email`
         }
       });
       
@@ -180,6 +183,26 @@ const DriverSignUp = () => {
       
       if (authData && authData.user) {
         const userId = authData.user.id;
+        
+        // Send email verification
+        try {
+          await sendEmailVerification(userId, email);
+          toast.success(t('auth.verificationEmailSent'));
+        } catch (verificationError) {
+          console.error("Failed to send verification email:", verificationError);
+          // Fall back to Supabase's built-in verification
+          toast.info(t('auth.defaultVerificationSent'));
+        }
+        
+        // Send welcome SMS notification
+        try {
+          const welcomeMessage = `Welcome to Wassalni, ${fullName}! Thank you for registering as a driver. Please verify your email to complete your account setup.`;
+          await sendSMSNotification(userId, phone, welcomeMessage);
+          toast.success(t('auth.welcomeSmsSent'));
+        } catch (smsError) {
+          console.error("Failed to send welcome SMS:", smsError);
+          toast.error(t('auth.smsError'));
+        }
         
         if (profilePhoto) {
           const profileImageUrl = await uploadProfileImage(profilePhoto, userId);
@@ -497,4 +520,3 @@ const DriverSignUp = () => {
 };
 
 export default DriverSignUp;
-

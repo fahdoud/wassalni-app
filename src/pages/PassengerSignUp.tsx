@@ -8,11 +8,12 @@ import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
 import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
-import { supabase, sendEmailVerification } from "@/integrations/supabase/client";
+import { supabase, sendEmailVerification, sendSMSVerification, sendSMSNotification } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { sendCustomNotification } from "@/services/notifications/notificationService";
 
 const PassengerSignUp = () => {
   const { t } = useLanguage();
@@ -84,7 +85,7 @@ const PassengerSignUp = () => {
       if (data.user) {
         setUserId(data.user.id);
         
-        // Try to send custom verification email
+        // Send email verification
         try {
           await sendEmailVerification(data.user.id, email);
           toast.success(t('auth.verificationEmailSent'));
@@ -92,6 +93,16 @@ const PassengerSignUp = () => {
           console.error("Failed to send verification email:", verificationError);
           // Fall back to Supabase's built-in verification
           toast.info(t('auth.defaultVerificationSent'));
+        }
+        
+        // Send welcome SMS notification
+        try {
+          const welcomeMessage = `Welcome to Wassalni, ${fullName}! Thank you for registering. Please verify your email to complete your account setup.`;
+          await sendSMSNotification(data.user.id, phone, welcomeMessage);
+          toast.success(t('auth.welcomeSmsSent'));
+        } catch (smsError) {
+          console.error("Failed to send welcome SMS:", smsError);
+          toast.error(t('auth.smsError'));
         }
         
         // Show verification dialog

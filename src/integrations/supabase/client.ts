@@ -220,7 +220,12 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 export const sendEmailVerification = async (userId: string, email: string) => {
   try {
     const { data, error } = await supabase.functions.invoke('send-email-verification', {
-      body: { userId, email, redirectUrl: window.location.origin + '/verify-email' }
+      body: { 
+        userId, 
+        email, 
+        redirectUrl: window.location.origin + '/verify-email',
+        type: "verification"
+      }
     });
     
     if (error) {
@@ -230,6 +235,29 @@ export const sendEmailVerification = async (userId: string, email: string) => {
     return data;
   } catch (error) {
     console.error("Error sending email verification:", error);
+    throw error;
+  }
+};
+
+// Function to send welcome email
+export const sendWelcomeEmail = async (userId: string, email: string, fullName: string) => {
+  try {
+    const { data, error } = await supabase.functions.invoke('send-email-verification', {
+      body: { 
+        userId, 
+        email,
+        fullName,
+        type: "welcome"
+      }
+    });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error sending welcome email:", error);
     throw error;
   }
 };

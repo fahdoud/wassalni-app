@@ -25,7 +25,7 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { userId, email, redirectUrl } = await req.json();
+    const { userId, email, redirectUrl, type = "verification", fullName = "" } = await req.json();
 
     if (!userId || !email) {
       return new Response(
@@ -34,41 +34,44 @@ serve(async (req) => {
       );
     }
 
-    // Generate a secure random token
-    const token = crypto.randomUUID();
-    const hashedToken = await hashToken(token);
-    
-    // Calculate expiration (24 hours from now)
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
+    // Generate a secure random token if it's a verification email
+    let token = "";
+    let hashedToken = "";
+    let verificationUrl = "";
+    let emailTemplate = "";
+    let emailSubject = "";
 
-    // Store verification data in database
-    const { error: dbError } = await supabase
-      .from("email_verification")
-      .upsert({
-        id: userId,
-        email: email,
-        verified: false,
-        verification_token: hashedToken,
-        token_expires_at: expiresAt.toISOString(),
-        updated_at: new Date().toISOString(),
-      });
+    if (type === "verification") {
+      token = crypto.randomUUID();
+      hashedToken = await hashToken(token);
+      
+      // Calculate expiration (24 hours from now)
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
 
-    if (dbError) {
-      console.error("Database error:", dbError);
-      throw new Error("Failed to store verification data");
-    }
+      // Store verification data in database
+      const { error: dbError } = await supabase
+        .from("email_verification")
+        .upsert({
+          id: userId,
+          email: email,
+          verified: false,
+          verification_token: hashedToken,
+          token_expires_at: expiresAt.toISOString(),
+          updated_at: new Date().toISOString(),
+        });
 
-    // Create verification URL (application will handle the verification)
-    const baseUrl = redirectUrl || "https://wassalni.app";
-    const verificationUrl = `${baseUrl}/verify-email?token=${token}&userId=${userId}`;
+      if (dbError) {
+        console.error("Database error:", dbError);
+        throw new Error("Failed to store verification data");
+      }
 
-    // Send email using Resend
-    const { data, error: emailError } = await resend.emails.send({
-      from: "Wassalni <noreply@wassalni.app>",
-      to: [email],
-      subject: "Verify your email address",
-      html: `
+      // Create verification URL (application will handle the verification)
+      const baseUrl = redirectUrl || "https://wassalni.app";
+      verificationUrl = `${baseUrl}/verify-email?token=${token}&userId=${userId}`;
+      
+      emailSubject = "Verify your email address";
+      emailTemplate = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #22c55e;">Wassalni Email Verification</h2>
           <p>Thank you for signing up with Wassalni. Please verify your email address by clicking the button below:</p>
@@ -79,16 +82,48 @@ serve(async (req) => {
           <p>If you did not sign up for Wassalni, please ignore this email.</p>
           <p>Thank you,<br>The Wassalni Team</p>
         </div>
-      `,
+      `;
+    } else if (type === "welcome") {
+      // Welcome email doesn't need verification token
+      emailSubject = "Welcome to Wassalni";
+      emailTemplate = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #22c55e;">Welcome to Wassalni!</h2>
+          <p>Hello ${fullName || "there"},</p>
+          <p>Thank you for joining Wassalni! We're excited to have you as part of our community.</p>
+          <p>With Wassalni, you can:</p>
+          <ul>
+            <li>Find rides easily and efficiently</li>
+            <li>Connect with trusted drivers in your area</li>
+            <li>Travel safely and comfortably</li>
+            <li>Save money on your transportation needs</li>
+          </ul>
+          <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+          <p>Happy travels!<br>The Wassalni Team</p>
+        </div>
+      `;
+    } else {
+      return new Response(
+        JSON.stringify({ error: "Invalid email type" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Send email using Resend
+    const { data, error: emailError } = await resend.emails.send({
+      from: "Wassalni <noreply@wassalni.app>",
+      to: [email],
+      subject: emailSubject,
+      html: emailTemplate,
     });
 
     if (emailError) {
       console.error("Email sending error:", emailError);
-      throw new Error("Failed to send verification email");
+      throw new Error("Failed to send email");
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: "Verification email sent" }),
+      JSON.stringify({ success: true, message: `${type === "verification" ? "Verification" : "Welcome"} email sent` }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
