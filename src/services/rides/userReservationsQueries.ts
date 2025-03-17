@@ -31,7 +31,7 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
           price,
           available_seats,
           driver_id,
-          profiles:driver_id(full_name)
+          drivers:driver_id(full_name)
         )
       `)
       .eq('passenger_id', user.id)
@@ -61,7 +61,7 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
         price: res.trips.price,
         driver_id: res.trips.driver_id,
         profiles: {
-          full_name: res.trips.profiles?.full_name || 'Unknown Driver'
+          full_name: res.trips.drivers?.full_name || 'Unknown Driver'
         }
       } : undefined
     }));

@@ -16,7 +16,26 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
-type Profile = {
+type DriverProfile = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  phone: string;
+  avatar_url?: string;
+  car_model?: string;
+  car_year?: string;
+  verification_status?: string;
+};
+
+type PassengerProfile = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  phone: string;
+  avatar_url?: string;
+};
+
+type UserProfile = {
   id: string;
   full_name: string;
   phone: string;
@@ -26,12 +45,64 @@ type Profile = {
 
 const UserProfileMenu = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [driverProfile, setDriverProfile] = useState<DriverProfile | null>(null);
+  const [passengerProfile, setPassengerProfile] = useState<PassengerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { t } = useLanguage();
 
-  const fetchProfile = async (userId: string) => {
+  const fetchDriverProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("drivers")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching driver profile:", error);
+        return null;
+      }
+      
+      if (data) {
+        console.log("Driver profile data loaded:", data);
+        return data as DriverProfile;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Unexpected error fetching driver profile:", error);
+      return null;
+    }
+  };
+
+  const fetchPassengerProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("passengers")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching passenger profile:", error);
+        return null;
+      }
+      
+      if (data) {
+        console.log("Passenger profile data loaded:", data);
+        return data as PassengerProfile;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Unexpected error fetching passenger profile:", error);
+      return null;
+    }
+  };
+
+  const fetchLegacyProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -40,18 +111,18 @@ const UserProfileMenu = () => {
         .single();
       
       if (error) {
-        console.error("Error fetching profile:", error);
+        console.error("Error fetching legacy profile:", error);
         return null;
       }
       
       if (data) {
-        console.log("Profile data loaded:", data);
-        return data as Profile;
+        console.log("Legacy profile data loaded:", data);
+        return data as UserProfile;
       }
       
       return null;
     } catch (error) {
-      console.error("Unexpected error fetching profile:", error);
+      console.error("Unexpected error fetching legacy profile:", error);
       return null;
     }
   };
@@ -65,9 +136,23 @@ const UserProfileMenu = () => {
         setUser(data.user);
         
         if (data.user) {
-          const profileData = await fetchProfile(data.user.id);
-          if (profileData) {
-            setProfile(profileData);
+          // First check if user has a legacy profile
+          const legacyProfile = await fetchLegacyProfile(data.user.id);
+          if (legacyProfile) {
+            setProfile(legacyProfile);
+            
+            // Based on role, fetch the specific profile
+            if (legacyProfile.role === 'driver') {
+              const driverData = await fetchDriverProfile(data.user.id);
+              if (driverData) {
+                setDriverProfile(driverData);
+              }
+            } else {
+              const passengerData = await fetchPassengerProfile(data.user.id);
+              if (passengerData) {
+                setPassengerProfile(passengerData);
+              }
+            }
           }
         }
       } catch (error) {
@@ -86,13 +171,29 @@ const UserProfileMenu = () => {
       if (event === "SIGNED_IN" && session) {
         setUser(session.user);
         
-        const profileData = await fetchProfile(session.user.id);
-        if (profileData) {
-          setProfile(profileData);
+        // First check if user has a legacy profile
+        const legacyProfile = await fetchLegacyProfile(session.user.id);
+        if (legacyProfile) {
+          setProfile(legacyProfile);
+          
+          // Based on role, fetch the specific profile
+          if (legacyProfile.role === 'driver') {
+            const driverData = await fetchDriverProfile(session.user.id);
+            if (driverData) {
+              setDriverProfile(driverData);
+            }
+          } else {
+            const passengerData = await fetchPassengerProfile(session.user.id);
+            if (passengerData) {
+              setPassengerProfile(passengerData);
+            }
+          }
         }
       } else if (event === "SIGNED_OUT") {
         setUser(null);
         setProfile(null);
+        setDriverProfile(null);
+        setPassengerProfile(null);
       }
     });
 
@@ -118,22 +219,30 @@ const UserProfileMenu = () => {
 
   if (!user) return null;
 
+  // Get the appropriate profile based on user role
+  const currentProfile = profile?.role === 'driver' ? driverProfile : passengerProfile;
+  
   // Use initials from full name or email as fallback
-  const initials = profile?.full_name
-    ? profile.full_name
+  const fullName = currentProfile?.full_name || profile?.full_name || '';
+  
+  const initials = fullName
+    ? fullName
         .split(" ")
         .map((n) => n[0])
         .join("")
         .toUpperCase()
     : user.email?.[0].toUpperCase() || "U";
 
+  // Get avatar URL from appropriate profile
+  const avatarUrl = currentProfile?.avatar_url || profile?.avatar_url;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
-            {profile?.avatar_url ? (
-              <AvatarImage src={profile.avatar_url} alt={profile.full_name || user.email || ""} />
+            {avatarUrl ? (
+              <AvatarImage src={avatarUrl} alt={fullName || user.email || ""} />
             ) : null}
             <AvatarFallback className="bg-wassalni-green text-white">
               {initials}
@@ -144,11 +253,16 @@ const UserProfileMenu = () => {
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{profile?.full_name || user.email}</p>
+            <p className="text-sm font-medium">{fullName || user.email}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
             {profile?.role && (
               <p className="text-xs text-muted-foreground capitalize">
                 Role: {profile.role}
+              </p>
+            )}
+            {profile?.role === 'driver' && driverProfile?.verification_status && (
+              <p className="text-xs text-muted-foreground capitalize">
+                Status: {driverProfile.verification_status}
               </p>
             )}
           </div>

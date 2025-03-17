@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/Button";
 import { Mail, Lock, User, Eye, EyeOff, Phone, Car, Calendar, FileImage, Camera, IdCard } from "lucide-react";
@@ -8,10 +7,13 @@ import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
 import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const DriverSignUp = () => {
   const { t } = useLanguage();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -23,6 +25,7 @@ const DriverSignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [vehiclePhoto, setVehiclePhoto] = useState<File | null>(null);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
@@ -44,64 +47,179 @@ const DriverSignUp = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadProfileImage = async (file: File, userId: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+      
+      const { error: uploadError } = await supabase
+        .storage
+        .from('profiles')
+        .upload(filePath, file);
+        
+      if (uploadError) {
+        console.error("Error uploading profile image:", uploadError);
+        throw new Error(uploadError.message);
+      }
+      
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('profiles')
+        .getPublicUrl(filePath);
+      
+      return publicUrl;
+    } catch (error: any) {
+      console.error("Failed to upload profile image:", error);
+      return null;
+    }
+  };
+
+  const uploadVehicleImage = async (file: File, userId: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `vehicle-${userId}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+      
+      const { error: uploadError } = await supabase
+        .storage
+        .from('vehicles')
+        .upload(filePath, file);
+        
+      if (uploadError) {
+        console.error("Error uploading vehicle image:", uploadError);
+        throw new Error(uploadError.message);
+      }
+      
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('vehicles')
+        .getPublicUrl(filePath);
+      
+      return publicUrl;
+    } catch (error: any) {
+      console.error("Failed to upload vehicle image:", error);
+      return null;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     if (!agreeTerms) {
-      toast({
+      uiToast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorTerms'),
       });
+      setIsLoading(false);
       return;
     }
     
     if (password !== confirmPassword) {
-      toast({
+      uiToast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorPasswordMatch'),
       });
+      setIsLoading(false);
       return;
     }
 
     if (!profilePhoto) {
-      toast({
+      uiToast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorProfilePhoto'),
       });
+      setIsLoading(false);
       return;
     }
 
     if (!vehiclePhoto) {
-      toast({
+      uiToast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorVehiclePhoto'),
       });
+      setIsLoading(false);
       return;
     }
     
-    // This would connect to registration in a real app
-    if (fullName && email && phone && carModel && carYear && licenseNumber && registrationNumber && password) {
-      toast({
-        title: t('auth.successTitle'),
-        description: t('auth.successDriverSignUp'),
-      });
-    } else {
-      toast({
+    if (!fullName || !email || !phone || !carModel || !carYear || !licenseNumber || !registrationNumber || !password) {
+      uiToast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorFields'),
       });
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone,
+            role: 'driver',
+            car_model: carModel,
+            car_year: carYear,
+            license_number: licenseNumber,
+            registration_number: registrationNumber
+          }
+        }
+      });
+      
+      if (authError) {
+        throw authError;
+      }
+      
+      if (authData && authData.user) {
+        const userId = authData.user.id;
+        
+        if (profilePhoto) {
+          const profileImageUrl = await uploadProfileImage(profilePhoto, userId);
+          if (profileImageUrl) {
+            await supabase
+              .from('drivers')
+              .update({ avatar_url: profileImageUrl })
+              .eq('user_id', userId);
+              
+            await supabase
+              .from('profiles')
+              .update({ avatar_url: profileImageUrl })
+              .eq('id', userId);
+          }
+        }
+        
+        if (vehiclePhoto) {
+          const vehicleImageUrl = await uploadVehicleImage(vehiclePhoto, userId);
+          if (vehicleImageUrl) {
+            await supabase
+              .from('drivers')
+              .update({ vehicle_photo_url: vehicleImageUrl })
+              .eq('user_id', userId);
+          }
+        }
+      }
+      
+      toast.success(t('auth.successDriverSignUp'));
+      
+      navigate('/');
+    } catch (error: any) {
+      toast.error(error.message || t('auth.errorGeneric'));
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col md:flex-row-reverse">
-        {/* Left Side - Image for driver */}
         <div className="hidden md:w-2/5 md:flex bg-gradient-primary relative">
           <div className="absolute inset-0 bg-pattern opacity-10"></div>
           <div className="relative z-10 flex flex-col justify-center items-center text-wassalni-dark p-16">
@@ -113,7 +231,6 @@ const DriverSignUp = () => {
           </div>
         </div>
         
-        {/* Right Side - Form */}
         <div className="w-full md:w-3/5 flex flex-col justify-center items-center p-8 md:p-16 overflow-y-auto">
           <div className="w-full max-w-xl">
             <Link to="/" className="flex items-center gap-2 mb-8">
@@ -137,7 +254,6 @@ const DriverSignUp = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 flex flex-col md:flex-row gap-6 items-start">
-                  {/* Profile Photo Upload */}
                   <div className="space-y-2 w-full md:w-1/2">
                     <label className="text-sm font-medium">{t('auth.profilePhoto')}</label>
                     <div className="flex flex-col items-center space-y-4">
@@ -163,7 +279,6 @@ const DriverSignUp = () => {
                     </div>
                   </div>
 
-                  {/* Vehicle Photo Upload */}
                   <div className="space-y-2 w-full md:w-1/2">
                     <label className="text-sm font-medium">{t('auth.vehiclePhoto')}</label>
                     <div className="flex flex-col items-center space-y-4">
@@ -382,3 +497,4 @@ const DriverSignUp = () => {
 };
 
 export default DriverSignUp;
+

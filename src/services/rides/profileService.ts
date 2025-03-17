@@ -2,6 +2,27 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Determine user type (driver or passenger)
+export const getUserRole = async (userId: string): Promise<string> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+      
+    if (error) {
+      console.error("Error fetching user role:", error);
+      return 'passenger'; // Default to passenger
+    }
+    
+    return data?.role || 'passenger';
+  } catch (error) {
+    console.error("Failed to get user role:", error);
+    return 'passenger';
+  }
+};
+
 // Upload a profile image
 export const uploadProfileImage = async (file: File, userId: string) => {
   try {
@@ -26,16 +47,39 @@ export const uploadProfileImage = async (file: File, userId: string) => {
       .storage
       .from('profiles')
       .getPublicUrl(filePath);
-      
-    // Update the user's profile with the image URL
-    const { error: updateError } = await supabase
+    
+    // Get user role
+    const role = await getUserRole(userId);
+    
+    // Update the appropriate profile table
+    if (role === 'driver') {
+      const { error: driverUpdateError } = await supabase
+        .from('drivers')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', userId);
+        
+      if (driverUpdateError) {
+        console.error("Error updating driver profile:", driverUpdateError);
+      }
+    } else {
+      const { error: passengerUpdateError } = await supabase
+        .from('passengers')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', userId);
+        
+      if (passengerUpdateError) {
+        console.error("Error updating passenger profile:", passengerUpdateError);
+      }
+    }
+    
+    // Also update the legacy profiles table
+    const { error: profileUpdateError } = await supabase
       .from('profiles')
       .update({ avatar_url: publicUrl })
       .eq('id', userId);
       
-    if (updateError) {
-      console.error("Error updating profile:", updateError);
-      throw new Error(updateError.message);
+    if (profileUpdateError) {
+      console.error("Error updating legacy profile:", profileUpdateError);
     }
     
     toast.success("Profile image updated successfully");

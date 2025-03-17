@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -9,10 +8,11 @@ import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
 import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const PassengerSignUp = () => {
   const { t } = useLanguage();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,7 +28,7 @@ const PassengerSignUp = () => {
     setIsLoading(true);
     
     if (!agreeTerms) {
-      toast({
+      uiToast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorTerms'),
@@ -38,7 +38,7 @@ const PassengerSignUp = () => {
     }
     
     if (password !== confirmPassword) {
-      toast({
+      uiToast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorPasswordMatch'),
@@ -48,7 +48,7 @@ const PassengerSignUp = () => {
     }
     
     if (!fullName || !email || !phone || !password) {
-      toast({
+      uiToast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorFields'),
@@ -74,19 +74,12 @@ const PassengerSignUp = () => {
         throw error;
       }
       
-      toast({
-        title: t('auth.successTitle'),
-        description: t('auth.successSignUp'),
-      });
+      toast.success(t('auth.successSignUp'));
       
       // Redirect to home page after successful signup
       navigate('/');
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: t('auth.errorTitle'),
-        description: error.message || t('auth.errorGeneric'),
-      });
+      toast.error(error.message || t('auth.errorGeneric'));
     } finally {
       setIsLoading(false);
     }
