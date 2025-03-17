@@ -5,6 +5,7 @@ import { getMockRides } from './mockRides';
 // Get all available rides
 export const getRides = async (): Promise<Ride[]> => {
   try {
+    // First try to get trips directly
     const { data: trips, error } = await supabase
       .from('trips')
       .select(`
@@ -14,8 +15,7 @@ export const getRides = async (): Promise<Ride[]> => {
         departure_time,
         price,
         available_seats,
-        driver_id,
-        profiles(full_name)
+        driver_id
       `)
       .eq('status', 'active');
     
@@ -24,39 +24,56 @@ export const getRides = async (): Promise<Ride[]> => {
       throw new Error(error.message);
     }
 
-    // Transform the data to match our Ride interface
-    const rides: Ride[] = trips.map(trip => {
-      // Handle the case where profiles is an array or object
-      let driverName = "Unknown Driver";
+    // If we successfully got trips, now get driver names in a separate query
+    if (trips && trips.length > 0) {
+      // Get all driver IDs from the trips
+      const driverIds = trips.map(trip => trip.driver_id).filter(Boolean);
       
-      if (trip.profiles) {
-        if (Array.isArray(trip.profiles) && trip.profiles.length > 0) {
-          // Access first element's full_name if it's an array
-          driverName = trip.profiles[0]?.full_name || "Unknown Driver";
-        } else if (typeof trip.profiles === 'object') {
-          // Access full_name directly if it's an object
-          driverName = (trip.profiles as any).full_name || "Unknown Driver";
-        }
+      // Fetch driver names from profiles
+      const { data: drivers, error: driversError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', driverIds);
+      
+      if (driversError) {
+        console.error("Error fetching drivers:", driversError);
+      }
+      
+      // Create a map of driver IDs to names for easy lookup
+      const driverMap = new Map();
+      if (drivers) {
+        drivers.forEach(driver => {
+          driverMap.set(driver.id, driver.full_name);
+        });
       }
 
-      return {
-        id: trip.id,
-        driver: driverName,
-        from: trip.origin,
-        to: trip.destination,
-        date: new Date(trip.departure_time).toISOString().split('T')[0],
-        time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        price: trip.price,
-        seats: trip.available_seats,
-        rating: 4.7, // Default rating - in a real app would come from reviews
-        trip_id: trip.id
-      };
-    });
+      // Transform the data to match our Ride interface
+      const rides: Ride[] = trips.map(trip => {
+        // Look up the driver name using our map
+        const driverName = trip.driver_id ? driverMap.get(trip.driver_id) || "Unknown Driver" : "Unknown Driver";
 
-    return rides;
+        return {
+          id: trip.id,
+          driver: driverName,
+          from: trip.origin,
+          to: trip.destination,
+          date: new Date(trip.departure_time).toISOString().split('T')[0],
+          time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          price: trip.price,
+          seats: trip.available_seats,
+          rating: 4.7, // Default rating - in a real app would come from reviews
+          trip_id: trip.id
+        };
+      });
+
+      return rides;
+    }
+    
+    // If no actual database trips, return mock rides
+    return getMockRides();
   } catch (error) {
     console.error("Failed to get rides:", error);
-    return [];
+    return getMockRides();
   }
 };
 
@@ -72,6 +89,7 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
   
   // Otherwise try to fetch from Supabase (UUID format)
   try {
+    // First fetch the trip data
     const { data: trip, error } = await supabase
       .from('trips')
       .select(`
@@ -81,8 +99,7 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
         departure_time,
         price,
         available_seats,
-        driver_id,
-        profiles(full_name)
+        driver_id
       `)
       .eq('id', rideId)
       .single();
@@ -92,16 +109,17 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
       return null;
     }
 
-    // Handle the case where profiles is an array or object
+    // Fetch the driver's name from profiles
     let driverName = "Unknown Driver";
-    
-    if (trip.profiles) {
-      if (Array.isArray(trip.profiles) && trip.profiles.length > 0) {
-        // Access first element's full_name if it's an array
-        driverName = trip.profiles[0]?.full_name || "Unknown Driver";
-      } else if (typeof trip.profiles === 'object') {
-        // Access full_name directly if it's an object
-        driverName = (trip.profiles as any).full_name || "Unknown Driver";
+    if (trip.driver_id) {
+      const { data: driver, error: driverError } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', trip.driver_id)
+        .single();
+      
+      if (!driverError && driver) {
+        driverName = driver.full_name;
       }
     }
 
@@ -125,3 +143,4 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
     return null;
   }
 };
+

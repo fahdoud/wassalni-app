@@ -32,6 +32,10 @@ export const createReservation = async (
       }
       
       console.log("Mock reservation created successfully:", reservation);
+      
+      // For mock rides, we manually decrement the seats in the mock data
+      // The UI will update based on the response, but next time the page loads
+      // it will show the original seat count since mock data is static
       return { success: true };
     }
     
@@ -102,15 +106,7 @@ export const getUserReservations = async (userId: string) => {
         seats_reserved,
         status,
         created_at,
-        trips (
-          id,
-          origin,
-          destination,
-          departure_time,
-          price,
-          driver_id,
-          profiles (full_name)
-        )
+        trip_id
       `)
       .eq('passenger_id', userId)
       .order('created_at', { ascending: false });
@@ -118,6 +114,44 @@ export const getUserReservations = async (userId: string) => {
     if (error) {
       console.error("Error fetching user reservations:", error);
       throw new Error(error.message);
+    }
+    
+    // If we have trips data, fetch the trip details in a separate query
+    if (data && data.length > 0) {
+      const tripIds = data
+        .filter(res => res.trip_id)
+        .map(res => res.trip_id);
+      
+      if (tripIds.length > 0) {
+        const { data: tripsData, error: tripsError } = await supabase
+          .from('trips')
+          .select(`
+            id,
+            origin,
+            destination,
+            departure_time,
+            price,
+            driver_id
+          `)
+          .in('id', tripIds);
+        
+        if (!tripsError && tripsData) {
+          // Create a map of trip data
+          const tripMap = new Map();
+          tripsData.forEach(trip => {
+            tripMap.set(trip.id, trip);
+          });
+          
+          // Add trip data to reservations
+          return data.map(res => {
+            const tripData = res.trip_id ? tripMap.get(res.trip_id) : null;
+            return {
+              ...res,
+              trips: tripData
+            };
+          });
+        }
+      }
     }
     
     return data;

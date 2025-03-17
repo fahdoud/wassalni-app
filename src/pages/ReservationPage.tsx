@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -23,7 +22,6 @@ const ReservationPage = () => {
   const [step, setStep] = useState(1);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Check if user is logged in
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -38,7 +36,6 @@ const ReservationPage = () => {
     checkAuth();
   }, [navigate]);
 
-  // Fetch ride data
   useEffect(() => {
     const fetchRide = async () => {
       setInitialLoading(true);
@@ -51,7 +48,6 @@ const ReservationPage = () => {
         const fetchedRide = await getRideById(rideId);
         if (fetchedRide) {
           setRide(fetchedRide);
-          // Ensure passenger count doesn't exceed available seats
           if (fetchedRide.seats < passengerCount) {
             setPassengerCount(Math.max(1, fetchedRide.seats));
           }
@@ -77,7 +73,6 @@ const ReservationPage = () => {
     setLoading(true);
     
     try {
-      // Use our service to create the reservation
       const { success, updatedSeats } = await createReservation(
         ride.trip_id || ride.id,
         userId,
@@ -85,19 +80,17 @@ const ReservationPage = () => {
       );
       
       if (success) {
-        // Update ride locally to reflect the new seat count
         setRide(prev => {
           if (prev) {
             return {
               ...prev,
-              // Use updatedSeats from the server if available, otherwise subtract passengerCount
               seats: updatedSeats !== undefined ? updatedSeats : (prev.seats - passengerCount)
             };
           }
           return prev;
         });
         
-        setStep(3); // Move to success step
+        setStep(3);
         toast.success(t('reservation.successMessage'));
       } else {
         toast.error("Failed to make reservation. Please try again.");
@@ -343,6 +336,7 @@ const ReservationPage = () => {
                       <span className="text-gray-600 dark:text-gray-300">{t('reservation.date')}</span>
                       <span className="font-medium">
                         {new Date(ride.date).toLocaleDateString('fr-FR', {
+                          weekday: 'long',
                           day: 'numeric',
                           month: 'long'
                         })}
@@ -366,7 +360,9 @@ const ReservationPage = () => {
                     <Button 
                       variant="outlined" 
                       className="flex-1" 
-                      onClick={() => navigate('/rides')}
+                      onClick={() => {
+                        window.location.href = '/rides';
+                      }}
                     >
                       {t('rides.title')}
                     </Button>
