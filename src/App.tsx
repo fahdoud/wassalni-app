@@ -17,6 +17,7 @@ import DriverSignIn from "./pages/DriverSignIn";
 import DriverSignUp from "./pages/DriverSignUp";
 import FeedbackPage from "./pages/FeedbackPage";
 import ReservationPage from "./pages/ReservationPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
@@ -72,6 +73,16 @@ const App = () => (
                 <Route path="/reservation/:rideId" element={
                   <ProtectedRoute requiredRole="passenger">
                     <ReservationPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile/:tab" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
                   </ProtectedRoute>
                 } />
                 <Route path="/auth/callback" element={<AuthCallback />} />
