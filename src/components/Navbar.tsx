@@ -109,6 +109,9 @@ const Navbar = () => {
                   {t('nav.signIn')}
                 </Button>
               </Link>
+              <Link to="/passenger-signup">
+                <Button size="sm">{t('nav.signUp')}</Button>
+              </Link>
             </div>
           )}
           <button
