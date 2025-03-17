@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Ride } from './types';
 import { getMockRides } from './mockRides';
@@ -26,18 +27,27 @@ export const getRides = async (): Promise<Ride[]> => {
     }
 
     // Transform the data to match our Ride interface
-    const rides: Ride[] = trips.map(trip => ({
-      id: trip.id,
-      driver: trip.profiles?.full_name || "Unknown Driver",
-      from: trip.origin,
-      to: trip.destination,
-      date: new Date(trip.departure_time).toISOString().split('T')[0],
-      time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      price: trip.price,
-      seats: trip.available_seats,
-      rating: 4.7, // Default rating - in a real app would come from reviews
-      trip_id: trip.id
-    }));
+    const rides: Ride[] = trips.map(trip => {
+      // Handle the case where profiles is an array or object
+      const driverName = trip.profiles 
+        ? Array.isArray(trip.profiles) 
+          ? trip.profiles[0]?.full_name 
+          : trip.profiles.full_name
+        : "Unknown Driver";
+
+      return {
+        id: trip.id,
+        driver: driverName || "Unknown Driver",
+        from: trip.origin,
+        to: trip.destination,
+        date: new Date(trip.departure_time).toISOString().split('T')[0],
+        time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        price: trip.price,
+        seats: trip.available_seats,
+        rating: 4.7, // Default rating - in a real app would come from reviews
+        trip_id: trip.id
+      };
+    });
 
     return rides;
   } catch (error) {
@@ -78,10 +88,17 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
       return null;
     }
 
+    // Handle the case where profiles is an array or object
+    const driverName = trip.profiles 
+      ? Array.isArray(trip.profiles) 
+        ? trip.profiles[0]?.full_name 
+        : trip.profiles.full_name
+      : "Unknown Driver";
+
     // Transform the trip data to our Ride interface
     const ride: Ride = {
       id: trip.id,
-      driver: trip.profiles?.full_name || "Unknown Driver",
+      driver: driverName || "Unknown Driver",
       from: trip.origin,
       to: trip.destination,
       date: new Date(trip.departure_time).toISOString().split('T')[0],
