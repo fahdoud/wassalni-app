@@ -173,7 +173,7 @@ const Navbar = () => {
                   {t('nav.feedback')}
                 </Link>
               </li>
-              {!user ? (
+              {!user && (
                 <>
                   <li className="pt-2">
                     <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
@@ -188,7 +188,7 @@ const Navbar = () => {
                     </Link>
                   </li>
                 </>
-              ) : null}
+              )}
             </ul>
           </nav>
         </div>
