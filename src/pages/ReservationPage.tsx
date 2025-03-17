@@ -11,15 +11,18 @@ import RideDetails from "@/components/reservation/RideDetails";
 import PaymentDetails from "@/components/reservation/PaymentDetails";
 import ConfirmationDetails from "@/components/reservation/ConfirmationDetails";
 import ReservationSidebar from "@/components/reservation/ReservationSidebar";
+import ChatInterface from "@/components/chat/ChatInterface";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ReservationPage = () => {
   const { t } = useLanguage();
   const { rideId } = useParams();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [userName, setUserName] = useState<string>("");
   
   // Check authentication status
   useEffect(() => {
@@ -33,6 +36,17 @@ const ReservationPage = () => {
         navigate("/passenger-signin", { 
           state: { returnTo: `/reservation/${rideId}` } 
         });
+      } else {
+        // Get user name for chat
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', data.user.id)
+          .single();
+          
+        if (profile) {
+          setUserName(profile.full_name || data.user.email || "User");
+        }
       }
     };
     
@@ -47,6 +61,7 @@ const ReservationPage = () => {
     initialLoading,
     step,
     setStep,
+    userId,
     handleReservation
   } = useReservation(rideId);
 
@@ -102,10 +117,55 @@ const ReservationPage = () => {
               )}
               
               {step === 3 && (
-                <ConfirmationDetails
-                  ride={ride}
-                  passengerCount={passengerCount}
-                />
+                <>
+                  <ConfirmationDetails
+                    ride={ride}
+                    passengerCount={passengerCount}
+                  />
+                  
+                  {/* Add chat interface after successful reservation */}
+                  <div className="mt-8 glass-card p-6 rounded-xl">
+                    <h2 className="text-xl font-semibold mb-4">{t('chat.title') || "Group Chat"}</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      {t('chat.description') || "Chat with the driver and other passengers"}
+                    </p>
+                    <div className="h-96 border rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+                      {userId && (
+                        <ChatInterface 
+                          rideId={ride.id || ride.trip_id || ''}
+                          userId={userId}
+                          userName={userName}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              {/* Show chat tab for existing reservations */}
+              {step === 1 && userId && (
+                <div className="mt-8 glass-card p-6 rounded-xl">
+                  <Tabs defaultValue="details">
+                    <TabsList className="mb-4">
+                      <TabsTrigger value="details">{t('reservation.details') || "Ride Details"}</TabsTrigger>
+                      <TabsTrigger value="chat">{t('chat.title') || "Group Chat"}</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="details">
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        {t('reservation.detailsDescription') || "View detailed information about this ride."}
+                      </p>
+                    </TabsContent>
+                    <TabsContent value="chat">
+                      <div className="h-96 border rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+                        <ChatInterface 
+                          rideId={ride.id || ride.trip_id || ''}
+                          userId={userId}
+                          userName={userName}
+                        />
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
               )}
             </div>
             
