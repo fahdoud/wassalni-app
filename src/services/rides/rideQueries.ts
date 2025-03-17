@@ -29,15 +29,21 @@ export const getRides = async (): Promise<Ride[]> => {
     // Transform the data to match our Ride interface
     const rides: Ride[] = trips.map(trip => {
       // Handle the case where profiles is an array or object
-      const driverName = trip.profiles 
-        ? Array.isArray(trip.profiles) 
-          ? trip.profiles[0]?.full_name 
-          : trip.profiles.full_name
-        : "Unknown Driver";
+      let driverName = "Unknown Driver";
+      
+      if (trip.profiles) {
+        if (Array.isArray(trip.profiles) && trip.profiles.length > 0) {
+          // Access first element's full_name if it's an array
+          driverName = trip.profiles[0]?.full_name || "Unknown Driver";
+        } else if (typeof trip.profiles === 'object') {
+          // Access full_name directly if it's an object
+          driverName = (trip.profiles as any).full_name || "Unknown Driver";
+        }
+      }
 
       return {
         id: trip.id,
-        driver: driverName || "Unknown Driver",
+        driver: driverName,
         from: trip.origin,
         to: trip.destination,
         date: new Date(trip.departure_time).toISOString().split('T')[0],
@@ -89,16 +95,22 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
     }
 
     // Handle the case where profiles is an array or object
-    const driverName = trip.profiles 
-      ? Array.isArray(trip.profiles) 
-        ? trip.profiles[0]?.full_name 
-        : trip.profiles.full_name
-      : "Unknown Driver";
+    let driverName = "Unknown Driver";
+    
+    if (trip.profiles) {
+      if (Array.isArray(trip.profiles) && trip.profiles.length > 0) {
+        // Access first element's full_name if it's an array
+        driverName = trip.profiles[0]?.full_name || "Unknown Driver";
+      } else if (typeof trip.profiles === 'object') {
+        // Access full_name directly if it's an object
+        driverName = (trip.profiles as any).full_name || "Unknown Driver";
+      }
+    }
 
     // Transform the trip data to our Ride interface
     const ride: Ride = {
       id: trip.id,
-      driver: driverName || "Unknown Driver",
+      driver: driverName,
       from: trip.origin,
       to: trip.destination,
       date: new Date(trip.departure_time).toISOString().split('T')[0],
