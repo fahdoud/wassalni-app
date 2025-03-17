@@ -119,10 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (!passengerError) {
           // Ensure email is included when setting passenger details
-          setPassengerDetails({
-            ...passengerData,
-            email: user?.email || null
-          } as PassengerDetails);
+          setPassengerDetails(passengerData as PassengerDetails);
         }
       } else if (profileData.role === 'driver') {
         const { data: driverData, error: driverError } = await supabase
@@ -133,10 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (!driverError) {
           // Ensure email is included when setting driver details
-          setDriverDetails({
-            ...driverData,
-            email: user?.email || null
-          } as DriverDetails);
+          setDriverDetails(driverData as DriverDetails);
         }
       }
     } catch (error) {
@@ -161,17 +155,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: 'Welcome back!',
       });
 
-      // Automatically redirect based on role
-      if (data.user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single();
-          
-        const redirectPath = profileData?.role === 'driver' ? '/offer-ride' : '/rides';
-        navigate(redirectPath);
-      }
+      const redirectPath = profile?.role === 'driver' ? '/offer-ride' : '/rides';
+      navigate(redirectPath);
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -252,13 +237,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: 'Please check your email to confirm your registration',
       });
 
-      // Directly signin after signup
-      if (data.user) {
-        await signIn(email, password);
-      } else {
-        const redirectPath = userData.role === 'driver' ? '/driver-signin' : '/passenger-signin';
-        navigate(redirectPath);
-      }
+      const redirectPath = userData.role === 'driver' ? '/driver-signin' : '/passenger-signin';
+      navigate(redirectPath);
     } catch (error: any) {
       toast({
         variant: 'destructive',
