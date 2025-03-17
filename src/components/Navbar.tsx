@@ -100,17 +100,7 @@ const Navbar = () => {
         <div className="md:hidden flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
-          {user ? (
-            <UserProfileMenu />
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/passenger-signin">
-                <Button variant="outlined" size="sm">
-                  {t('nav.signIn')}
-                </Button>
-              </Link>
-            </div>
-          )}
+          {user && <UserProfileMenu />}
           <button
             className="text-gray-700 focus:outline-none dark:text-gray-300"
             onClick={toggleMenu}

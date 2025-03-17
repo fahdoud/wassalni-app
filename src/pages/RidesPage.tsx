@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -18,10 +17,10 @@ import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { useToast } from '@/components/ui/use-toast';
 
-type Trip = {
+type Ride = {
   id: string;
-  origin: string;
-  destination: string;
+  start_location: string;
+  end_location: string;
   available_seats: number;
   price: number;
   departure_time: string;
@@ -29,102 +28,69 @@ type Trip = {
 };
 
 const RidesPage = () => {
-  const [trips, setTrips] = useState<Trip[]>([]);
+  const [rides, setRides] = useState<Ride[]>([]);
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
 
-  const { data: tripsData, isLoading, isError } = useQuery({
-    queryKey: ['trips', date],
+  const { data: ridesData, isLoading, isError } = useQuery({
+    queryKey: ['rides', date],
     queryFn: async () => {
       if (!date) return [];
 
       const formattedDate = format(date, 'yyyy-MM-dd');
 
-      // We need to query the trips table instead of rides
-      // and filter by date from the departure_time field
       const { data, error } = await supabase
-        .from('trips')
+        .from('rides')
         .select('*')
-        .gte('available_seats', 1)
-        .filter('departure_time', 'ilike', `${formattedDate}%`);
+        .eq('departure_date', formattedDate)
+        .gte('available_seats', 1);
 
       if (error) {
-        console.error("Error fetching trips:", error);
+        console.error("Error fetching rides:", error);
         throw error;
       }
 
-      return data as Trip[];
+      return data as Ride[];
     },
   });
 
   useEffect(() => {
-    if (tripsData) {
-      setTrips(tripsData);
+    if (ridesData) {
+      setRides(ridesData);
     }
-  }, [tripsData]);
+  }, [ridesData]);
 
-  const handleRideReservation = async (tripId: string) => {
+  const handleRideReservation = async (rideId: string) => {
     if (!user) {
       navigate('/passenger-signin');
       return;
     }
 
     try {
-      // First, get the trip to check available seats
-      const { data: tripData, error: tripError } = await supabase
-        .from('trips')
-        .select('available_seats')
-        .eq('id', tripId)
-        .single();
-
-      if (tripError) {
-        throw tripError;
-      }
-
-      // Make sure seats are available
-      if (tripData.available_seats < 1) {
-        toast({
-          title: "Error",
-          description: "No seats available for this trip",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Create reservation
       const { data, error } = await supabase.from('reservations').insert([
-        { trip_id: tripId, passenger_id: user.id, seats_reserved: 1 }
+        { ride_id: rideId, user_id: user.id },
       ]);
 
       if (error) {
         throw error;
       }
 
-      // Update available seats by directly calculating the new value
-      const newAvailableSeats = tripData.available_seats - 1;
-      
+      // Update available seats
       const { error: updateError } = await supabase
-        .from('trips')
-        .update({ available_seats: newAvailableSeats })
-        .eq('id', tripId);
+        .from('rides')
+        .update({ available_seats: () => 'available_seats - 1' })
+        .eq('id', rideId);
 
       if (updateError) {
         throw updateError;
       }
 
-      // Update local state to reflect the change
-      setTrips(trips.map(trip => 
-        trip.id === tripId 
-          ? { ...trip, available_seats: newAvailableSeats } 
-          : trip
-      ));
-
       toast({
         title: "Success",
-        description: "Ride reserved successfully!"
+        description: "Ride reserved successfully!",
       });
     } catch (error: any) {
       toast({
@@ -170,22 +136,22 @@ const RidesPage = () => {
         </Popover>
       </div>
 
-      {trips.length === 0 ? (
+      {rides.length === 0 ? (
         <p>{t('rides.noRidesAvailable')}</p>
       ) : (
         <div className="grid gap-4">
-          {trips.map((trip) => (
-            <Card key={trip.id}>
+          {rides.map((ride) => (
+            <Card key={ride.id}>
               <CardHeader>
-                <CardTitle>{trip.origin} - {trip.destination}</CardTitle>
+                <CardTitle>{ride.start_location} - {ride.end_location}</CardTitle>
                 <CardDescription>
-                  {t('rides.departure')}: {new Date(trip.departure_time).toLocaleTimeString()}
+                  {t('rides.departure')}: {new Date(ride.departure_time).toLocaleTimeString()}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>{t('rides.availableSeats')}: {trip.available_seats}</p>
-                <p>{t('rides.price')}: ${trip.price}</p>
-                <Button onClick={() => handleRideReservation(trip.id)}>{t('rides.reserveRide')}</Button>
+                <p>{t('rides.availableSeats')}: {ride.available_seats}</p>
+                <p>{t('rides.price')}: ${ride.price}</p>
+                <Button onClick={() => handleRideReservation(ride.id)}>{t('rides.reserveRide')}</Button>
               </CardContent>
             </Card>
           ))}
