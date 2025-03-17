@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -13,6 +12,7 @@ export interface Ride {
   seats: number;
   rating: number;
   trip_id?: string;
+  is_mock?: boolean;
 }
 
 // Get all available rides
@@ -61,6 +61,15 @@ export const getRides = async (): Promise<Ride[]> => {
 
 // Get a specific ride by ID
 export const getRideById = async (rideId: string): Promise<Ride | null> => {
+  // Check if the ID is from a mock ride (simple numeric ID)
+  if (/^\d+$/.test(rideId)) {
+    console.log("Using mock ride with ID:", rideId);
+    const mockRides = getMockRides();
+    const mockRide = mockRides.find(ride => ride.id === rideId);
+    return mockRide || null;
+  }
+  
+  // Otherwise try to fetch from Supabase (UUID format)
   try {
     const { data: trip, error } = await supabase
       .from('trips')
@@ -110,6 +119,13 @@ export const createReservation = async (
   seatsReserved: number
 ): Promise<boolean> => {
   try {
+    // For mock rides, just simulate a successful reservation
+    if (/^\d+$/.test(tripId)) {
+      // Simulate a delay to mimic network request
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return true;
+    }
+    
     // 1. Create the reservation
     const { data: reservation, error: reservationError } = await supabase
       .from('reservations')
@@ -132,7 +148,7 @@ export const createReservation = async (
       seats_count: number;
     };
     
-    const { error: updateError } = await supabase.rpc<any, DecreaseAvailableSeatsParams>(
+    const { error: updateError } = await supabase.rpc<DecreaseAvailableSeatsParams>(
       'decrease_available_seats', 
       {
         trip_id: tripId,
@@ -168,6 +184,7 @@ export const getMockRides = (): Ride[] => {
       price: 200,
       seats: 3,
       rating: 4.8,
+      is_mock: true
     },
     {
       id: "2",
@@ -179,6 +196,7 @@ export const getMockRides = (): Ride[] => {
       price: 150,
       seats: 2,
       rating: 4.5,
+      is_mock: true
     },
     {
       id: "3",
@@ -190,6 +208,7 @@ export const getMockRides = (): Ride[] => {
       price: 180,
       seats: 1,
       rating: 4.9,
+      is_mock: true
     },
     {
       id: "4",
@@ -201,6 +220,7 @@ export const getMockRides = (): Ride[] => {
       price: 250,
       seats: 4,
       rating: 4.7,
+      is_mock: true
     },
     {
       id: "5",
@@ -212,6 +232,7 @@ export const getMockRides = (): Ride[] => {
       price: 120,
       seats: 2,
       rating: 4.6,
+      is_mock: true
     },
   ];
 };
