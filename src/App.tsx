@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from "@/pages/Index";
@@ -14,9 +15,8 @@ import FeedbackPage from "@/pages/FeedbackPage";
 import ReservationPage from "@/pages/ReservationPage";
 import NotFound from "@/pages/NotFound";
 import { LanguageProvider } from './contexts/LanguageContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { useTheme } from './hooks/useTheme';
-import { Toaster } from "@/components/ui/sonner"
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { Toaster } from "@/components/ui/sonner";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
 import VerifyPhonePage from "@/pages/VerifyPhonePage";
 
