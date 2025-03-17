@@ -1,3 +1,4 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -5,7 +6,7 @@ import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getRides, Ride, getMockRides } from "@/services/RideService";
+import { getRides, Ride, getMockRides } from "@/services/rides";
 import { Bookmark, Loader2 } from "lucide-react";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];

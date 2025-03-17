@@ -8,7 +8,7 @@ import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
 import { Check, MapPin, Calendar, Clock, User, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { createReservation, getRideById, Ride } from "@/services/RideService";
+import { createReservation, getRideById, Ride } from "@/services/rides";
 import { supabase } from "@/integrations/supabase/client";
 
 const ReservationPage = () => {
