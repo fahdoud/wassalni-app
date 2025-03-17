@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,8 +8,11 @@ import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
 import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, sendEmailVerification } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const PassengerSignUp = () => {
   const { t } = useLanguage();
@@ -22,6 +26,8 @@ const PassengerSignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [userId, setUserId] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +64,7 @@ const PassengerSignUp = () => {
     }
     
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -66,7 +72,8 @@ const PassengerSignUp = () => {
             full_name: fullName,
             phone,
             role: 'passenger'
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/verify-email`
         }
       });
       
@@ -74,15 +81,34 @@ const PassengerSignUp = () => {
         throw error;
       }
       
-      toast.success(t('auth.successSignUp'));
-      
-      // Redirect to home page after successful signup
-      navigate('/');
+      if (data.user) {
+        setUserId(data.user.id);
+        
+        // Try to send custom verification email
+        try {
+          await sendEmailVerification(data.user.id, email);
+          toast.success(t('auth.verificationEmailSent'));
+        } catch (verificationError) {
+          console.error("Failed to send verification email:", verificationError);
+          // Fall back to Supabase's built-in verification
+          toast.info(t('auth.defaultVerificationSent'));
+        }
+        
+        // Show verification dialog
+        setShowVerificationDialog(true);
+      }
     } catch (error: any) {
       toast.error(error.message || t('auth.errorGeneric'));
-    } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDialogClose = () => {
+    setShowVerificationDialog(false);
+    setIsLoading(false);
+    
+    // Redirect to home page
+    navigate('/');
   };
 
   return (
@@ -242,6 +268,55 @@ const PassengerSignUp = () => {
           </div>
         </div>
       </div>
+
+      {/* Verification Dialog */}
+      <Dialog open={showVerificationDialog} onOpenChange={setShowVerificationDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('auth.verifyYourEmail')}</DialogTitle>
+            <DialogDescription>
+              {t('auth.verificationEmailSentDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {t('auth.verificationNote')}
+            </p>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="user-id">{t('auth.yourUserId')}</Label>
+              <div className="flex items-center space-x-2">
+                <Input 
+                  id="user-id" 
+                  value={userId} 
+                  readOnly 
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(userId);
+                    toast.success(t('auth.copiedToClipboard'));
+                  }}
+                >
+                  {t('auth.copy')}
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">
+                {t('auth.userIdHelp')}
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button onClick={handleDialogClose}>
+              {t('auth.gotIt')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

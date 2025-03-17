@@ -57,6 +57,36 @@ export type Database = {
         }
         Relationships: []
       }
+      email_verification: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          token_expires_at: string | null
+          updated_at: string | null
+          verification_token: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+          verification_token?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+          verification_token?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           comment: string | null
@@ -138,6 +168,36 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      phone_verification: {
+        Row: {
+          code_expires_at: string | null
+          created_at: string | null
+          id: string
+          phone: string
+          updated_at: string | null
+          verification_code: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          code_expires_at?: string | null
+          created_at?: string | null
+          id: string
+          phone: string
+          updated_at?: string | null
+          verification_code?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          code_expires_at?: string | null
+          created_at?: string | null
+          id?: string
+          phone?: string
+          updated_at?: string | null
+          verification_code?: string | null
+          verified?: boolean | null
         }
         Relationships: []
       }
