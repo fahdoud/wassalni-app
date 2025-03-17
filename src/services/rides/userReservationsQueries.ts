@@ -31,7 +31,7 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
           price,
           available_seats,
           driver_id,
-          driver:drivers(full_name)
+          driver:profiles(full_name)
         )
       `)
       .eq('passenger_id', user.id)
@@ -50,14 +50,14 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
       let trip = undefined;
       
       if (res.trip) {
-        // Extract the trip object
+        // Extract the trip object - it's a single object, not an array
         const tripData = res.trip;
         
         // Handle driver name safely
         let driverName = 'Unknown Driver';
         
         if (tripData && tripData.driver && typeof tripData.driver === 'object') {
-          // When the driver is returned as an object with full_name
+          // When the driver profile data is returned
           driverName = tripData.driver.full_name || 'Unknown Driver';
         }
           
