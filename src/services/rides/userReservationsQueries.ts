@@ -23,7 +23,7 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
         status,
         created_at,
         trip_id,
-        trips:trip_id(
+        trip:trip_id(
           id,
           origin,
           destination,
@@ -31,7 +31,7 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
           price,
           available_seats,
           driver_id,
-          drivers:profiles!driver_id(full_name)
+          driver:drivers(full_name)
         )
       `)
       .eq('passenger_id', user.id)
@@ -49,17 +49,17 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
       // Safely access nested trip data
       let trip = undefined;
       
-      if (res.trips) {
-        // Extract the trip object from the array or object response
-        const tripData = res.trips;
+      if (res.trip) {
+        // Extract the trip object
+        const tripData = res.trip;
         
         // Handle driver name safely
         let driverName = 'Unknown Driver';
         
-        if (tripData.drivers && 
-            typeof tripData.drivers === 'object' && 
-            'full_name' in tripData.drivers) {
-          driverName = tripData.drivers.full_name || 'Unknown Driver';
+        if (tripData.driver && 
+            typeof tripData.driver === 'object' && 
+            'full_name' in tripData.driver) {
+          driverName = tripData.driver.full_name || 'Unknown Driver';
         }
           
         trip = {

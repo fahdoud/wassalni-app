@@ -44,6 +44,7 @@ function App() {
                 <Route path="/offer-ride" element={<OfferRidePage />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path="/ride/:rideId" element={<ReservationPage />} />
+                <Route path="/reservation/:rideId" element={<ReservationPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />
