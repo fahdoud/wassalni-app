@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,11 +19,9 @@ const ProfilePage = () => {
     full_name: "",
     phone: "",
     email: "",
-    // Passenger specific fields
     interests: "",
     preferred_payment_method: "",
     emergency_contact: "",
-    // Driver specific fields
     driving_experience_years: 0,
     preferred_routes: "",
     availability_hours: "",
@@ -75,7 +72,6 @@ const ProfilePage = () => {
     
     setLoading(true);
     try {
-      // Update profile table
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -86,7 +82,6 @@ const ProfilePage = () => {
 
       if (profileError) throw profileError;
 
-      // Update role-specific tables
       if (isDriver) {
         const { error: driverError } = await supabase
           .from('driver_details')
@@ -152,7 +147,6 @@ const ProfilePage = () => {
 
           <div className="max-w-3xl mx-auto">
             <form onSubmit={handleSubmit} className="glass-card p-8 rounded-xl space-y-8">
-              {/* Profile Avatar */}
               <div className="flex flex-col items-center gap-4">
                 <Avatar className="h-24 w-24">
                   <AvatarImage src={formData.profile_photo_url} alt={formData.full_name} />
@@ -180,7 +174,6 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              {/* Basic Information */}
               <div>
                 <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -238,7 +231,6 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* Role-specific Information */}
               {isDriver ? (
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Driver Information</h2>
