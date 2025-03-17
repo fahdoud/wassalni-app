@@ -6,20 +6,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
-import { Check, MapPin, Calendar, Clock, User, ChevronLeft } from "lucide-react";
+import { Check, MapPin, Calendar, Clock, User, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-
-interface Ride {
-  id: number;
-  driver: string;
-  from: string;
-  to: string;
-  date: string;
-  time: string;
-  price: number;
-  seats: number;
-  rating: number;
-}
+import { createReservation, getRideById, Ride } from "@/services/RideService";
+import { supabase } from "@/integrations/supabase/client";
 
 const ReservationPage = () => {
   const { t } = useLanguage();
@@ -29,85 +19,73 @@ const ReservationPage = () => {
   const [passengerCount, setPassengerCount] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [step, setStep] = useState(1);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Fetch ride data - in a real app, this would be an API call
+  // Check if user is logged in
   useEffect(() => {
-    // Mocked ride data for now
-    const rides: Ride[] = [
-      {
-        id: 1,
-        driver: "Mohamed A.",
-        from: "Ali Mendjeli",
-        to: "City Center",
-        date: "2023-06-24",
-        time: "08:30",
-        price: 200,
-        seats: 3,
-        rating: 4.8,
-      },
-      {
-        id: 2,
-        driver: "Sara B.",
-        from: "City Center",
-        to: "El Khroub",
-        date: "2023-06-24",
-        time: "10:15",
-        price: 150,
-        seats: 2,
-        rating: 4.5,
-      },
-      {
-        id: 3,
-        driver: "Ahmed K.",
-        from: "Boussouf",
-        to: "Didouche Mourad",
-        date: "2023-06-24",
-        time: "12:00",
-        price: 180,
-        seats: 1,
-        rating: 4.9,
-      },
-      {
-        id: 4,
-        driver: "Fatima Z.",
-        from: "Zighoud Youcef",
-        to: "Ain Abid",
-        date: "2023-06-24",
-        time: "15:30",
-        price: 250,
-        seats: 4,
-        rating: 4.7,
-      },
-      {
-        id: 5,
-        driver: "Karim M.",
-        from: "Hamma Bouziane",
-        to: "Bekira",
-        date: "2023-06-24",
-        time: "17:45",
-        price: 120,
-        seats: 2,
-        rating: 4.6,
-      },
-    ];
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
+      } else {
+        toast.error("Please login to make a reservation");
+        navigate("/passenger-signin");
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
-    const foundRide = rides.find(r => r.id === parseInt(rideId || "0"));
-    if (foundRide) {
-      setRide(foundRide);
-    } else {
-      // Handle ride not found
-      navigate("/rides");
-    }
-  }, [rideId, navigate]);
+  // Fetch ride data
+  useEffect(() => {
+    const fetchRide = async () => {
+      setInitialLoading(true);
+      if (!rideId) {
+        navigate("/rides");
+        return;
+      }
 
-  const handleReservation = () => {
+      try {
+        const fetchedRide = await getRideById(rideId);
+        if (fetchedRide) {
+          setRide(fetchedRide);
+          // Ensure passenger count doesn't exceed available seats
+          if (fetchedRide.seats < passengerCount) {
+            setPassengerCount(Math.max(1, fetchedRide.seats));
+          }
+        } else {
+          toast.error("Ride not found");
+          navigate("/rides");
+        }
+      } catch (error) {
+        console.error("Error fetching ride:", error);
+        toast.error("Failed to load ride details");
+        navigate("/rides");
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    fetchRide();
+  }, [rideId, navigate, passengerCount]);
+
+  const handleReservation = async () => {
+    if (!ride || !userId) return;
+    
     setLoading(true);
     
-    // Update available seats in the "database"
-    if (ride) {
-      // Simulate API call to update seats
-      setTimeout(() => {
+    try {
+      // Use our service to create the reservation
+      const success = await createReservation(
+        ride.trip_id || ride.id,
+        userId,
+        passengerCount
+      );
+      
+      if (success) {
+        // Update ride locally to reflect the new seat count
         setRide(prev => {
           if (prev) {
             return {
@@ -118,12 +96,33 @@ const ReservationPage = () => {
           return prev;
         });
         
-        setLoading(false);
         setStep(3); // Move to success step
         toast.success(t('reservation.successMessage'));
-      }, 1500);
+      } else {
+        toast.error("Failed to make reservation. Please try again.");
+      }
+    } catch (error) {
+      console.error("Reservation error:", error);
+      toast.error("An error occurred during reservation");
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow pt-28 pb-16 flex justify-center items-center">
+          <div className="flex flex-col items-center">
+            <Loader2 className="w-8 h-8 animate-spin text-wassalni-green" />
+            <p className="mt-4 text-gray-600 dark:text-gray-300">Loading ride details...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!ride) return null;
 
@@ -201,9 +200,17 @@ const ReservationPage = () => {
                       <Clock size={16} className="text-wassalni-green dark:text-wassalni-lightGreen" />
                       <span>{ride.time}</span>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full dark:bg-gray-700">
-                      <User size={16} className="text-wassalni-green dark:text-wassalni-lightGreen" />
-                      <span>{ride.seats} {ride.seats === 1 ? t('rides.seat') : t('rides.seats')}</span>
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
+                      ride.seats > 0 
+                        ? "bg-gray-100 dark:bg-gray-700"
+                        : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                    }`}>
+                      <User size={16} className={ride.seats > 0 ? "text-wassalni-green dark:text-wassalni-lightGreen" : "text-red-500 dark:text-red-400"} />
+                      <span>
+                        {ride.seats > 0 
+                          ? `${ride.seats} ${ride.seats === 1 ? t('rides.seat') : t('rides.seats')}`
+                          : t('rides.full')}
+                      </span>
                     </div>
                   </div>
                   
@@ -211,8 +218,9 @@ const ReservationPage = () => {
                     <Button 
                       className="w-full"
                       onClick={() => setStep(2)}
+                      disabled={ride.seats <= 0}
                     >
-                      {t('reservation.payment')}
+                      {ride.seats > 0 ? t('reservation.payment') : t('rides.full')}
                     </Button>
                   </div>
                 </div>
@@ -302,6 +310,7 @@ const ReservationPage = () => {
                       className="flex-1"
                       onClick={handleReservation}
                       isLoading={loading}
+                      disabled={loading}
                     >
                       {t('reservation.confirmReservation')}
                     </Button>
