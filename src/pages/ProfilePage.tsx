@@ -342,7 +342,7 @@ const ProfilePage = () => {
               )}
 
               <div className="flex justify-center pt-4">
-                <Button type="submit" size="lg" loading={loading}>
+                <Button type="submit" size="lg" isLoading={loading}>
                   Save Changes
                 </Button>
               </div>
