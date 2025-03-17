@@ -1,8 +1,6 @@
-
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
 import Button from "@/components/Button";
 import { Mail, Lock, User, Eye, EyeOff, Phone } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,7 +10,6 @@ import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
 
 const PassengerSignUp = () => {
   const { t } = useLanguage();
-  const { signUp, user, loading, profile } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,17 +19,7 @@ const PassengerSignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  // Redirect if already logged in as a passenger
-  if (user && profile?.role === 'passenger') {
-    return <Navigate to="/rides" />;
-  }
-
-  // Redirect if logged in as a driver
-  if (user && profile?.role === 'driver') {
-    return <Navigate to="/offer-ride" />;
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!agreeTerms) {
@@ -53,23 +40,18 @@ const PassengerSignUp = () => {
       return;
     }
     
-    if (!fullName || !email || !phone || !password) {
+    // This would connect to registration in a real app
+    if (fullName && email && phone && password) {
+      toast({
+        title: t('auth.successTitle'),
+        description: t('auth.successSignUp'),
+      });
+    } else {
       toast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorFields'),
       });
-      return;
-    }
-    
-    try {
-      await signUp(email, password, {
-        full_name: fullName,
-        phone,
-        role: 'passenger'
-      });
-    } catch (error) {
-      // Error handling is done in the AuthContext
     }
   };
 

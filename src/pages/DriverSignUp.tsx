@@ -1,7 +1,7 @@
+
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
 import Button from "@/components/Button";
 import { Mail, Lock, User, Eye, EyeOff, Phone, Car, Calendar, FileImage, Camera, IdCard } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -11,7 +11,6 @@ import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
 
 const DriverSignUp = () => {
   const { t } = useLanguage();
-  const { signUp, user, loading, profile } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,16 +28,6 @@ const DriverSignUp = () => {
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
   const [vehiclePhotoPreview, setVehiclePhotoPreview] = useState<string | null>(null);
 
-  // Redirect if already logged in as a driver
-  if (user && profile?.role === 'driver') {
-    return <Navigate to="/offer-ride" />;
-  }
-
-  // Redirect if logged in as a passenger
-  if (user && profile?.role === 'passenger') {
-    return <Navigate to="/rides" />;
-  }
-
   const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -55,7 +44,7 @@ const DriverSignUp = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!agreeTerms) {
@@ -94,27 +83,18 @@ const DriverSignUp = () => {
       return;
     }
     
-    if (!fullName || !email || !phone || !carModel || !carYear || !licenseNumber || !registrationNumber || !password) {
+    // This would connect to registration in a real app
+    if (fullName && email && phone && carModel && carYear && licenseNumber && registrationNumber && password) {
+      toast({
+        title: t('auth.successTitle'),
+        description: t('auth.successDriverSignUp'),
+      });
+    } else {
       toast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorFields'),
       });
-      return;
-    }
-    
-    try {
-      // For now, we're just doing basic auth, we'll handle the photos separately later
-      await signUp(email, password, {
-        full_name: fullName,
-        phone,
-        role: 'driver'
-      });
-      
-      // Note: In a production app, you would upload the photos to storage here
-      // and store URLs/paths in a driver_details table
-    } catch (error) {
-      // Error handling is done in the AuthContext
     }
   };
 
@@ -402,4 +382,3 @@ const DriverSignUp = () => {
 };
 
 export default DriverSignUp;
-
