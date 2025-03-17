@@ -20,19 +20,14 @@ const RidesPage = () => {
     const fetchRides = async () => {
       setLoading(true);
       try {
-        // Try to fetch from Supabase first
         const fetchedRides = await getRides();
-        
-        // If we got rides from Supabase, use them
         if (fetchedRides && fetchedRides.length > 0) {
           setRides(fetchedRides);
         } else {
-          // Otherwise, use mock data
           setRides(getMockRides());
         }
       } catch (error) {
         console.error("Error fetching rides:", error);
-        // Fallback to mock data
         setRides(getMockRides());
       } finally {
         setLoading(false);
@@ -173,7 +168,7 @@ const RidesPage = () => {
                           <Button size="sm">{t('rides.reserve')}</Button>
                         </Link>
                       ) : (
-                        <Button size="sm" variant="outline" disabled>
+                        <Button size="sm" variant="outlined" disabled>
                           {t('rides.full')}
                         </Button>
                       )}
