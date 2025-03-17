@@ -1,390 +1,356 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { User, Phone, Mail, Car, MapPin, Clock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Button from "@/components/Button";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Phone, Mail, Heart, CreditCard, Phone as ContactPhone } from "lucide-react";
+import GradientText from "@/components/ui-components/GradientText";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const ProfilePage = () => {
-  const { user, profile, passengerDetails, driverDetails, loading } = useAuth();
-  const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { user, profile, passengerDetails, driverDetails, isDriver } = useAuth();
   const { toast } = useToast();
-  const { tab = "general" } = useParams();
-  
-  const [formState, setFormState] = useState({
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
     full_name: "",
     phone: "",
+    email: "",
     // Passenger specific fields
     interests: "",
     preferred_payment_method: "",
     emergency_contact: "",
     // Driver specific fields
-    driving_experience_years: "",
+    driving_experience_years: 0,
     preferred_routes: "",
     availability_hours: "",
-    profile_photo_url: "",
+    profile_photo_url: ""
   });
-  
-  const [isUpdating, setIsUpdating] = useState(false);
-  
+
   useEffect(() => {
+    if (!user) {
+      navigate("/passenger-signin");
+      return;
+    }
+
     if (profile) {
-      setFormState(prevState => ({
+      setFormData(prevState => ({
         ...prevState,
         full_name: profile.full_name || "",
         phone: profile.phone || "",
+        email: user.email || "",
       }));
     }
-    
-    if (profile?.role === "passenger" && passengerDetails) {
-      setFormState(prevState => ({
+
+    if (isDriver && driverDetails) {
+      setFormData(prevState => ({
+        ...prevState,
+        driving_experience_years: driverDetails.driving_experience_years || 0,
+        preferred_routes: driverDetails.preferred_routes || "",
+        availability_hours: driverDetails.availability_hours || "",
+        profile_photo_url: driverDetails.profile_photo_url || ""
+      }));
+    } else if (!isDriver && passengerDetails) {
+      setFormData(prevState => ({
         ...prevState,
         interests: passengerDetails.interests || "",
         preferred_payment_method: passengerDetails.preferred_payment_method || "",
-        emergency_contact: passengerDetails.emergency_contact || "",
+        emergency_contact: passengerDetails.emergency_contact || ""
       }));
     }
-    
-    if (profile?.role === "driver" && driverDetails) {
-      setFormState(prevState => ({
-        ...prevState,
-        driving_experience_years: driverDetails.driving_experience_years?.toString() || "",
-        preferred_routes: driverDetails.preferred_routes || "",
-        availability_hours: driverDetails.availability_hours || "",
-        profile_photo_url: driverDetails.profile_photo_url || "",
-      }));
-    }
-  }, [profile, passengerDetails, driverDetails]);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, [user, profile, passengerDetails, driverDetails, isDriver, navigate]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormState(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setFormData({ ...formData, [name]: value });
   };
-  
-  const handleSaveProfile = async () => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!user) return;
     
-    setIsUpdating(true);
-    
+    setLoading(true);
     try {
-      // Update profiles table
+      // Update profile table
       const { error: profileError } = await supabase
-        .from("profiles")
+        .from('profiles')
         .update({
-          full_name: formState.full_name,
-          phone: formState.phone,
+          full_name: formData.full_name,
+          phone: formData.phone
         })
-        .eq("id", user.id);
-      
+        .eq('id', user.id);
+
       if (profileError) throw profileError;
-      
-      // Update role-specific details
-      if (profile?.role === "passenger") {
-        const { error: passengerError } = await supabase
-          .from("passenger_details")
+
+      // Update role-specific tables
+      if (isDriver) {
+        const { error: driverError } = await supabase
+          .from('driver_details')
           .update({
-            interests: formState.interests,
-            preferred_payment_method: formState.preferred_payment_method,
-            emergency_contact: formState.emergency_contact,
+            driving_experience_years: formData.driving_experience_years,
+            preferred_routes: formData.preferred_routes,
+            availability_hours: formData.availability_hours,
+            profile_photo_url: formData.profile_photo_url
           })
-          .eq("id", user.id);
-        
+          .eq('id', user.id);
+
+        if (driverError) throw driverError;
+      } else {
+        const { error: passengerError } = await supabase
+          .from('passenger_details')
+          .update({
+            interests: formData.interests,
+            preferred_payment_method: formData.preferred_payment_method,
+            emergency_contact: formData.emergency_contact
+          })
+          .eq('id', user.id);
+
         if (passengerError) throw passengerError;
       }
-      
-      if (profile?.role === "driver") {
-        const { error: driverError } = await supabase
-          .from("driver_details")
-          .update({
-            driving_experience_years: formState.driving_experience_years ? parseInt(formState.driving_experience_years) : null,
-            preferred_routes: formState.preferred_routes,
-            availability_hours: formState.availability_hours,
-            profile_photo_url: formState.profile_photo_url,
-          })
-          .eq("id", user.id);
-        
-        if (driverError) throw driverError;
-      }
-      
+
       toast({
-        title: t('profile.updateSuccess'),
-        description: t('profile.profileUpdated'),
+        title: "Profile updated",
+        description: "Your profile information has been successfully updated."
       });
     } catch (error: any) {
       console.error("Error updating profile:", error);
       toast({
         variant: "destructive",
-        title: t('profile.updateError'),
-        description: error.message || t('profile.errorUpdating'),
+        title: "Update failed",
+        description: error.message || "Failed to update profile information."
       });
     } finally {
-      setIsUpdating(false);
+      setLoading(false);
     }
   };
-  
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="container mx-auto max-w-4xl px-4 py-24 flex items-center justify-center">
-        <div className="animate-pulse text-center">
-          {t('common.loading')}...
-        </div>
-      </div>
-    );
-  }
-  
-  // Redirect if not logged in
+
   if (!user || !profile) {
-    navigate("/passenger-signin");
-    return null;
+    return <div>Loading...</div>;
   }
-  
-  // Get user initials for avatar fallback
-  const getInitials = () => {
-    if (profile?.full_name) {
-      const nameParts = profile.full_name.split(" ");
-      if (nameParts.length >= 2) {
-        return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
-      }
-      return profile.full_name.slice(0, 2).toUpperCase();
-    }
-    return user.email?.slice(0, 2).toUpperCase() || "NN";
-  };
-  
+
+  const userInitials = formData.full_name
+    ? formData.full_name.split(" ").map(n => n[0]).join("").toUpperCase()
+    : "U";
+
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-24">
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8">
-          <Avatar className="h-24 w-24 border-4 border-white shadow-md">
-            <AvatarImage src={driverDetails?.profile_photo_url || ""} />
-            <AvatarFallback className="bg-wassalni-green text-white text-3xl">
-              {getInitials()}
-            </AvatarFallback>
-          </Avatar>
-          
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">{profile.full_name || user.email?.split("@")[0]}</h1>
-            <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-              <div className="flex items-center">
-                <Mail className="mr-1 h-4 w-4" />
-                {user.email}
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-grow pt-28 pb-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h1 className="mb-4">
+              <GradientText>Your Profile</GradientText>
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Update your personal information and preferences
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            <form onSubmit={handleSubmit} className="glass-card p-8 rounded-xl space-y-8">
+              {/* Profile Avatar */}
+              <div className="flex flex-col items-center gap-4">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={formData.profile_photo_url} alt={formData.full_name} />
+                  <AvatarFallback className="bg-wassalni-green text-white text-2xl">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                {isDriver && (
+                  <div className="w-full max-w-md">
+                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Profile Photo URL</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="profile_photo_url"
+                        value={formData.profile_photo_url}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="Enter image URL"
+                      />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <User size={18} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              {profile.phone && (
-                <div className="flex items-center">
-                  <Phone className="mr-1 h-4 w-4" />
-                  {profile.phone}
+
+              {/* Basic Information */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Full Name</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="full_name"
+                        value={formData.full_name}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="Your full name"
+                      />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <User size={18} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Phone Number</label>
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="Your phone number"
+                      />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Phone size={18} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Email</label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        disabled
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 bg-gray-50 outline-none dark:bg-gray-600 dark:border-gray-600 dark:text-gray-300"
+                        placeholder="Your email address"
+                      />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail size={18} className="text-gray-400" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Email cannot be changed</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Role-specific Information */}
+              {isDriver ? (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">Driver Information</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Driving Experience (years)</label>
+                      <input
+                        type="number"
+                        name="driving_experience_years"
+                        value={formData.driving_experience_years}
+                        onChange={handleChange}
+                        min="0"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Availability Hours</label>
+                      <input
+                        type="text"
+                        name="availability_hours"
+                        value={formData.availability_hours}
+                        onChange={handleChange}
+                        placeholder="e.g. Weekdays 8AM-5PM"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Preferred Routes</label>
+                      <textarea
+                        name="preferred_routes"
+                        value={formData.preferred_routes}
+                        onChange={handleChange}
+                        placeholder="Describe your preferred routes or areas"
+                        rows={3}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">Passenger Information</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Preferred Payment Method</label>
+                      <div className="relative">
+                        <select
+                          name="preferred_payment_method"
+                          value={formData.preferred_payment_method || ""}
+                          onChange={handleChange}
+                          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        >
+                          <option value="">Select payment method</option>
+                          <option value="cash">Cash</option>
+                          <option value="card">Card</option>
+                          <option value="mobile_wallet">Mobile Wallet</option>
+                        </select>
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <CreditCard size={18} className="text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Emergency Contact</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="emergency_contact"
+                          value={formData.emergency_contact || ""}
+                          onChange={handleChange}
+                          placeholder="Emergency contact number"
+                          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <ContactPhone size={18} className="text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Interests</label>
+                      <div className="relative">
+                        <textarea
+                          name="interests"
+                          value={formData.interests || ""}
+                          onChange={handleChange}
+                          placeholder="Share your interests (e.g. music, conversation topics)"
+                          rows={3}
+                          className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        ></textarea>
+                        <div className="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
+                          <Heart size={18} className="text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
-              <div className="flex items-center bg-primary/10 text-primary rounded-full px-2 py-1 text-xs">
-                {profile.role === "driver" ? t('common.driver') : t('common.passenger')}
+
+              <div className="flex justify-center pt-4">
+                <Button type="submit" size="lg" isLoading={loading}>
+                  Save Changes
+                </Button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
-        
-        <Tabs defaultValue="general" className="w-full pt-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="general">{t('profile.generalInfo')}</TabsTrigger>
-            <TabsTrigger value="details">
-              {profile.role === "driver" ? t('profile.driverDetails') : t('profile.passengerDetails')}
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="general" className="pt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('profile.personalInformation')}</CardTitle>
-                <CardDescription>
-                  {t('profile.updateYourPersonalInfo')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="full_name">{t('profile.fullName')}</Label>
-                  <div className="flex">
-                    <User className="mr-2 h-4 w-4 mt-3 text-muted-foreground" />
-                    <Input
-                      id="full_name"
-                      name="full_name"
-                      value={formState.full_name}
-                      onChange={handleInputChange}
-                      placeholder={t('profile.enterFullName')}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="phone">{t('profile.phoneNumber')}</Label>
-                  <div className="flex">
-                    <Phone className="mr-2 h-4 w-4 mt-3 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      name="phone"
-                      value={formState.phone}
-                      onChange={handleInputChange}
-                      placeholder={t('profile.enterPhoneNumber')}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t('profile.email')}</Label>
-                  <div className="flex">
-                    <Mail className="mr-2 h-4 w-4 mt-3 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      name="email"
-                      value={user.email || ""}
-                      readOnly
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
-                  <p className="text-sm text-muted-foreground">{t('profile.emailCannotBeChanged')}</p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={handleSaveProfile} 
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? t('common.saving') : t('common.saveChanges')}
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="details" className="pt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {profile.role === "driver" ? t('profile.driverDetails') : t('profile.passengerDetails')}
-                </CardTitle>
-                <CardDescription>
-                  {profile.role === "driver" 
-                    ? t('profile.updateYourDriverInfo') 
-                    : t('profile.updateYourPassengerInfo')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {profile.role === "passenger" ? (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="interests">{t('profile.interests')}</Label>
-                      <Input
-                        id="interests"
-                        name="interests"
-                        value={formState.interests}
-                        onChange={handleInputChange}
-                        placeholder={t('profile.enterYourInterests')}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="preferred_payment_method">{t('profile.preferredPayment')}</Label>
-                      <Input
-                        id="preferred_payment_method"
-                        name="preferred_payment_method"
-                        value={formState.preferred_payment_method}
-                        onChange={handleInputChange}
-                        placeholder={t('profile.enterPreferredPayment')}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="emergency_contact">{t('profile.emergencyContact')}</Label>
-                      <Input
-                        id="emergency_contact"
-                        name="emergency_contact"
-                        value={formState.emergency_contact}
-                        onChange={handleInputChange}
-                        placeholder={t('profile.enterEmergencyContact')}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="profile_photo_url">{t('profile.profilePhotoUrl')}</Label>
-                      <Input
-                        id="profile_photo_url"
-                        name="profile_photo_url"
-                        value={formState.profile_photo_url}
-                        onChange={handleInputChange}
-                        placeholder={t('profile.enterProfilePhotoUrl')}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="driving_experience_years">{t('profile.drivingExperience')}</Label>
-                      <div className="flex">
-                        <Car className="mr-2 h-4 w-4 mt-3 text-muted-foreground" />
-                        <Input
-                          id="driving_experience_years"
-                          name="driving_experience_years"
-                          type="number"
-                          value={formState.driving_experience_years}
-                          onChange={handleInputChange}
-                          placeholder={t('profile.enterYearsOfExperience')}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="preferred_routes">{t('profile.preferredRoutes')}</Label>
-                      <div className="flex">
-                        <MapPin className="mr-2 h-4 w-4 mt-3 text-muted-foreground" />
-                        <Input
-                          id="preferred_routes"
-                          name="preferred_routes"
-                          value={formState.preferred_routes}
-                          onChange={handleInputChange}
-                          placeholder={t('profile.enterPreferredRoutes')}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="availability_hours">{t('profile.availabilityHours')}</Label>
-                      <div className="flex">
-                        <Clock className="mr-2 h-4 w-4 mt-3 text-muted-foreground" />
-                        <Input
-                          id="availability_hours"
-                          name="availability_hours"
-                          value={formState.availability_hours}
-                          onChange={handleInputChange}
-                          placeholder={t('profile.enterAvailabilityHours')}
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={handleSaveProfile} 
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? t('common.saving') : t('common.saveChanges')}
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };

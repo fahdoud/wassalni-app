@@ -7,9 +7,9 @@ import GradientText from "./ui-components/GradientText";
 import Logo from "./ui-components/Logo";
 import LanguageSwitcher from "./ui-components/LanguageSwitcher";
 import ThemeToggle from "./ui-components/ThemeToggle";
+import UserProfile from "./UserProfile";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import UserProfileMenu from "./UserProfileMenu";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -69,6 +69,22 @@ const Navbar = () => {
             </li>
             <li>
               <Link
+                to="/rides"
+                className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
+              >
+                {t('nav.findRide')}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/offer-ride"
+                className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
+              >
+                {t('nav.offerRide')}
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/feedback"
                 className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
               >
@@ -80,7 +96,7 @@ const Navbar = () => {
             <LanguageSwitcher />
             <ThemeToggle />
             {user ? (
-              <UserProfileMenu />
+              <UserProfile />
             ) : (
               <>
                 <Link to="/passenger-signin">
@@ -100,13 +116,16 @@ const Navbar = () => {
         <div className="md:hidden flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
-          {user && <UserProfileMenu />}
-          <button
-            className="text-gray-700 focus:outline-none dark:text-gray-300"
-            onClick={toggleMenu}
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {user ? (
+            <UserProfile />
+          ) : (
+            <button
+              className="text-gray-700 focus:outline-none dark:text-gray-300"
+              onClick={toggleMenu}
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          )}
         </div>
       </div>
 
@@ -135,6 +154,24 @@ const Navbar = () => {
               </li>
               <li>
                 <Link
+                  to="/rides"
+                  className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
+                  onClick={toggleMenu}
+                >
+                  {t('nav.findRide')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/offer-ride"
+                  className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
+                  onClick={toggleMenu}
+                >
+                  {t('nav.offerRide')}
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/feedback"
                   className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
                   onClick={toggleMenu}
@@ -143,16 +180,20 @@ const Navbar = () => {
                 </Link>
               </li>
               {!user && (
-                <li className="flex flex-col gap-2 pt-2">
-                  <Link to="/passenger-signin" onClick={toggleMenu}>
-                    <Button variant="outlined" className="w-full">
-                      {t('nav.signIn')}
-                    </Button>
-                  </Link>
-                  <Link to="/passenger-signup" onClick={toggleMenu}>
-                    <Button className="w-full">{t('nav.signUp')}</Button>
-                  </Link>
-                </li>
+                <>
+                  <li className="pt-2">
+                    <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
+                      <Button variant="outlined" className="w-full">
+                        {t('nav.signIn')}
+                      </Button>
+                    </Link>
+                  </li>
+                  <li className="pt-2">
+                    <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
+                      <Button className="w-full">{t('nav.signUp')}</Button>
+                    </Link>
+                  </li>
+                </>
               )}
             </ul>
           </nav>

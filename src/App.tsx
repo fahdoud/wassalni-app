@@ -16,13 +16,20 @@ import PassengerSignUp from "./pages/PassengerSignUp";
 import DriverSignIn from "./pages/DriverSignIn";
 import DriverSignUp from "./pages/DriverSignUp";
 import FeedbackPage from "./pages/FeedbackPage";
-import ReservationPage from "./pages/ReservationPage";
 import ProfilePage from "./pages/ProfilePage";
+import ReservationPage from "./pages/ReservationPage";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 // Auth callback handler
 const AuthCallback = () => {
@@ -50,21 +57,26 @@ const App = () => (
               <Toaster />
               <Sonner />
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<Index />} />
-                <Route path="/rides" element={
-                  <ProtectedRoute requiredRole="passenger">
-                    <RidesPage />
-                  </ProtectedRoute>
-                } />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/passenger-signin" element={<PassengerSignIn />} />
+                <Route path="/passenger-signup" element={<PassengerSignUp />} />
+                <Route path="/driver-signin" element={<DriverSignIn />} />
+                <Route path="/driver-signup" element={<DriverSignUp />} />
+
+                {/* Protected Routes */}
+                <Route path="/rides" element={<RidesPage />} />
                 <Route path="/offer-ride" element={
                   <ProtectedRoute requiredRole="driver">
                     <OfferRidePage />
                   </ProtectedRoute>
                 } />
-                <Route path="/passenger-signin" element={<PassengerSignIn />} />
-                <Route path="/passenger-signup" element={<PassengerSignUp />} />
-                <Route path="/driver-signin" element={<DriverSignIn />} />
-                <Route path="/driver-signup" element={<DriverSignUp />} />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/feedback" element={
                   <ProtectedRoute>
                     <FeedbackPage />
@@ -75,18 +87,8 @@ const App = () => (
                     <ReservationPage />
                   </ProtectedRoute>
                 } />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/profile/:tab" element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                
+                {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TooltipProvider>
