@@ -7,11 +7,14 @@ import GradientText from "./ui-components/GradientText";
 import Logo from "./ui-components/Logo";
 import LanguageSwitcher from "./ui-components/LanguageSwitcher";
 import ThemeToggle from "./ui-components/ThemeToggle";
+import UserProfileMenu from "./UserProfileMenu";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -25,6 +28,29 @@ const Navbar = () => {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Check current auth state
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getUser();
+      setIsLoggedIn(!!data.user);
+    };
+
+    checkAuth();
+
+    // Set up auth listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
+        setIsLoggedIn(true);
+      } else if (event === "SIGNED_OUT") {
+        setIsLoggedIn(false);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -76,14 +102,20 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <ThemeToggle />
-            <Link to="/passenger-signin">
-              <Button variant="outlined" size="sm">
-                {t('nav.signIn')}
-              </Button>
-            </Link>
-            <Link to="/passenger-signup">
-              <Button size="sm">{t('nav.signUp')}</Button>
-            </Link>
+            {isLoggedIn ? (
+              <UserProfileMenu />
+            ) : (
+              <>
+                <Link to="/passenger-signin">
+                  <Button variant="outlined" size="sm">
+                    {t('nav.signIn')}
+                  </Button>
+                </Link>
+                <Link to="/passenger-signup">
+                  <Button size="sm">{t('nav.signUp')}</Button>
+                </Link>
+              </>
+            )}
           </div>
         </nav>
 
@@ -91,6 +123,7 @@ const Navbar = () => {
         <div className="md:hidden flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
+          {isLoggedIn && <UserProfileMenu />}
           <button
             className="text-gray-700 focus:outline-none dark:text-gray-300"
             onClick={toggleMenu}
@@ -132,16 +165,18 @@ const Navbar = () => {
                   {t('nav.feedback')}
                 </Link>
               </li>
-              <li className="flex flex-col gap-2 pt-2">
-                <Link to="/passenger-signin" onClick={toggleMenu}>
-                  <Button variant="outlined" className="w-full">
-                    {t('nav.signIn')}
-                  </Button>
-                </Link>
-                <Link to="/passenger-signup" onClick={toggleMenu}>
-                  <Button className="w-full">{t('nav.signUp')}</Button>
-                </Link>
-              </li>
+              {!isLoggedIn && (
+                <li className="flex flex-col gap-2 pt-2">
+                  <Link to="/passenger-signin" onClick={toggleMenu}>
+                    <Button variant="outlined" className="w-full">
+                      {t('nav.signIn')}
+                    </Button>
+                  </Link>
+                  <Link to="/passenger-signup" onClick={toggleMenu}>
+                    <Button className="w-full">{t('nav.signUp')}</Button>
+                  </Link>
+                </li>
+              )}
             </ul>
           </nav>
         </div>
