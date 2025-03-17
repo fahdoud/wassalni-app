@@ -69,6 +69,22 @@ const Navbar = () => {
             </li>
             <li>
               <Link
+                to="/rides"
+                className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
+              >
+                {t('nav.findRide')}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/offer-ride"
+                className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
+              >
+                {t('nav.offerRide')}
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/feedback"
                 className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
               >
@@ -85,11 +101,11 @@ const Navbar = () => {
               <>
                 <Link to="/passenger-signin">
                   <Button variant="outlined" size="sm">
-                    Se connecter
+                    {t('nav.signIn')}
                   </Button>
                 </Link>
                 <Link to="/passenger-signup">
-                  <Button size="sm">S'inscrire</Button>
+                  <Button size="sm">{t('nav.signUp')}</Button>
                 </Link>
               </>
             )}
@@ -138,6 +154,24 @@ const Navbar = () => {
               </li>
               <li>
                 <Link
+                  to="/rides"
+                  className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
+                  onClick={toggleMenu}
+                >
+                  {t('nav.findRide')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/offer-ride"
+                  className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
+                  onClick={toggleMenu}
+                >
+                  {t('nav.offerRide')}
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/feedback"
                   className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
                   onClick={toggleMenu}
@@ -150,13 +184,13 @@ const Navbar = () => {
                   <li className="pt-2">
                     <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
                       <Button variant="outlined" className="w-full">
-                        Se connecter
+                        {t('nav.signIn')}
                       </Button>
                     </Link>
                   </li>
                   <li className="pt-2">
                     <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
-                      <Button className="w-full">S'inscrire</Button>
+                      <Button className="w-full">{t('nav.signUp')}</Button>
                     </Link>
                   </li>
                 </>

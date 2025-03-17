@@ -11,9 +11,14 @@ type ProtectedRouteProps = {
 const ProtectedRoute = ({ children, requiredRole = null }: ProtectedRouteProps) => {
   const { user, profile, loading } = useAuth();
   
-  // If still loading auth state, show nothing or a spinner
+  // If still loading auth state, show a loading spinner
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-wassalni-green"></div>
+        <p className="ml-3 text-lg text-gray-600 dark:text-gray-300">Loading...</p>
+      </div>
+    );
   }
   
   // Check if user is authenticated
