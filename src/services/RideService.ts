@@ -144,13 +144,14 @@ export const createReservation = async (
     }
 
     // 2. Update the available seats in the trip
-    type DecreaseAvailableSeatsParams = {
+    // This is a type definition for our RPC function parameters
+    interface DecreaseSeatsParams {
       trip_id: string;
       seats_count: number;
-    };
+    }
     
-    // The correct way to use rpc with type parameters
-    const { error: updateError } = await supabase.rpc<DecreaseAvailableSeatsParams, null>(
+    // Using generic arguments correctly for the rpc call
+    const { error: updateError } = await supabase.rpc<DecreaseSeatsParams>(
       'decrease_available_seats', 
       {
         trip_id: tripId,
