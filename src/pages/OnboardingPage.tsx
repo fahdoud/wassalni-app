@@ -26,23 +26,23 @@ const OnboardingPage = () => {
 
   const slides = [
     {
-      title: t('onboarding.welcome'),
-      description: t('onboarding.welcomeDesc'),
+      title: "Welcome to Wassalni",
+      description: "Your premium carpooling solution in Constantine. Discover a smarter way to travel together.",
       image: "/lovable-uploads/0ed09104-7848-4012-8db2-6ee6006b35af.png",
     },
     {
-      title: t('onboarding.findRides'),
-      description: t('onboarding.findRidesDesc'),
+      title: "Find Available Rides",
+      description: "Browse through numerous available rides in your area and choose what works best for you.",
       icon: "🚗",
     },
     {
-      title: t('onboarding.shareRides'),
-      description: t('onboarding.shareRidesDesc'),
+      title: "Connect with Community",
+      description: "Join a trusted network of drivers and passengers to make traveling more social and affordable.",
       icon: "👥",
     },
     {
-      title: t('onboarding.saveMoney'),
-      description: t('onboarding.saveMoneyDesc'),
+      title: "Save Money & Time",
+      description: "Reduce your transportation costs while contributing to less traffic and a greener environment.",
       icon: "💰",
     },
   ];
@@ -91,7 +91,7 @@ const OnboardingPage = () => {
               onClick={handleSkip} 
               className="p-2 text-sm font-medium text-wassalni-green dark:text-wassalni-lightGreen"
             >
-              {t('onboarding.skip')}
+              Skip
             </button>
           </div>
 
@@ -141,7 +141,7 @@ const OnboardingPage = () => {
             className="w-full mt-4 group"
           >
             <span className="flex items-center justify-center">
-              {currentSlide < slides.length - 1 ? t('onboarding.next') : t('onboarding.getStarted')}
+              {currentSlide < slides.length - 1 ? "Next" : "Get Started"}
               <ChevronRight size={20} className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
             </span>
           </Button>

@@ -48,7 +48,7 @@ export function useIsMobile() {
 }
 
 // Export the simpler version for backward compatibility
-export default function useIsMobileSimple() {
+export default function useIsMobileSimple(): boolean {
   const { isMobile } = useIsMobile();
   return isMobile;
 }

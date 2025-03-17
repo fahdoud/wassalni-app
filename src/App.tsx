@@ -27,8 +27,12 @@ function App() {
   
   // Add viewport meta tag for better mobile experience
   useEffect(() => {
-    // Enable iOS PWA features
-    if (navigator.standalone) {
+    // Check for iOS PWA mode safely
+    const isInStandaloneMode = () => 
+      window.matchMedia('(display-mode: standalone)').matches || 
+      (window.navigator as any).standalone === true;
+    
+    if (isInStandaloneMode()) {
       document.body.classList.add('ios-pwa');
     }
   }, []);
