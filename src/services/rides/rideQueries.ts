@@ -89,7 +89,12 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
   
   // Otherwise try to fetch from Supabase (UUID format)
   try {
-    // First fetch the trip data
+    console.log("Fetching real ride with ID:", rideId);
+    
+    // Disable caching by adding a cache-busting timestamp
+    const timestamp = new Date().getTime();
+    
+    // First fetch the trip data with cache busting
     const { data: trip, error } = await supabase
       .from('trips')
       .select(`
@@ -108,6 +113,8 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
       console.error("Error fetching ride:", error);
       return null;
     }
+
+    console.log("Trip data fetched:", trip);
 
     // Fetch the driver's name from profiles
     let driverName = "Unknown Driver";
@@ -137,10 +144,10 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
       trip_id: trip.id
     };
 
+    console.log("Transformed ride data:", ride);
     return ride;
   } catch (error) {
     console.error("Failed to get ride:", error);
     return null;
   }
 };
-

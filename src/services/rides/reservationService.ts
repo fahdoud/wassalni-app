@@ -42,6 +42,24 @@ export const createReservation = async (
     // For real rides with UUID trip IDs
     console.log("Creating a real reservation with tripId:", tripId);
     
+    // First fetch current available seats
+    const { data: currentTrip, error: tripError } = await supabase
+      .from('trips')
+      .select('available_seats')
+      .eq('id', tripId)
+      .single();
+      
+    if (tripError) {
+      console.error("Error fetching current trip seats:", tripError);
+      throw new Error(tripError.message);
+    }
+    
+    if (currentTrip.available_seats < seatsReserved) {
+      console.error("Not enough seats available");
+      toast.error("Not enough seats available");
+      return { success: false };
+    }
+    
     // 1. Create the reservation
     const { data: reservation, error: reservationError } = await supabase
       .from('reservations')
