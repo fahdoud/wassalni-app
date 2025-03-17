@@ -8,7 +8,7 @@ import GradientText from "@/components/ui-components/GradientText";
 import { Check, MapPin, Calendar, Clock, User, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createReservation } from "@/services/rides/reservationService";
-import { getRideById } from "@/services/rides/rideQueries";
+import { getRideById, subscribeToRideUpdates } from "@/services/rides/rideQueries";
 import { Ride } from "@/services/rides/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -68,6 +68,27 @@ const ReservationPage = () => {
 
     fetchRide();
   }, [rideId, navigate, passengerCount]);
+
+  useEffect(() => {
+    if (!rideId || !ride) return;
+    
+    console.log("Setting up real-time subscription for ride:", rideId);
+    
+    if (!/^\d+$/.test(rideId)) {
+      const subscription = subscribeToRideUpdates(rideId, (updatedRide) => {
+        console.log("Received ride update:", updatedRide);
+        setRide(updatedRide);
+        
+        if (updatedRide.seats < passengerCount) {
+          setPassengerCount(Math.max(1, updatedRide.seats));
+        }
+      });
+      
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [rideId, ride, passengerCount]);
 
   const handleReservation = async () => {
     if (!ride || !userId) return;
@@ -449,4 +470,3 @@ const ReservationPage = () => {
 };
 
 export default ReservationPage;
-

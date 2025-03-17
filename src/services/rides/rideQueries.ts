@@ -8,9 +8,6 @@ export const getRides = async (): Promise<Ride[]> => {
   try {
     console.log("Fetching rides with cache busting");
     
-    // Add a cache-busting timestamp to ensure fresh data
-    const timestamp = new Date().getTime();
-    
     // First try to get trips directly
     const { data: trips, error } = await supabase
       .from('trips')
@@ -100,9 +97,6 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
   try {
     console.log("Fetching real ride with ID:", rideId);
     
-    // Disable caching by adding a cache-busting timestamp
-    const timestamp = new Date().getTime();
-    
     // First fetch the trip data with cache busting
     const { data: trip, error } = await supabase
       .from('trips')
@@ -159,4 +153,44 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
     console.error("Failed to get ride:", error);
     return null;
   }
+};
+
+// Subscribe to changes for a specific ride
+export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) => void) => {
+  if (/^\d+$/.test(rideId)) {
+    // Mock rides don't support real-time updates
+    console.log("Mock rides don't support real-time updates");
+    return { unsubscribe: () => {} };
+  }
+
+  console.log("Setting up real-time subscription for ride:", rideId);
+  
+  const channel = supabase
+    .channel(`ride-${rideId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'trips',
+        filter: `id=eq.${rideId}`
+      },
+      async (payload) => {
+        console.log("Received real-time update for ride:", payload);
+        
+        // Fetch the updated ride data
+        const updatedRide = await getRideById(rideId);
+        if (updatedRide) {
+          callback(updatedRide);
+        }
+      }
+    )
+    .subscribe();
+
+  return {
+    unsubscribe: () => {
+      console.log("Unsubscribing from ride updates");
+      supabase.removeChannel(channel);
+    }
+  };
 };

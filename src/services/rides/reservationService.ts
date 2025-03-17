@@ -79,27 +79,29 @@ export const createReservation = async (
 
     console.log("Created reservation record:", reservation);
 
-    // 2. Update the available seats in the trip
-    const { data: updatedTrip, error: updateError } = await supabase.rpc(
-      'decrease_available_seats', 
-      {
+    // 2. Update the available seats in the trip using the new function
+    const { data: success, error: updateError } = await supabase
+      .rpc('decrease_available_seats', {
         trip_id: tripId,
         seats_count: seatsReserved
-      }
-    ).then(() => 
-      // Fetch the updated trip to get the new available_seats count
-      supabase
-        .from('trips')
-        .select('available_seats')
-        .eq('id', tripId)
-        .single()
-    );
+      });
 
-    if (updateError) {
+    if (updateError || !success) {
       console.error("Error updating available seats:", updateError);
       // If there's an error updating seats, try to delete the reservation
       await supabase.from('reservations').delete().eq('id', reservation.id);
-      throw new Error(updateError.message);
+      throw new Error(updateError?.message || "Failed to update seats");
+    }
+
+    // 3. Fetch the updated seat count to confirm
+    const { data: updatedTrip, error: fetchError } = await supabase
+      .from('trips')
+      .select('available_seats')
+      .eq('id', tripId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching updated seat count:", fetchError);
     }
 
     console.log("Reservation created successfully. Updated trip:", updatedTrip);
