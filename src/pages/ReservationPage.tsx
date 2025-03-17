@@ -7,7 +7,9 @@ import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
 import { Check, MapPin, Calendar, Clock, User, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { createReservation, getRideById, Ride } from "@/services/rides";
+import { createReservation } from "@/services/rides/reservationService";
+import { getRideById } from "@/services/rides/rideQueries";
+import { Ride } from "@/services/rides/types";
 import { supabase } from "@/integrations/supabase/client";
 
 const ReservationPage = () => {
@@ -89,6 +91,8 @@ const ReservationPage = () => {
           }
           return prev;
         });
+        
+        sessionStorage.setItem('fromReservation', 'true');
         
         setStep(3);
         toast.success(t('reservation.successMessage'));
@@ -361,7 +365,8 @@ const ReservationPage = () => {
                       variant="outlined" 
                       className="flex-1" 
                       onClick={() => {
-                        window.location.href = '/rides';
+                        sessionStorage.setItem('fromReservation', 'true');
+                        navigate('/rides');
                       }}
                     >
                       {t('rides.title')}
@@ -444,3 +449,4 @@ const ReservationPage = () => {
 };
 
 export default ReservationPage;
+

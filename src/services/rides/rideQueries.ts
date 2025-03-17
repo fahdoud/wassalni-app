@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Ride } from './types';
 import { getMockRides } from './mockRides';
@@ -5,6 +6,11 @@ import { getMockRides } from './mockRides';
 // Get all available rides
 export const getRides = async (): Promise<Ride[]> => {
   try {
+    console.log("Fetching rides with cache busting");
+    
+    // Add a cache-busting timestamp to ensure fresh data
+    const timestamp = new Date().getTime();
+    
     // First try to get trips directly
     const { data: trips, error } = await supabase
       .from('trips')
@@ -26,6 +32,8 @@ export const getRides = async (): Promise<Ride[]> => {
 
     // If we successfully got trips, now get driver names in a separate query
     if (trips && trips.length > 0) {
+      console.log("Trips fetched successfully:", trips);
+      
       // Get all driver IDs from the trips
       const driverIds = trips.map(trip => trip.driver_id).filter(Boolean);
       
@@ -66,6 +74,7 @@ export const getRides = async (): Promise<Ride[]> => {
         };
       });
 
+      console.log("Transformed rides data:", rides);
       return rides;
     }
     

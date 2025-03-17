@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -6,7 +5,9 @@ import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { getRides, Ride, getMockRides } from "@/services/rides";
+import { getRides } from "@/services/rides";
+import { Ride } from "@/services/rides/types";
+import { getMockRides } from "@/services/rides/mockRides";
 import { Bookmark, Loader2 } from "lucide-react";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
@@ -19,13 +20,22 @@ const RidesPage = () => {
   const location = useLocation();
   
   // Fetch rides data - will run on initial load and when navigating back to the page
-  const fetchRides = async () => {
+  const fetchRides = async (forceRefresh = false) => {
     setLoading(true);
     try {
+      console.log("Fetching rides, forceRefresh:", forceRefresh);
+      
+      // Clear existing rides to show loading state
+      if (forceRefresh) {
+        setRides([]);
+      }
+      
       const fetchedRides = await getRides();
       if (fetchedRides && fetchedRides.length > 0) {
+        console.log("Fetched rides:", fetchedRides);
         setRides(fetchedRides);
       } else {
+        console.log("No rides found, using mock rides");
         setRides(getMockRides());
       }
     } catch (error) {
@@ -38,14 +48,41 @@ const RidesPage = () => {
 
   // Initial load of rides data
   useEffect(() => {
-    fetchRides();
+    fetchRides(true);
+    
+    // Add an event listener for the beforeunload event to handle page refreshes
+    const handleBeforeUnload = () => {
+      localStorage.setItem('ridesPageReloaded', 'true');
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Add an event listener for the 'focus' event to refresh data when returning to the tab
+    const handleFocus = () => {
+      fetchRides(true);
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Add a listener for route changes to refresh rides when returning to this page
   useEffect(() => {
     // This will run whenever the component is mounted or the location changes
     if (location.pathname === '/rides') {
-      fetchRides();
+      const fromReservation = sessionStorage.getItem('fromReservation');
+      
+      if (fromReservation === 'true') {
+        console.log("Returning from reservation page, force refreshing rides");
+        fetchRides(true);
+        sessionStorage.removeItem('fromReservation');
+      } else {
+        fetchRides();
+      }
     }
   }, [location]);
 
@@ -176,7 +213,7 @@ const RidesPage = () => {
                         {ride.price} <span className="text-sm">DZD</span>
                       </p>
                       {ride.seats > 0 ? (
-                        <Link to={`/reservation/${ride.id}`}>
+                        <Link to={`/reservation/${ride.id}`} onClick={() => sessionStorage.removeItem('fromReservation')}>
                           <Button size="sm">{t('rides.reserve')}</Button>
                         </Link>
                       ) : (
