@@ -85,11 +85,11 @@ const Navbar = () => {
               <>
                 <Link to="/passenger-signin">
                   <Button variant="outlined" size="sm">
-                    {t('nav.signIn')}
+                    Se connecter
                   </Button>
                 </Link>
                 <Link to="/passenger-signup">
-                  <Button size="sm">{t('nav.signUp')}</Button>
+                  <Button size="sm">S'inscrire</Button>
                 </Link>
               </>
             )}
@@ -150,13 +150,13 @@ const Navbar = () => {
                   <li className="pt-2">
                     <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
                       <Button variant="outlined" className="w-full">
-                        {t('nav.signIn')}
+                        Se connecter
                       </Button>
                     </Link>
                   </li>
                   <li className="pt-2">
                     <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
-                      <Button className="w-full">{t('nav.signUp')}</Button>
+                      <Button className="w-full">S'inscrire</Button>
                     </Link>
                   </li>
                 </>
