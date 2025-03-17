@@ -119,6 +119,7 @@ export const useReservation = (rideId: string | undefined) => {
       );
       
       if (success) {
+        // Immediately update the local state to reflect the new seat count
         setRide(prev => {
           if (prev) {
             return {
@@ -129,6 +130,7 @@ export const useReservation = (rideId: string | undefined) => {
           return prev;
         });
         
+        // Set a flag in session storage to force refresh rides list when returning
         sessionStorage.setItem('fromReservation', 'true');
         
         setStep(3);

@@ -14,7 +14,9 @@ const ReservationSidebar = ({ ride, step, passengerCount }: ReservationSidebarPr
   const { t } = useLanguage();
   const [availableSeats, setAvailableSeats] = useState(ride.seats);
 
+  // Update availableSeats whenever ride.seats changes
   useEffect(() => {
+    console.log("Ride seats updated in sidebar:", ride.seats);
     setAvailableSeats(ride.seats);
   }, [ride.seats]);
 
@@ -67,7 +69,7 @@ const ReservationSidebar = ({ ride, step, passengerCount }: ReservationSidebarPr
             <p className="text-sm text-gray-500 dark:text-gray-400">{t('reservation.availableSeats')}</p>
             <p className={`font-medium ${availableSeats > 0 ? '' : 'text-red-500'}`}>
               {availableSeats > 0 
-                ? `${availableSeats} ${availableSeats === 1 ? t('rides.seat') : t('rides.seats')}`
+                ? `${availableSeats} ${availableSeats === 1 ? t('rides.seat') : t('rides.seats')}` 
                 : t('rides.full')}
             </p>
           </div>
