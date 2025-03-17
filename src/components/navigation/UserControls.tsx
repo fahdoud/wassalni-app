@@ -41,10 +41,8 @@ const UserControls = () => {
         variant="ghost" 
         size="sm" 
         onClick={handleSignOut}
-        className="flex items-center gap-2"
       >
-        <LogOut size={16} />
-        <span className="hidden md:inline">{t('nav.signOut')}</span>
+        {t('nav.signOut')}
       </Button>
     </div>
   );
