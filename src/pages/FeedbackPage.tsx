@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MessageSquare, Star, Send, ThumbsUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,7 +29,6 @@ const FeedbackPage = () => {
       setIsLoggedIn(!!data.user);
       
       if (data.user) {
-        // Load user's completed trips
         const { data: reservations, error } = await supabase
           .from("reservations")
           .select(`
@@ -53,7 +51,6 @@ const FeedbackPage = () => {
           const uniqueTrips = reservations.filter((r: any) => r.trip !== null);
           setTrips(uniqueTrips.map((r: any) => r.trip));
           
-          // Extract unique drivers
           const uniqueDrivers = Array.from(
             new Map(
               uniqueTrips
@@ -90,8 +87,6 @@ const FeedbackPage = () => {
             tripId
           });
         } else {
-          // For general feedback or suggestions
-          // Store in feedback with system user as recipient
           const { data: adminData } = await supabase
             .from("profiles")
             .select("id")
@@ -111,7 +106,6 @@ const FeedbackPage = () => {
         
         toast.success(t('feedback.successTitle'));
         
-        // Reset form
         setName("");
         setEmail("");
         setMessage("");
@@ -119,7 +113,6 @@ const FeedbackPage = () => {
         setTripId(undefined);
         setToUserId(undefined);
       } else {
-        // For non-logged in users, store contact info
         console.log({
           feedbackType,
           name,
@@ -128,13 +121,8 @@ const FeedbackPage = () => {
           rating: feedbackType === "rating" ? rating : undefined,
         });
         
-        toast({
-          title: t('feedback.successTitle'),
-          description: t('feedback.successDescription'),
-          duration: 5000,
-        });
+        toast.success(t('feedback.successTitle'));
         
-        // Reset form
         setName("");
         setEmail("");
         setMessage("");
@@ -351,7 +339,6 @@ const FeedbackPage = () => {
   );
 };
 
-// Helper component for feedback type buttons
 interface FeedbackTypeButtonProps {
   icon: React.ReactNode;
   title: string;
