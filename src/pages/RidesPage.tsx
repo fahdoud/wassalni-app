@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { getRides, Ride, getMockRides } from "@/services/rides";
 import { Bookmark, Loader2 } from "lucide-react";
 
@@ -16,27 +16,38 @@ const RidesPage = () => {
   const [filter, setFilter] = useState("");
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
   
-  useEffect(() => {
-    const fetchRides = async () => {
-      setLoading(true);
-      try {
-        const fetchedRides = await getRides();
-        if (fetchedRides && fetchedRides.length > 0) {
-          setRides(fetchedRides);
-        } else {
-          setRides(getMockRides());
-        }
-      } catch (error) {
-        console.error("Error fetching rides:", error);
+  // Fetch rides data - will run on initial load and when navigating back to the page
+  const fetchRides = async () => {
+    setLoading(true);
+    try {
+      const fetchedRides = await getRides();
+      if (fetchedRides && fetchedRides.length > 0) {
+        setRides(fetchedRides);
+      } else {
         setRides(getMockRides());
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching rides:", error);
+      setRides(getMockRides());
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Initial load of rides data
+  useEffect(() => {
     fetchRides();
   }, []);
+
+  // Add a listener for route changes to refresh rides when returning to this page
+  useEffect(() => {
+    // This will run whenever the component is mounted or the location changes
+    if (location.pathname === '/rides') {
+      fetchRides();
+    }
+  }, [location]);
 
   const filteredRides = filter 
     ? rides.filter(ride => 

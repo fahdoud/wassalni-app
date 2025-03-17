@@ -58,13 +58,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "feedback_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: false
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
         ]
       }
       profiles: {
@@ -168,60 +161,6 @@ export type Database = {
           {
             foreignKeyName: "reservations_passenger_id_fkey"
             columns: ["passenger_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reservations_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: false
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      trips: {
-        Row: {
-          available_seats: number
-          created_at: string | null
-          departure_time: string
-          destination: string
-          driver_id: string | null
-          id: string
-          origin: string
-          price: number
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          available_seats: number
-          created_at?: string | null
-          departure_time: string
-          destination: string
-          driver_id?: string | null
-          id?: string
-          origin: string
-          price: number
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          available_seats?: number
-          created_at?: string | null
-          departure_time?: string
-          destination?: string
-          driver_id?: string | null
-          id?: string
-          origin?: string
-          price?: number
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trips_driver_id_fkey"
-            columns: ["driver_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

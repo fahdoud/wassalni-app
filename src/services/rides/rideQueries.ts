@@ -17,8 +17,7 @@ export const getRides = async (): Promise<Ride[]> => {
         driver_id,
         profiles(full_name)
       `)
-      .eq('status', 'active')
-      .gt('available_seats', 0);
+      .eq('status', 'active');
     
     if (error) {
       console.error("Error fetching rides:", error);
