@@ -36,6 +36,8 @@ serve(async (req) => {
       );
     }
 
+    console.log(`Processing ${type} SMS request for user ${userId} to phone ${phone}`);
+
     // For verification type
     if (type === "verification") {
       // Generate a 6-digit verification code
@@ -73,6 +75,8 @@ serve(async (req) => {
         throw new Error("Failed to send SMS");
       }
 
+      console.log(`Verification SMS sent successfully to ${phone}, SID: ${smsMessage.sid}`);
+      
       return new Response(
         JSON.stringify({ success: true, message: "Verification SMS sent" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -87,6 +91,8 @@ serve(async (req) => {
         );
       }
 
+      console.log(`Sending notification SMS to ${phone}: "${message}"`);
+
       // Send notification SMS using Twilio
       const smsMessage = await twilioClient.messages.create({
         body: message,
@@ -97,6 +103,8 @@ serve(async (req) => {
       if (!smsMessage.sid) {
         throw new Error("Failed to send notification SMS");
       }
+
+      console.log(`Notification SMS sent successfully to ${phone}, SID: ${smsMessage.sid}`);
 
       // Log the notification in the database if needed
       const { error: logError } = await supabase

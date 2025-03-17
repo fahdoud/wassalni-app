@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -8,12 +7,11 @@ import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
 import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
-import { supabase, sendEmailVerification, sendSMSVerification, sendSMSNotification } from "@/integrations/supabase/client";
+import { supabase, sendEmailVerification, sendSMSNotification, sendWelcomeEmail, sendSMSVerification } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { sendCustomNotification } from "@/services/notifications/notificationService";
 
 const PassengerSignUp = () => {
   const { t } = useLanguage();
@@ -65,6 +63,8 @@ const PassengerSignUp = () => {
     }
     
     try {
+      console.log("Attempting to sign up with:", { email, fullName, phone, role: 'passenger' });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -83,32 +83,59 @@ const PassengerSignUp = () => {
       }
       
       if (data.user) {
+        console.log("User created successfully:", data.user.id);
         setUserId(data.user.id);
         
-        // Send email verification
+        let formattedPhone = phone;
+        if (!phone.startsWith('+')) {
+          formattedPhone = `+213${phone.startsWith('0') ? phone.substring(1) : phone}`;
+        }
+        
         try {
-          await sendEmailVerification(data.user.id, email);
+          console.log("Sending email verification to:", email);
+          const emailResult = await sendEmailVerification(data.user.id, email);
+          console.log("Email verification result:", emailResult);
           toast.success(t('auth.verificationEmailSent'));
         } catch (verificationError) {
           console.error("Failed to send verification email:", verificationError);
-          // Fall back to Supabase's built-in verification
-          toast.info(t('auth.defaultVerificationSent'));
+          toast.error("Failed to send verification email. Please try again later.");
         }
         
-        // Send welcome SMS notification
+        try {
+          console.log("Sending welcome email to:", email);
+          const welcomeResult = await sendWelcomeEmail(data.user.id, email, fullName);
+          console.log("Welcome email result:", welcomeResult);
+          toast.success("Welcome email sent successfully");
+        } catch (welcomeError) {
+          console.error("Failed to send welcome email:", welcomeError);
+          toast.error("Failed to send welcome email. Please try again later.");
+        }
+        
+        try {
+          console.log("Sending SMS verification to:", formattedPhone);
+          const smsVerificationResult = await sendSMSVerification(data.user.id, formattedPhone);
+          console.log("SMS verification result:", smsVerificationResult);
+          toast.success("SMS verification code sent");
+        } catch (smsVerificationError) {
+          console.error("Failed to send SMS verification:", smsVerificationError);
+          toast.error("Failed to send SMS verification. Please try again later.");
+        }
+        
         try {
           const welcomeMessage = `Welcome to Wassalni, ${fullName}! Thank you for registering. Please verify your email to complete your account setup.`;
-          await sendSMSNotification(data.user.id, phone, welcomeMessage);
+          console.log("Sending welcome SMS to:", formattedPhone);
+          const smsResult = await sendSMSNotification(data.user.id, formattedPhone, welcomeMessage);
+          console.log("Welcome SMS result:", smsResult);
           toast.success(t('auth.welcomeSmsSent'));
         } catch (smsError) {
           console.error("Failed to send welcome SMS:", smsError);
           toast.error(t('auth.smsError'));
         }
         
-        // Show verification dialog
         setShowVerificationDialog(true);
       }
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast.error(error.message || t('auth.errorGeneric'));
       setIsLoading(false);
     }
@@ -118,14 +145,12 @@ const PassengerSignUp = () => {
     setShowVerificationDialog(false);
     setIsLoading(false);
     
-    // Redirect to home page
     navigate('/');
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col md:flex-row">
-        {/* Left Side - Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-16">
           <div className="w-full max-w-md">
             <Link to="/" className="flex items-center gap-2 mb-8">
@@ -193,6 +218,7 @@ const PassengerSignUp = () => {
                     placeholder={t('auth.phonePlaceholder')}
                   />
                 </div>
+                <p className="text-xs text-gray-500">Include country code for international format (e.g., +213...)</p>
               </div>
               
               <div className="space-y-2">
@@ -267,7 +293,6 @@ const PassengerSignUp = () => {
           </div>
         </div>
         
-        {/* Right Side - Image */}
         <div className="hidden md:w-1/2 md:flex bg-gradient-primary relative">
           <div className="absolute inset-0 bg-pattern opacity-10"></div>
           <div className="relative z-10 flex flex-col justify-center items-center text-wassalni-dark p-16">
@@ -280,7 +305,6 @@ const PassengerSignUp = () => {
         </div>
       </div>
 
-      {/* Verification Dialog */}
       <Dialog open={showVerificationDialog} onOpenChange={setShowVerificationDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

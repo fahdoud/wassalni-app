@@ -219,6 +219,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // Function to send email verification
 export const sendEmailVerification = async (userId: string, email: string) => {
   try {
+    console.log(`Calling send-email-verification function for user ${userId} with email ${email}`);
     const { data, error } = await supabase.functions.invoke('send-email-verification', {
       body: { 
         userId, 
@@ -229,9 +230,11 @@ export const sendEmailVerification = async (userId: string, email: string) => {
     });
     
     if (error) {
+      console.error("Error in sendEmailVerification:", error);
       throw error;
     }
     
+    console.log("Email verification function response:", data);
     return data;
   } catch (error) {
     console.error("Error sending email verification:", error);
@@ -242,6 +245,7 @@ export const sendEmailVerification = async (userId: string, email: string) => {
 // Function to send welcome email
 export const sendWelcomeEmail = async (userId: string, email: string, fullName: string) => {
   try {
+    console.log(`Calling send-email-verification function for welcome email to ${email}`);
     const { data, error } = await supabase.functions.invoke('send-email-verification', {
       body: { 
         userId, 
@@ -252,9 +256,11 @@ export const sendWelcomeEmail = async (userId: string, email: string, fullName: 
     });
     
     if (error) {
+      console.error("Error in sendWelcomeEmail:", error);
       throw error;
     }
     
+    console.log("Welcome email function response:", data);
     return data;
   } catch (error) {
     console.error("Error sending welcome email:", error);
@@ -265,14 +271,17 @@ export const sendWelcomeEmail = async (userId: string, email: string, fullName: 
 // Function to send SMS verification
 export const sendSMSVerification = async (userId: string, phone: string) => {
   try {
+    console.log(`Calling send-sms-verification function for user ${userId} with phone ${phone}`);
     const { data, error } = await supabase.functions.invoke('send-sms-verification', {
       body: { userId, phone, type: "verification" }
     });
     
     if (error) {
+      console.error("Error in sendSMSVerification:", error);
       throw error;
     }
     
+    console.log("SMS verification function response:", data);
     return data;
   } catch (error) {
     console.error("Error sending SMS verification:", error);
@@ -283,14 +292,17 @@ export const sendSMSVerification = async (userId: string, phone: string) => {
 // Function to send SMS notification
 export const sendSMSNotification = async (userId: string, phone: string, message: string) => {
   try {
+    console.log(`Calling send-sms-verification function for notification to ${phone}`);
     const { data, error } = await supabase.functions.invoke('send-sms-verification', {
       body: { userId, phone, message, type: "notification" }
     });
     
     if (error) {
+      console.error("Error in sendSMSNotification:", error);
       throw error;
     }
     
+    console.log("SMS notification function response:", data);
     return data;
   } catch (error) {
     console.error("Error sending SMS notification:", error);

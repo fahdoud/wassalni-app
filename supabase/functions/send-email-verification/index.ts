@@ -122,6 +122,9 @@ serve(async (req) => {
       throw new Error("Failed to send email");
     }
 
+    // Log success for debugging
+    console.log(`Email sent successfully: ${type} email to ${email}`);
+
     return new Response(
       JSON.stringify({ success: true, message: `${type === "verification" ? "Verification" : "Welcome"} email sent` }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
