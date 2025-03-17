@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Trajet } from "./types";
+import { Trajet, StatutReservation } from "./types";
 import { getMockRides } from "@/services/rides/mockRides";
 
 // Obtenir tous les trajets disponibles
