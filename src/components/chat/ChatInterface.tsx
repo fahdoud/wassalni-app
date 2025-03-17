@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import { notifyRideParticipants } from "@/services/rides/chatService";
 
 interface Message {
   id: string;
@@ -95,6 +96,9 @@ const ChatInterface = ({ rideId, userId, userName }: ChatInterfaceProps) => {
         });
         
       if (error) throw error;
+      
+      // Notify other participants about the new message
+      await notifyRideParticipants(rideId, userId, newMessage.trim());
       
       setNewMessage("");
     } catch (error) {

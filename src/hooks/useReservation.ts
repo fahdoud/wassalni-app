@@ -1,161 +1,126 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+import { getRideById, subscribeToRideUpdates } from '@/services/rides/rideQueries';
+import { createReservation } from '@/services/rides/reservationService';
+import { Ride } from '@/services/rides/types';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { createReservation } from "@/services/rides/reservationService";
-import { getRideById, subscribeToRideUpdates } from "@/services/rides/rideQueries";
-import { Ride } from "@/services/rides/types";
 
-export const useReservation = (rideId: string | undefined) => {
-  const navigate = useNavigate();
+export const useReservation = (rideId: string) => {
   const [ride, setRide] = useState<Ride | null>(null);
-  const [passengerCount, setPassengerCount] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [step, setStep] = useState(1);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  // Check auth status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUserId(session.user.id);
-      } else {
-        toast.error("Please login to make a reservation");
-        navigate("/passenger-signin");
-      }
-    };
-    
-    checkAuth();
-  }, [navigate]);
-
-  // Fetch ride data
+  const [seats, setSeats] = useState<number>(1);
+  const [price, setPrice] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [reservationSuccess, setReservationSuccess] = useState<boolean>(false);
+  const [reservationError, setReservationError] = useState<string | null>(null);
+  
+  // Get the ride data
   useEffect(() => {
     const fetchRide = async () => {
-      setInitialLoading(true);
-      if (!rideId) {
-        navigate("/rides");
-        return;
-      }
-
+      setIsLoading(true);
+      
       try {
-        const fetchedRide = await getRideById(rideId);
-        if (fetchedRide) {
-          setRide(fetchedRide);
-          
-          // Make sure passenger count doesn't exceed available seats
-          if (fetchedRide.seats < passengerCount) {
-            setPassengerCount(Math.max(1, fetchedRide.seats));
-          } else if (fetchedRide.seats === 0) {
-            // If no seats available, show message
-            toast.error("This ride is fully booked");
-          }
-        } else {
-          toast.error("Ride not found");
-          navigate("/rides");
+        const ride = await getRideById(rideId);
+        
+        if (ride) {
+          setRide(ride);
+          setPrice(ride.price);
         }
       } catch (error) {
         console.error("Error fetching ride:", error);
-        toast.error("Failed to load ride details");
-        navigate("/rides");
       } finally {
-        setInitialLoading(false);
+        setIsLoading(false);
       }
     };
-
-    fetchRide();
-  }, [rideId, navigate, passengerCount]);
-
-  // Set up real-time subscription
-  useEffect(() => {
-    if (!rideId || !ride) return;
     
-    console.log("Setting up real-time subscription for ride:", rideId);
-    
-    // Only subscribe to real-time updates for actual database trips
-    if (!/^\d+$/.test(rideId)) {
-      const subscription = subscribeToRideUpdates(rideId, (updatedRide) => {
-        console.log("Received ride update:", updatedRide);
-        
-        setRide(updatedRide);
-        
-        // Auto-adjust passenger count if it exceeds available seats
-        if (updatedRide.seats < passengerCount) {
-          if (updatedRide.seats <= 0) {
-            // If ride becomes fully booked during reservation process
-            if (step === 1) {
-              toast.error("This ride is now fully booked");
-            }
-          }
-          setPassengerCount(Math.max(1, updatedRide.seats));
-        }
-      });
-      
-      return () => {
-        subscription.unsubscribe();
-      };
+    if (rideId) {
+      fetchRide();
     }
-  }, [rideId, ride, passengerCount, step]);
-
-  // Handle reservation submission
-  const handleReservation = async () => {
-    if (!ride || !userId) return;
-    
-    // Check if there are still enough seats available
-    if (ride.seats < passengerCount) {
-      toast.error(`Only ${ride.seats} seats available now. Please adjust your booking.`);
+  }, [rideId]);
+  
+  // Update price when seats change
+  useEffect(() => {
+    if (ride) {
+      setPrice(ride.price * seats);
+    }
+  }, [seats, ride]);
+  
+  // Subscribe to real-time updates for the ride
+  useEffect(() => {
+    if (!rideId || !ride || /^\d+$/.test(rideId)) {
+      // We don't subscribe to real-time updates for mock rides
       return;
     }
     
-    setLoading(true);
+    const { unsubscribe } = subscribeToRideUpdates(rideId, (updatedRide) => {
+      setRide(updatedRide);
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [rideId, ride]);
+  
+  // Make a reservation
+  const makeReservation = async () => {
+    setReservationError(null);
+    
+    // Check if authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      setReservationError("You must be logged in to make a reservation");
+      return;
+    }
+    
+    // Check if ride exists
+    if (!ride) {
+      setReservationError("Ride not found");
+      return;
+    }
+    
+    // Check if enough seats are available
+    if (ride.seats < seats) {
+      setReservationError("Not enough seats available");
+      return;
+    }
     
     try {
-      const { success, updatedSeats } = await createReservation(
-        ride.trip_id || ride.id,
-        userId,
-        passengerCount
+      // Create the reservation
+      const response = await createReservation(
+        ride.id, 
+        user.id, 
+        seats
       );
       
-      if (success) {
-        // Immediately update the local state to reflect the new seat count
-        setRide(prev => {
-          if (prev) {
-            return {
-              ...prev,
-              seats: updatedSeats !== undefined ? updatedSeats : (prev.seats - passengerCount)
-            };
-          }
-          return prev;
-        });
+      if (response.success) {
+        // Update the ride with the new seat count if provided
+        if (response.updatedSeats !== undefined) {
+          setRide(prev => prev ? { ...prev, seats: response.updatedSeats! } : null);
+        } else {
+          // For mock rides, we manually update the UI
+          setRide(prev => prev ? { ...prev, seats: prev.seats - seats } : null);
+        }
         
-        // Set a flag in session storage to force refresh rides list when returning
-        sessionStorage.setItem('fromReservation', 'true');
-        
-        setStep(3);
+        setReservationSuccess(true);
         toast.success("Reservation successful!");
+        
       } else {
-        toast.error("Failed to make reservation. Please try again.");
+        setReservationError("Failed to make reservation. Please try again.");
       }
     } catch (error) {
-      console.error("Reservation error:", error);
-      toast.error("An error occurred during reservation");
-    } finally {
-      setLoading(false);
+      console.error("Error making reservation:", error);
+      setReservationError("An error occurred. Please try again.");
     }
   };
-
+  
   return {
     ride,
-    setRide,
-    passengerCount,
-    setPassengerCount,
-    loading,
-    initialLoading,
-    step,
-    setStep,
-    userId,
-    handleReservation
+    isLoading,
+    seats,
+    setSeats,
+    price,
+    makeReservation,
+    reservationSuccess,
+    reservationError
   };
 };

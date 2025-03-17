@@ -340,6 +340,33 @@ export type Database = {
           },
         ]
       }
+      ride_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          ride_id: string
+          sender_id: string
+          sender_name: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          ride_id: string
+          sender_id: string
+          sender_name: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          ride_id?: string
+          sender_id?: string
+          sender_name?: string
+        }
+        Relationships: []
+      }
       trajets: {
         Row: {
           chauffeur_id: string

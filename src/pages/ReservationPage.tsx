@@ -1,185 +1,150 @@
 
-import { useParams, useNavigate } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { ChevronLeft } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import GradientText from "@/components/ui-components/GradientText";
-import { useReservation } from "@/hooks/useReservation";
-import LoadingState from "@/components/reservation/LoadingState";
-import RideDetails from "@/components/reservation/RideDetails";
-import PaymentDetails from "@/components/reservation/PaymentDetails";
-import ConfirmationDetails from "@/components/reservation/ConfirmationDetails";
-import ReservationSidebar from "@/components/reservation/ReservationSidebar";
-import ChatInterface from "@/components/chat/ChatInterface";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ReservationSidebar from '@/components/reservation/ReservationSidebar';
+import RideDetails from '@/components/reservation/RideDetails';
+import PaymentDetails from '@/components/reservation/PaymentDetails';
+import ConfirmationDetails from '@/components/reservation/ConfirmationDetails';
+import LoadingState from '@/components/reservation/LoadingState';
+import { useReservation } from '@/hooks/useReservation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { ChevronLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import ChatInterface from '@/components/chat/ChatInterface';
 
 const ReservationPage = () => {
-  const { t } = useLanguage();
   const { rideId } = useParams();
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState<string>("ride-details");
+  const [user, setUser] = useState<any>(null);
   const [userName, setUserName] = useState<string>("");
   
-  // Check authentication status
+  const { 
+    ride, 
+    isLoading, 
+    seats, 
+    setSeats,
+    price,
+    makeReservation,
+    reservationSuccess,
+    reservationError
+  } = useReservation(rideId || "");
+
+  // Get the current user
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getUser();
-      const isLoggedIn = !!data.user;
-      setIsAuthenticated(isLoggedIn);
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
       
-      if (!isLoggedIn) {
-        toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
-        navigate("/passenger-signin", { 
-          state: { returnTo: `/reservation/${rideId}` } 
-        });
-      } else {
-        // Get user name for chat
+      if (user) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name')
-          .eq('id', data.user.id)
+          .eq('id', user.id)
           .single();
           
-        if (profile) {
-          setUserName(profile.full_name || data.user.email || "User");
-        }
+        setUserName(profile?.full_name || user.email || "User");
       }
     };
     
-    checkAuth();
-  }, [navigate, rideId, t]);
-  
-  const {
-    ride,
-    passengerCount,
-    setPassengerCount,
-    loading,
-    initialLoading,
-    step,
-    setStep,
-    userId,
-    handleReservation
-  } = useReservation(rideId);
+    fetchUser();
+  }, []);
 
-  // If still checking auth or auth check complete but not authenticated, show loading
-  if (isAuthenticated === null || isAuthenticated === false) {
-    return <LoadingState />;
-  }
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
 
-  if (initialLoading) {
-    return <LoadingState />;
-  }
-
-  if (!ride) return null;
+  // Show chat tab only if reservation is successful and we have a user
+  const showChatTab = reservationSuccess && user && ride && !(/^\d+$/.test(ride.id));
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow pt-28 pb-16">
-        <div className="container max-w-4xl mx-auto px-4">
-          <button 
-            onClick={() => navigate("/rides")} 
-            className="flex items-center text-gray-600 hover:text-wassalni-green mb-6 transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
-          >
-            <ChevronLeft size={18} />
-            <span>{t('rides.title')}</span>
-          </button>
+    <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
+      <Button 
+        variant="ghost" 
+        className="mb-4 flex items-center gap-1"
+        onClick={() => navigate(-1)}
+      >
+        <ChevronLeft size={16} />
+        {t('back')}
+      </Button>
 
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">
-              <GradientText>{t('reservation.title')}</GradientText>
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">{t('reservation.subtitle')}</p>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <TabsList className="w-full mb-6">
+              <TabsTrigger value="ride-details" className="flex-1">
+                {t('reservation.rideDetails')}
+              </TabsTrigger>
+              <TabsTrigger value="payment" className="flex-1">
+                {t('reservation.payment')}
+              </TabsTrigger>
+              <TabsTrigger value="confirmation" className="flex-1" disabled={!reservationSuccess}>
+                {t('reservation.confirmation')}
+              </TabsTrigger>
+              {showChatTab && (
+                <TabsTrigger value="chat" className="flex-1">
+                  {t('chat.groupChat')}
+                </TabsTrigger>
+              )}
+            </TabsList>
 
-          <div className="flex flex-col lg:flex-row gap-8">
-            <div className="flex-grow">
-              {step === 1 && (
-                <RideDetails
-                  ride={ride}
-                  onContinue={() => setStep(2)}
-                />
-              )}
-              
-              {step === 2 && (
-                <PaymentDetails
-                  ride={ride}
-                  passengerCount={passengerCount}
-                  setPassengerCount={setPassengerCount}
-                  onBack={() => setStep(1)}
-                  onConfirm={handleReservation}
-                  loading={loading}
-                />
-              )}
-              
-              {step === 3 && (
-                <>
-                  <ConfirmationDetails
-                    ride={ride}
-                    passengerCount={passengerCount}
+            {isLoading ? (
+              <LoadingState />
+            ) : (
+              <>
+                <TabsContent value="ride-details">
+                  {ride && (
+                    <RideDetails 
+                      ride={ride} 
+                      seats={seats} 
+                      setSeats={setSeats} 
+                      goToPayment={() => handleTabChange('payment')} 
+                    />
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="payment">
+                  <PaymentDetails 
+                    price={price} 
+                    seats={seats} 
+                    onSubmit={makeReservation} 
+                    error={reservationError}
                   />
-                  
-                  {/* Add chat interface after successful reservation */}
-                  <div className="mt-8 glass-card p-6 rounded-xl">
-                    <h2 className="text-xl font-semibold mb-4">{t('chat.title') || "Group Chat"}</h2>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">
-                      {t('chat.description') || "Chat with the driver and other passengers"}
-                    </p>
-                    <div className="h-96 border rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-                      {userId && (
-                        <ChatInterface 
-                          rideId={ride.id || ride.trip_id || ''}
-                          userId={userId}
-                          userName={userName}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-              
-              {/* Show chat tab for existing reservations */}
-              {step === 1 && userId && (
-                <div className="mt-8 glass-card p-6 rounded-xl">
-                  <Tabs defaultValue="details">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="details">{t('reservation.details') || "Ride Details"}</TabsTrigger>
-                      <TabsTrigger value="chat">{t('chat.title') || "Group Chat"}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="details">
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        {t('reservation.detailsDescription') || "View detailed information about this ride."}
-                      </p>
-                    </TabsContent>
-                    <TabsContent value="chat">
-                      <div className="h-96 border rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-                        <ChatInterface 
-                          rideId={ride.id || ride.trip_id || ''}
-                          userId={userId}
-                          userName={userName}
-                        />
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </div>
-              )}
-            </div>
-            
-            {(step === 1 || step === 2) && (
-              <ReservationSidebar
-                ride={ride}
-                step={step}
-                passengerCount={passengerCount}
-              />
+                </TabsContent>
+                
+                <TabsContent value="confirmation">
+                  <ConfirmationDetails 
+                    ride={ride} 
+                    seats={seats} 
+                  />
+                </TabsContent>
+                
+                {showChatTab && (
+                  <TabsContent value="chat">
+                    {user && ride && (
+                      <ChatInterface 
+                        rideId={ride.id} 
+                        userId={user.id}
+                        userName={userName}
+                      />
+                    )}
+                  </TabsContent>
+                )}
+              </>
             )}
-          </div>
+          </Tabs>
         </div>
-      </main>
-      <Footer />
+
+        <ReservationSidebar 
+          ride={ride} 
+          seats={seats} 
+          price={price}
+          reservationSuccess={reservationSuccess}
+        />
+      </div>
     </div>
   );
 };

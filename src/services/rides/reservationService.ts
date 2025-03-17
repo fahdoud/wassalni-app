@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ReservationStatus } from "./types";
+import { getUserDisplayInfo } from "./chatService";
 
 // Create a reservation
 export const createReservation = async (
@@ -93,7 +94,24 @@ export const createReservation = async (
       throw new Error(updateError?.message || "Failed to update seats");
     }
 
-    // 3. Fetch the updated seat count to confirm
+    // 3. Send a welcome message to the ride chat
+    try {
+      // Get user display info
+      const userInfo = await getUserDisplayInfo(passengerId);
+      
+      // Add welcome message to the chat
+      await supabase.from('ride_messages').insert({
+        ride_id: tripId,
+        sender_id: 'system', // Using 'system' as ID for system messages
+        sender_name: 'System',
+        content: `${userInfo.name} has joined the ride.`
+      });
+    } catch (chatError) {
+      console.error("Error sending welcome message to chat:", chatError);
+      // Don't throw error here, the reservation was still successful
+    }
+
+    // 4. Fetch the updated seat count to confirm
     const { data: updatedTrip, error: fetchError } = await supabase
       .from('trips')
       .select('available_seats')

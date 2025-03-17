@@ -79,33 +79,15 @@ export const notifyRideParticipants = async (
     // Send notification to all participants except sender
     for (const participantId of participants) {
       if (participantId !== senderId) {
-        // Get participant phone
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('phone')
-          .eq('id', participantId)
-          .single();
-          
-        if (profile?.phone) {
-          // Send SMS notification - Optional, can be enabled if needed
-          // await supabase.functions.invoke('send-sms-verification', {
-          //   body: { 
-          //     userId: participantId, 
-          //     phone: profile.phone, 
-          //     message: notificationMessage,
-          //     type: "notification"
-          //   }
-          // });
-          
-          // Insert in-app notification
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: participantId,
-              message: notificationMessage,
-              type: 'chat'
-            });
-        }
+        // Insert in-app notification
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: participantId,
+            message: notificationMessage,
+            type: 'chat',
+            phone: '' // Required by the schema but not used for in-app notifications
+          });
       }
     }
   } catch (error) {
