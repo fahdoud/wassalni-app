@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
@@ -56,7 +55,6 @@ const RidesPage = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // Sample rides data - in a real app, this would come from an API
   const sampleRides: Ride[] = [
     {
       id: 1,
@@ -145,7 +143,6 @@ const RidesPage = () => {
   ];
 
   useEffect(() => {
-    // In a real app, we would fetch rides from the API
     setRides(sampleRides);
     setFilteredRides(sampleRides);
   }, []);
@@ -157,7 +154,6 @@ const RidesPage = () => {
   const applyFilters = () => {
     let filtered = rides;
     
-    // Filter by locations if selected
     if (fromLocation) {
       filtered = filtered.filter(ride => ride.from === fromLocation);
     }
@@ -166,23 +162,17 @@ const RidesPage = () => {
       filtered = filtered.filter(ride => ride.to === toLocation);
     }
     
-    // Filter by date
     if (searchDate) {
       filtered = filtered.filter(ride => ride.date === searchDate);
     }
     
-    // Apply active filters
     filtered = filtered.filter(ride => {
-      // Price filter
       if (ride.price > activeFilters.maxPrice) return false;
       
-      // Rating filter
       if (ride.rating < activeFilters.minRating) return false;
       
-      // Seats filter
       if (ride.seats < activeFilters.minSeats) return false;
       
-      // Time of day filter
       if (activeFilters.timeOfDay !== "all") {
         const hour = parseInt(ride.time.split(":")[0]);
         if (
@@ -203,7 +193,6 @@ const RidesPage = () => {
   const handleSearch = () => {
     setLoading(true);
     
-    // Simulate API call delay
     setTimeout(() => {
       applyFilters();
       setLoading(false);
@@ -212,7 +201,7 @@ const RidesPage = () => {
         title: t('search.completed'),
         description: filteredRides.length > 0 
           ? t('search.foundRides', { count: filteredRides.length }) 
-          : t('search.noRidesFound'),
+          : t('search.noRidesFound')
       });
     }, 1000);
   };
@@ -325,7 +314,6 @@ const RidesPage = () => {
                 </div>
               </div>
 
-              {/* Advanced filters section */}
               {showFilters && (
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
