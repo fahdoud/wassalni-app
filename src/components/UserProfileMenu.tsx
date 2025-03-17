@@ -14,6 +14,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 type Profile = {
   id: string;
@@ -25,29 +26,54 @@ type Profile = {
 const UserProfileMenu = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { t } = useLanguage();
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      if (data) {
+        console.log("Profile data loaded:", data);
+        return data as Profile;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Unexpected error fetching profile:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     // Check current auth state
     const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-      
-      if (data.user) {
-        // Fetch user profile information
-        const { data: profileData, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", data.user.id)
-          .single();
+      setLoading(true);
+      try {
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
         
-        if (!error && profileData) {
-          setProfile(profileData);
-          console.log("Profile data loaded:", profileData);
-        } else {
-          console.error("Error fetching profile:", error);
+        if (data.user) {
+          const profileData = await fetchProfile(data.user.id);
+          if (profileData) {
+            setProfile(profileData);
+          }
         }
+      } catch (error) {
+        console.error("Error checking user:", error);
+        toast.error("Error loading user profile");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -59,18 +85,9 @@ const UserProfileMenu = () => {
       if (event === "SIGNED_IN" && session) {
         setUser(session.user);
         
-        // Fetch profile data
-        const { data: profileData, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-        
-        if (!error && profileData) {
+        const profileData = await fetchProfile(session.user.id);
+        if (profileData) {
           setProfile(profileData);
-          console.log("Profile data loaded after sign in:", profileData);
-        } else {
-          console.error("Error fetching profile after sign in:", error);
         }
       } else if (event === "SIGNED_OUT") {
         setUser(null);
@@ -84,9 +101,19 @@ const UserProfileMenu = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+    try {
+      await supabase.auth.signOut();
+      toast.success("Signed out successfully");
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Error signing out");
+    }
   };
+
+  if (loading) {
+    return <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>;
+  }
 
   if (!user) return null;
 
@@ -115,6 +142,11 @@ const UserProfileMenu = () => {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{profile?.full_name || user.email}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
+            {profile?.role && (
+              <p className="text-xs text-muted-foreground capitalize">
+                Role: {profile.role}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -128,6 +160,11 @@ const UserProfileMenu = () => {
             My Rides
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/reservations" className="cursor-pointer w-full">
+            My Reservations
+          </Link>
+        </DropdownMenuItem>
         {profile?.role === "driver" && (
           <DropdownMenuItem asChild>
             <Link to="/offer-ride" className="cursor-pointer w-full">
@@ -135,6 +172,11 @@ const UserProfileMenu = () => {
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild>
+          <Link to="/feedback" className="cursor-pointer w-full">
+            Submit Feedback
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
           Sign Out

@@ -12,3 +12,6 @@ export { getRides, getRideById } from './rideQueries';
 
 // Export reservation service
 export { createReservation, getUserReservations } from './reservationService';
+
+// Export feedback service
+export { submitFeedback, getUserFeedback } from './feedbackService';
