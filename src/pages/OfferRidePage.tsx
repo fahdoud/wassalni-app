@@ -4,13 +4,19 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
-import { useState } from "react";
-import { toast } from "@/components/ui/use-toast";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
 const OfferRidePage = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     from: "",
     to: "",
@@ -21,6 +27,21 @@ const OfferRidePage = () => {
     description: ""
   });
 
+  // Check if user is logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        toast.error("Please login to offer a ride");
+        navigate("/driver-signin");
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({
@@ -29,26 +50,71 @@ const OfferRidePage = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting ride offer:", formData);
     
-    // Show success toast
-    toast({
-      title: "Ride offered successfully!",
-      description: "Your ride has been listed. You'll be notified when someone books a seat.",
-    });
+    if (!user) {
+      toast.error("You must be logged in to offer a ride");
+      return;
+    }
     
-    // Reset form in a real application, you might redirect to another page
-    setFormData({
-      from: "",
-      to: "",
-      date: "",
-      time: "",
-      seats: 1,
-      price: 150,
-      description: ""
-    });
+    setLoading(true);
+    
+    try {
+      console.log("Submitting ride offer:", formData);
+      
+      // Combine date and time for departure_time
+      const departureTimeStr = `${formData.date}T${formData.time}:00`;
+      const departureTime = new Date(departureTimeStr);
+      
+      // Create the trip in the database
+      const { data, error } = await supabase
+        .from('trips')
+        .insert({
+          driver_id: user.id,
+          origin: formData.from,
+          destination: formData.to,
+          departure_time: departureTime.toISOString(),
+          price: parseFloat(formData.price as any),
+          available_seats: parseInt(formData.seats as any),
+          status: 'active',
+          // Add any other required fields
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error creating trip:", error);
+        throw new Error(error.message);
+      }
+      
+      console.log("Trip created successfully:", data);
+      
+      // Show success toast
+      toast.success("Ride offered successfully!");
+      
+      // Reset form
+      setFormData({
+        from: "",
+        to: "",
+        date: "",
+        time: "",
+        seats: 1,
+        price: 150,
+        description: ""
+      });
+      
+      // Redirect to rides page after a short delay
+      setTimeout(() => {
+        navigate("/rides");
+      }, 1500);
+      
+    } catch (error: any) {
+      console.error("Failed to offer ride:", error);
+      toast.error(error.message || "Failed to offer ride. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -168,7 +234,9 @@ const OfferRidePage = () => {
                 </div>
 
                 <div className="flex justify-center">
-                  <Button type="submit" size="lg">Offer Ride</Button>
+                  <Button type="submit" size="lg" isLoading={loading} disabled={loading}>
+                    {loading ? "Offering Ride..." : "Offer Ride"}
+                  </Button>
                 </div>
               </div>
             </form>

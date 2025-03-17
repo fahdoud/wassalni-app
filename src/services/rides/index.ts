@@ -15,3 +15,6 @@ export { createReservation, getUserReservations } from './reservationService';
 
 // Export feedback service
 export { submitFeedback, getUserFeedback } from './feedbackService';
+
+// Export proposed trip service
+export { createProposedTrip, getProposedTrips, updateProposedTripStatus } from './proposedTripService';
