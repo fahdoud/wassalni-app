@@ -169,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq('id', data.user.id)
           .single();
           
+        // Always navigate after login is complete
         const redirectPath = profileData?.role === 'driver' ? '/offer-ride' : '/rides';
         navigate(redirectPath);
       }
@@ -254,7 +255,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Directly signin after signup
       if (data.user) {
+        const redirectPath = userData.role === 'driver' ? '/offer-ride' : '/rides';
         await signIn(email, password);
+        navigate(redirectPath);
       } else {
         const redirectPath = userData.role === 'driver' ? '/driver-signin' : '/passenger-signin';
         navigate(redirectPath);

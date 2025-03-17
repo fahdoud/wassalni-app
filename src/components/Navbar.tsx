@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Menu, X, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "./Button";
 import GradientText from "./ui-components/GradientText";
 import Logo from "./ui-components/Logo";
@@ -15,7 +15,8 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,6 +32,12 @@ const Navbar = () => {
   }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+    setIsMenuOpen(false);
+  };
 
   return (
     <header
@@ -80,9 +87,20 @@ const Navbar = () => {
             <LanguageSwitcher />
             <ThemeToggle />
             {user ? (
-              <UserProfile />
+              <div className="flex items-center gap-3">
+                <UserProfile />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut size={16} />
+                  {t('nav.signOut')}
+                </Button>
+              </div>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <Link to="/passenger-signin">
                   <Button variant="outlined" size="sm">
                     {t('nav.signIn')}
@@ -91,7 +109,7 @@ const Navbar = () => {
                 <Link to="/passenger-signup">
                   <Button size="sm">{t('nav.signUp')}</Button>
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </nav>
@@ -101,7 +119,17 @@ const Navbar = () => {
           <LanguageSwitcher />
           <ThemeToggle />
           {user ? (
-            <UserProfile />
+            <div className="flex items-center gap-2">
+              <UserProfile />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="flex items-center gap-1 p-1"
+              >
+                <LogOut size={16} />
+              </Button>
+            </div>
           ) : (
             <button
               className="text-gray-700 focus:outline-none dark:text-gray-300"
@@ -114,7 +142,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Navigation */}
-      {isMenuOpen && (
+      {isMenuOpen && !user && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg animate-slide-down dark:bg-gray-900">
           <nav className="container mx-auto px-4 py-4">
             <ul className="flex flex-col gap-4">
@@ -145,22 +173,18 @@ const Navbar = () => {
                   {t('nav.feedback')}
                 </Link>
               </li>
-              {!user && (
-                <>
-                  <li className="pt-2">
-                    <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
-                      <Button variant="outlined" className="w-full">
-                        {t('nav.signIn')}
-                      </Button>
-                    </Link>
-                  </li>
-                  <li className="pt-2">
-                    <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
-                      <Button className="w-full">{t('nav.signUp')}</Button>
-                    </Link>
-                  </li>
-                </>
-              )}
+              <li className="pt-2">
+                <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
+                  <Button variant="outlined" className="w-full">
+                    {t('nav.signIn')}
+                  </Button>
+                </Link>
+              </li>
+              <li className="pt-2">
+                <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
+                  <Button className="w-full">{t('nav.signUp')}</Button>
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>
