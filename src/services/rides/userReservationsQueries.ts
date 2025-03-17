@@ -50,26 +50,32 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
       let trip = undefined;
       
       if (res.trip) {
-        const tripData = res.trip;
+        // The trip property should be the first (and only) item in the array
+        const tripData = Array.isArray(res.trip) && res.trip.length > 0 ? res.trip[0] : null;
         
-        // Handle driver name safely
-        let driverName = 'Unknown Driver';
-        
-        if (tripData && tripData.driver && tripData.driver.full_name) {
-          driverName = tripData.driver.full_name;
-        }
+        if (tripData) {
+          // Handle driver name safely
+          let driverName = 'Unknown Driver';
           
-        trip = {
-          id: tripData.id,
-          origin: tripData.origin,
-          destination: tripData.destination,
-          departure_time: tripData.departure_time,
-          price: tripData.price,
-          driver_id: tripData.driver_id,
-          profiles: {
-            full_name: driverName
+          if (tripData.driver && Array.isArray(tripData.driver) && tripData.driver.length > 0) {
+            const driverProfile = tripData.driver[0];
+            if (driverProfile && driverProfile.full_name) {
+              driverName = driverProfile.full_name;
+            }
           }
-        };
+            
+          trip = {
+            id: tripData.id,
+            origin: tripData.origin,
+            destination: tripData.destination,
+            departure_time: tripData.departure_time,
+            price: tripData.price,
+            driver_id: tripData.driver_id,
+            profiles: {
+              full_name: driverName
+            }
+          };
+        }
       }
 
       return {
