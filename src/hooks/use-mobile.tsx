@@ -1,54 +1,45 @@
 
-import * as React from "react"
+import { useEffect, useState } from "react";
 
-const MOBILE_BREAKPOINT = 768
+// Interface for the detailed mobile information
+export interface MobileInfo {
+  isMobile: boolean;
+  deviceType: string;
+}
 
-export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean>(() => {
-    // Detect mobile device based on user agent as a fallback
-    if (typeof window !== 'undefined') {
-      const userAgent = window.navigator.userAgent;
-      const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-      if (mobileRegex.test(userAgent)) {
-        return true;
+// This hook returns detailed mobile information
+export const useIsMobile = (): MobileInfo => {
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [deviceType, setDeviceType] = useState<string>("desktop");
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const mobile = /iphone|ipad|ipod|android|blackberry|windows phone/g.test(userAgent);
+      setIsMobile(mobile);
+      
+      if (/iphone|ipod|android|blackberry|windows phone/g.test(userAgent)) {
+        setDeviceType("phone");
+      } else if (/ipad/g.test(userAgent)) {
+        setDeviceType("tablet");
+      } else {
+        setDeviceType("desktop");
       }
-      // Check screen width as well
-      return window.innerWidth < MOBILE_BREAKPOINT;
-    }
-    return false;
-  });
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
-    
-    window.addEventListener('resize', handleResize);
-    
-    // Initial check
-    handleResize();
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
-  // Add a device type detection
-  const deviceType = React.useMemo(() => {
-    if (typeof window !== 'undefined') {
-      const userAgent = window.navigator.userAgent;
-      if (/iPhone|iPad|iPod/i.test(userAgent)) {
-        return 'ios';
-      } else if (/Android/i.test(userAgent)) {
-        return 'android';
-      }
-    }
-    return 'desktop';
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
+    
+    return () => {
+      window.removeEventListener("resize", checkIsMobile);
+    };
   }, []);
 
   return { isMobile, deviceType };
-}
+};
 
-// Export the simpler version for backward compatibility
-export default function useIsMobileSimple(): boolean {
+// This is a simplified version of the hook that only returns a boolean
+export const useIsMobileSimple = (): boolean => {
   const { isMobile } = useIsMobile();
   return isMobile;
-}
+};

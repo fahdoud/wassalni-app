@@ -7,12 +7,19 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast"
+import { useIsMobileSimple } from "@/hooks/use-mobile";
 
-export function Toaster() {
+export function Toaster({ ...props }: ToasterProps) {
+  const isMobile = useIsMobileSimple();
+  
+  const mobileProps = isMobile 
+    ? { position: "top-center" as const } 
+    : {};
+    
   const { toasts } = useToast()
 
   return (
-    <ToastProvider>
+    <ToastProvider {...mobileProps} {...props}>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
