@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import GradientText from '@/components/ui-components/GradientText';
 import Logo from '@/components/ui-components/Logo';
 import Button from '@/components/Button';
-import useIsMobileSimple from '@/hooks/use-mobile';
+import { useIsMobileSimple } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const OnboardingPage = () => {
