@@ -21,6 +21,7 @@ type Profile = {
   full_name: string;
   phone: string;
   role: string;
+  avatar_url?: string;
 };
 
 const UserProfileMenu = () => {
@@ -131,6 +132,9 @@ const UserProfileMenu = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
+            {profile?.avatar_url ? (
+              <AvatarImage src={profile.avatar_url} alt={profile.full_name || user.email || ""} />
+            ) : null}
             <AvatarFallback className="bg-wassalni-green text-white">
               {initials}
             </AvatarFallback>
@@ -155,16 +159,27 @@ const UserProfileMenu = () => {
             My Profile
           </Link>
         </DropdownMenuItem>
+        
+        {profile?.role === 'driver' ? (
+          <DropdownMenuItem asChild>
+            <Link to="/my-trips" className="cursor-pointer w-full">
+              My Trips
+            </Link>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link to="/rides" className="cursor-pointer w-full">
+              Available Rides
+            </Link>
+          </DropdownMenuItem>
+        )}
+        
         <DropdownMenuItem asChild>
-          <Link to="/rides" className="cursor-pointer w-full">
-            My Rides
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/reservations" className="cursor-pointer w-full">
+          <Link to="/my-reservations" className="cursor-pointer w-full">
             My Reservations
           </Link>
         </DropdownMenuItem>
+        
         {profile?.role === "driver" && (
           <DropdownMenuItem asChild>
             <Link to="/offer-ride" className="cursor-pointer w-full">
@@ -172,11 +187,13 @@ const UserProfileMenu = () => {
             </Link>
           </DropdownMenuItem>
         )}
+        
         <DropdownMenuItem asChild>
           <Link to="/feedback" className="cursor-pointer w-full">
-            Submit Feedback
+            Feedback
           </Link>
         </DropdownMenuItem>
+        
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
           Sign Out
