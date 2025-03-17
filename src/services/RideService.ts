@@ -104,7 +104,11 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
 };
 
 // Create a reservation
-export const createReservation = async (tripId: string, passengerId: string, seatsReserved: number): Promise<boolean> => {
+export const createReservation = async (
+  tripId: string, 
+  passengerId: string, 
+  seatsReserved: number
+): Promise<boolean> => {
   try {
     // 1. Create the reservation
     const { data: reservation, error: reservationError } = await supabase
@@ -123,10 +127,13 @@ export const createReservation = async (tripId: string, passengerId: string, sea
     }
 
     // 2. Update the available seats in the trip
-    const { error: updateError } = await supabase.rpc('decrease_available_seats', {
-      trip_id: tripId,
-      seats_count: seatsReserved
-    });
+    const { error: updateError } = await supabase.rpc(
+      'decrease_available_seats', 
+      {
+        trip_id: tripId,
+        seats_count: seatsReserved
+      }
+    );
 
     if (updateError) {
       console.error("Error updating available seats:", updateError);
