@@ -142,7 +142,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Navigation */}
-      {isMenuOpen && (
+      {isMenuOpen && !user && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg animate-slide-down dark:bg-gray-900">
           <nav className="container mx-auto px-4 py-4">
             <ul className="flex flex-col gap-4">
@@ -173,22 +173,18 @@ const Navbar = () => {
                   {t('nav.feedback')}
                 </Link>
               </li>
-              {!user && (
-                <>
-                  <li className="pt-2">
-                    <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
-                      <Button variant="outlined" className="w-full">
-                        {t('nav.signIn')}
-                      </Button>
-                    </Link>
-                  </li>
-                  <li className="pt-2">
-                    <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
-                      <Button className="w-full">{t('nav.signUp')}</Button>
-                    </Link>
-                  </li>
-                </>
-              )}
+              <li className="pt-2">
+                <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
+                  <Button variant="outlined" className="w-full">
+                    {t('nav.signIn')}
+                  </Button>
+                </Link>
+              </li>
+              <li className="pt-2">
+                <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
+                  <Button className="w-full">{t('nav.signUp')}</Button>
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>
