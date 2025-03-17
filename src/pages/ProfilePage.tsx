@@ -158,9 +158,9 @@ const ProfilePage = () => {
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('profile.fullName')}</FormLabel>
+                    <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder={t('profile.fullNamePlaceholder')} {...field} />
+                      <Input placeholder="Enter your full name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -171,16 +171,16 @@ const ProfilePage = () => {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('profile.phone')}</FormLabel>
+                    <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder={t('profile.phonePlaceholder')} {...field} />
+                      <Input placeholder="Enter your phone number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? t('profile.updating') : t('profile.updateProfile')}
+                {loading ? "Updating..." : "Update Profile"}
               </Button>
             </form>
           </Form>

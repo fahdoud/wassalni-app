@@ -120,24 +120,24 @@ const UserProfileMenu = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/profile" className="cursor-pointer w-full">
-            {t('profile.myProfile')}
+            My Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/rides" className="cursor-pointer w-full">
-            {t('profile.myRides')}
+            My Rides
           </Link>
         </DropdownMenuItem>
         {profile?.role === "driver" && (
           <DropdownMenuItem asChild>
             <Link to="/offer-ride" className="cursor-pointer w-full">
-              {t('profile.offerRide')}
+              Offer Ride
             </Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
-          {t('profile.signOut')}
+          Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
