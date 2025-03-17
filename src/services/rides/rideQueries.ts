@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Ride } from './types';
 import { getMockRides } from './mockRides';
