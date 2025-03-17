@@ -311,7 +311,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      decrease_available_seats: {
+        Args: {
+          trip_id: string
+          seats_count: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
