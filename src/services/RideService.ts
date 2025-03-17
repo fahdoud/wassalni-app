@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -148,7 +149,8 @@ export const createReservation = async (
       seats_count: number;
     };
     
-    const { error: updateError } = await supabase.rpc<DecreaseAvailableSeatsParams>(
+    // The correct way to use rpc with type parameters
+    const { error: updateError } = await supabase.rpc<DecreaseAvailableSeatsParams, null>(
       'decrease_available_seats', 
       {
         trip_id: tripId,
