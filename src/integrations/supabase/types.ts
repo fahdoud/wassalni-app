@@ -167,6 +167,48 @@ export type Database = {
           },
         ]
       }
+      trips: {
+        Row: {
+          available_seats: number
+          created_at: string | null
+          departure_time: string
+          description: string | null
+          destination: string
+          driver_id: string
+          id: string
+          origin: string
+          price: number
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          available_seats: number
+          created_at?: string | null
+          departure_time: string
+          description?: string | null
+          destination: string
+          driver_id: string
+          id?: string
+          origin: string
+          price: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string | null
+          departure_time?: string
+          description?: string | null
+          destination?: string
+          driver_id?: string
+          id?: string
+          origin?: string
+          price?: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

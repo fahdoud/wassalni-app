@@ -9,6 +9,9 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
@@ -17,14 +20,18 @@ const OfferRidePage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    from: "",
-    to: "",
-    date: "",
-    time: "",
-    seats: 1,
-    price: 150,
-    description: ""
+  
+  // Create a form with react-hook-form
+  const form = useForm({
+    defaultValues: {
+      from: "",
+      to: "",
+      date: "",
+      time: "",
+      seats: "1",
+      price: "150",
+      description: ""
+    }
   });
 
   // Check if user is logged in
@@ -32,6 +39,7 @@ const OfferRidePage = () => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
+        console.log("User is logged in:", session.user);
         setUser(session.user);
       } else {
         toast.error("Please login to offer a ride");
@@ -42,17 +50,7 @@ const OfferRidePage = () => {
     checkAuth();
   }, [navigate]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (formData: any) => {
     if (!user) {
       toast.error("You must be logged in to offer a ride");
       return;
@@ -75,10 +73,10 @@ const OfferRidePage = () => {
           origin: formData.from,
           destination: formData.to,
           departure_time: departureTime.toISOString(),
-          price: parseFloat(formData.price as any),
-          available_seats: parseInt(formData.seats as any),
-          status: 'active',
-          // Add any other required fields
+          price: parseFloat(formData.price),
+          available_seats: parseInt(formData.seats),
+          description: formData.description,
+          status: 'active'
         })
         .select()
         .single();
@@ -94,13 +92,13 @@ const OfferRidePage = () => {
       toast.success("Ride offered successfully!");
       
       // Reset form
-      setFormData({
+      form.reset({
         from: "",
         to: "",
         date: "",
         time: "",
-        seats: 1,
-        price: 150,
+        seats: "1",
+        price: "150",
         description: ""
       });
       
@@ -132,114 +130,102 @@ const OfferRidePage = () => {
           </div>
 
           <div className="max-w-2xl mx-auto">
-            <form onSubmit={handleSubmit} className="glass-card p-8 rounded-xl">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">From</label>
-                    <select 
-                      name="from"
-                      value={formData.from}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      required
-                    >
-                      <option value="">Select pickup location</option>
-                      {constantineAreas.map(area => (
-                        <option key={area} value={area}>{area}</option>
-                      ))}
-                    </select>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="glass-card p-8 rounded-xl">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">From</label>
+                      <select 
+                        {...form.register("from")}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        required
+                      >
+                        <option value="">Select pickup location</option>
+                        {constantineAreas.map(area => (
+                          <option key={area} value={area}>{area}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">To</label>
+                      <select 
+                        {...form.register("to")}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        required
+                      >
+                        <option value="">Select destination</option>
+                        {constantineAreas.map(area => (
+                          <option key={area} value={area}>{area}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">To</label>
-                    <select 
-                      name="to"
-                      value={formData.to}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      required
-                    >
-                      <option value="">Select destination</option>
-                      {constantineAreas.map(area => (
-                        <option key={area} value={area}>{area}</option>
-                      ))}
-                    </select>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Date</label>
+                      <input 
+                        type="date"
+                        {...form.register("date")}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Time</label>
+                      <input 
+                        type="time"
+                        {...form.register("time")}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Date</label>
-                    <input 
-                      type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      required
-                    />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Available Seats</label>
+                      <input 
+                        type="number"
+                        {...form.register("seats")}
+                        min="1"
+                        max="7"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Price per Seat (DZD)</label>
+                      <input 
+                        type="number"
+                        {...form.register("price")}
+                        min="50"
+                        step="10"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        required
+                      />
+                    </div>
                   </div>
+                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Time</label>
-                    <input 
-                      type="time"
-                      name="time"
-                      value={formData.time}
-                      onChange={handleChange}
+                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Additional Information</label>
+                    <textarea 
+                      {...form.register("description")}
+                      rows={4}
+                      placeholder="Add any details about your ride, such as meetup point, luggage space, etc."
                       className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      required
-                    />
+                    ></textarea>
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Available Seats</label>
-                    <input 
-                      type="number"
-                      name="seats"
-                      value={formData.seats}
-                      onChange={handleChange}
-                      min="1"
-                      max="7"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Price per Seat (DZD)</label>
-                    <input 
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleChange}
-                      min="50"
-                      step="10"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Additional Information</label>
-                  <textarea 
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows={4}
-                    placeholder="Add any details about your ride, such as meetup point, luggage space, etc."
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  ></textarea>
-                </div>
 
-                <div className="flex justify-center">
-                  <Button type="submit" size="lg" isLoading={loading} disabled={loading}>
-                    {loading ? "Offering Ride..." : "Offer Ride"}
-                  </Button>
+                  <div className="flex justify-center">
+                    <Button type="submit" size="lg" isLoading={loading} disabled={loading}>
+                      {loading ? "Offering Ride..." : "Offer Ride"}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </Form>
           </div>
         </section>
       </main>
