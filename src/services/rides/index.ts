@@ -2,7 +2,7 @@
 // Main export file for the ride services
 
 // Export types
-export type { Ride } from './types';
+export type { Ride, ReservationStatus, Reservation } from './types';
 
 // Export mock data service
 export { getMockRides } from './mockRides';
@@ -11,4 +11,4 @@ export { getMockRides } from './mockRides';
 export { getRides, getRideById } from './rideQueries';
 
 // Export reservation service
-export { createReservation } from './reservationService';
+export { createReservation, getUserReservations } from './reservationService';

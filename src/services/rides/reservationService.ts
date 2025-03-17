@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ReservationStatus } from "./types";
 
 // Create a reservation
 export const createReservation = async (
@@ -22,7 +23,8 @@ export const createReservation = async (
       .insert({
         trip_id: tripId,
         passenger_id: passengerId,
-        seats_reserved: seatsReserved
+        seats_reserved: seatsReserved,
+        status: 'confirmed' as ReservationStatus
       })
       .select()
       .single();
@@ -33,7 +35,6 @@ export const createReservation = async (
     }
 
     // 2. Update the available seats in the trip
-    // Instead of using generic type parameters with rpc, we'll use the standard approach
     const { error: updateError } = await supabase.rpc(
       'decrease_available_seats', 
       {
@@ -49,10 +50,46 @@ export const createReservation = async (
       throw new Error(updateError.message);
     }
 
+    console.log("Reservation created successfully:", reservation);
     return true;
   } catch (error) {
     console.error("Failed to create reservation:", error);
     toast.error("Failed to create reservation. Please try again.");
     return false;
+  }
+};
+
+// Get all reservations for a user
+export const getUserReservations = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select(`
+        id,
+        seats_reserved,
+        status,
+        created_at,
+        trips (
+          id,
+          origin,
+          destination,
+          departure_time,
+          price,
+          driver_id,
+          profiles (full_name)
+        )
+      `)
+      .eq('passenger_id', userId)
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error("Error fetching user reservations:", error);
+      throw new Error(error.message);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Failed to get user reservations:", error);
+    return [];
   }
 };

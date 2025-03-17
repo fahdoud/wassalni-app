@@ -14,3 +14,26 @@ export interface Ride {
   trip_id?: string;
   is_mock?: boolean;
 }
+
+export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+
+export interface Reservation {
+  id: string;
+  trip_id: string;
+  passenger_id: string;
+  seats_reserved: number;
+  status: ReservationStatus;
+  created_at: string;
+  updated_at: string;
+  trip?: {
+    id: string;
+    origin: string;
+    destination: string;
+    departure_time: string;
+    price: number;
+    driver_id: string;
+    profiles: {
+      full_name: string;
+    };
+  };
+}
