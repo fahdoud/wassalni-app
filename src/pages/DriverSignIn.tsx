@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/Button";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
@@ -8,29 +8,56 @@ import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
 import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
+import { supabase } from "@/integrations/supabase/client";
 
 const DriverSignIn = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    // This would connect to authentication in a real app
-    if (email && password) {
-      toast({
-        title: t('auth.successTitle'),
-        description: t('auth.successSignIn'),
-      });
-    } else {
+    if (!email || !password) {
       toast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorFields'),
       });
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: t('auth.successTitle'),
+        description: t('auth.successSignIn'),
+      });
+      
+      // Redirect to home page after successful login
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: t('auth.errorTitle'),
+        description: error.message || t('auth.errorGeneric'),
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -131,8 +158,8 @@ const DriverSignIn = () => {
                 </a>
               </div>
               
-              <Button type="submit" className="w-full mt-2">
-                {t('auth.signIn')}
+              <Button type="submit" className="w-full mt-2" disabled={isLoading}>
+                {isLoading ? t('auth.signingIn') : t('auth.signIn')}
               </Button>
               
               <div className="text-center mt-6">

@@ -44,6 +44,9 @@ const UserProfileMenu = () => {
         
         if (!error && profileData) {
           setProfile(profileData);
+          console.log("Profile data loaded:", profileData);
+        } else {
+          console.error("Error fetching profile:", error);
         }
       }
     };
@@ -52,6 +55,7 @@ const UserProfileMenu = () => {
 
     // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
       if (event === "SIGNED_IN" && session) {
         setUser(session.user);
         
@@ -64,6 +68,9 @@ const UserProfileMenu = () => {
         
         if (!error && profileData) {
           setProfile(profileData);
+          console.log("Profile data loaded after sign in:", profileData);
+        } else {
+          console.error("Error fetching profile after sign in:", error);
         }
       } else if (event === "SIGNED_OUT") {
         setUser(null);
@@ -83,6 +90,7 @@ const UserProfileMenu = () => {
 
   if (!user) return null;
 
+  // Use initials from full name or email as fallback
   const initials = profile?.full_name
     ? profile.full_name
         .split(" ")

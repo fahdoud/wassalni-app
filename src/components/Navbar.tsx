@@ -35,12 +35,14 @@ const Navbar = () => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
       setIsLoggedIn(!!data.user);
+      console.log("Auth state checked, user logged in:", !!data.user);
     };
 
     checkAuth();
 
     // Set up auth listener
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      console.log("Auth state change in Navbar:", event);
       if (event === "SIGNED_IN") {
         setIsLoggedIn(true);
       } else if (event === "SIGNED_OUT") {

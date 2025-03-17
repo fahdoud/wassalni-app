@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/Button";
 import { Mail, Lock, User, Eye, EyeOff, Phone } from "lucide-react";
@@ -7,10 +8,12 @@ import { useToast } from "@/components/ui/use-toast";
 import GradientText from "@/components/ui-components/GradientText";
 import Logo from "@/components/ui-components/Logo";
 import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
+import { supabase } from "@/integrations/supabase/client";
 
 const PassengerSignUp = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -18,9 +21,11 @@ const PassengerSignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     if (!agreeTerms) {
       toast({
@@ -28,6 +33,7 @@ const PassengerSignUp = () => {
         title: t('auth.errorTitle'),
         description: t('auth.errorTerms'),
       });
+      setIsLoading(false);
       return;
     }
     
@@ -37,21 +43,52 @@ const PassengerSignUp = () => {
         title: t('auth.errorTitle'),
         description: t('auth.errorPasswordMatch'),
       });
+      setIsLoading(false);
       return;
     }
     
-    // This would connect to registration in a real app
-    if (fullName && email && phone && password) {
-      toast({
-        title: t('auth.successTitle'),
-        description: t('auth.successSignUp'),
-      });
-    } else {
+    if (!fullName || !email || !phone || !password) {
       toast({
         variant: "destructive",
         title: t('auth.errorTitle'),
         description: t('auth.errorFields'),
       });
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone,
+            role: 'passenger'
+          }
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: t('auth.successTitle'),
+        description: t('auth.successSignUp'),
+      });
+      
+      // Redirect to home page after successful signup
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: t('auth.errorTitle'),
+        description: error.message || t('auth.errorGeneric'),
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -184,8 +221,8 @@ const PassengerSignUp = () => {
                 </label>
               </div>
               
-              <Button type="submit" className="w-full mt-2">
-                {t('auth.signUp')}
+              <Button type="submit" className="w-full mt-2" disabled={isLoading}>
+                {isLoading ? t('auth.signingUp') : t('auth.signUp')}
               </Button>
               
               <div className="text-center mt-6">
