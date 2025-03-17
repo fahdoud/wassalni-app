@@ -20,10 +20,11 @@ import { Toaster } from "@/components/ui/sonner";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
 import VerifyPhonePage from "@/pages/VerifyPhonePage";
 import OnboardingPage from "@/pages/OnboardingPage";
-import { useIsMobile } from '@/hooks/use-mobile';
+import useIsMobileSimple from '@/hooks/use-mobile';
 
 function App() {
   const { theme } = useTheme();
+  const isMobile = useIsMobileSimple();
   
   // Add viewport meta tag for better mobile experience
   useEffect(() => {
@@ -62,7 +63,7 @@ function App() {
                 <Route path="/reservation/:rideId" element={<ReservationPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <Toaster position={useIsMobile() ? "bottom-center" : "top-right"} />
+              <Toaster position={isMobile ? "bottom-center" : "top-right"} />
             </div>
           </ThemeProvider>
         </LanguageProvider>

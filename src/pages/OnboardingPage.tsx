@@ -5,13 +5,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import GradientText from '@/components/ui-components/GradientText';
 import Logo from '@/components/ui-components/Logo';
 import Button from '@/components/Button';
-import { useIsMobile } from '@/hooks/use-mobile';
+import useIsMobileSimple from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const OnboardingPage = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobileSimple();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
 
@@ -27,22 +27,22 @@ const OnboardingPage = () => {
   const slides = [
     {
       title: "Welcome to Wassalni",
-      description: "Your premium carpooling solution in Constantine. Discover a smarter way to travel together.",
+      description: "Your premium carpooling platform in Constantine offering a smarter way to commute together with comfort and convenience",
       image: "/lovable-uploads/0ed09104-7848-4012-8db2-6ee6006b35af.png",
     },
     {
       title: "Find Available Rides",
-      description: "Browse through numerous available rides in your area and choose what works best for you.",
+      description: "Discover and book available rides in your area with ease, customized to fit your schedule and destination preferences",
       icon: "🚗",
     },
     {
       title: "Connect with Community",
-      description: "Join a trusted network of drivers and passengers to make traveling more social and affordable.",
+      description: "Join our trusted network of drivers and passengers creating a safer, more affordable and social transportation experience",
       icon: "👥",
     },
     {
       title: "Save Money & Time",
-      description: "Reduce your transportation costs while contributing to less traffic and a greener environment.",
+      description: "Reduce transportation costs significantly while contributing to less traffic congestion and a more sustainable environment",
       icon: "💰",
     },
   ];
