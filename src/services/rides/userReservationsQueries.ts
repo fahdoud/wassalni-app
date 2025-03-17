@@ -109,7 +109,7 @@ export const cancelReservation = async (reservationId: string): Promise<boolean>
         .eq('id', reservation.trip_id)
         .single();
         
-      if (!tripFetchError) {
+      if (!tripFetchError && tripData) {
         // Update available seats
         const newSeats = tripData.available_seats + reservation.seats_reserved;
         await supabase
