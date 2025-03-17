@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from "@/pages/Index";
 import PassengerSignIn from "@/pages/PassengerSignIn";
@@ -19,9 +19,19 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { Toaster } from "@/components/ui/sonner";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
 import VerifyPhonePage from "@/pages/VerifyPhonePage";
+import OnboardingPage from "@/pages/OnboardingPage";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 function App() {
   const { theme } = useTheme();
+  
+  // Add viewport meta tag for better mobile experience
+  useEffect(() => {
+    // Enable iOS PWA features
+    if (navigator.standalone) {
+      document.body.classList.add('ios-pwa');
+    }
+  }, []);
 
   return (
     <div className={theme}>
@@ -30,6 +40,7 @@ function App() {
           <ThemeProvider>
             <div className="dark:bg-gray-950 min-h-screen">
               <Routes>
+                <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/" element={<Index />} />
                 <Route path="/passenger-signin" element={<PassengerSignIn />} />
                 <Route path="/driver-signin" element={<DriverSignIn />} />
@@ -47,7 +58,7 @@ function App() {
                 <Route path="/reservation/:rideId" element={<ReservationPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <Toaster />
+              <Toaster position={useIsMobile() ? "bottom-center" : "top-right"} />
             </div>
           </ThemeProvider>
         </LanguageProvider>
