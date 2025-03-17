@@ -10,8 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { submitFeedback } from "@/services/rides/index";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 
 // Example suggestions for different feedback types
@@ -74,14 +72,6 @@ const FeedbackPage = () => {
   const [drivers, setDrivers] = useState<any[]>([]);
   const [exampleSuggestions, setExampleSuggestions] = useState<string[]>(FEEDBACK_EXAMPLES.general);
   
-  const form = useForm({
-    defaultValues: {
-      name: "",
-      email: "",
-      message: ""
-    }
-  });
-
   useEffect(() => {
     // Update example suggestions when feedback type changes
     switch (feedbackType) {
@@ -142,6 +132,7 @@ const FeedbackPage = () => {
           const uniqueDrivers = Array.from(
             new Map(
               uniqueTrips
+                .filter((r: any) => r.trip.driver_id)
                 .map((r: any) => [
                   r.trip.driver_id, 
                   { id: r.trip.driver_id, name: r.trip.driver?.full_name || "Driver" }
@@ -293,9 +284,9 @@ const FeedbackPage = () => {
                 {!isLoggedIn && (
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <FormLabel htmlFor="name" className="block text-sm font-medium mb-2">
+                      <label htmlFor="name" className="block text-sm font-medium mb-2">
                         {t('feedback.name')}
-                      </FormLabel>
+                      </label>
                       <Input
                         id="name"
                         type="text"
@@ -306,9 +297,9 @@ const FeedbackPage = () => {
                       />
                     </div>
                     <div>
-                      <FormLabel htmlFor="email" className="block text-sm font-medium mb-2">
+                      <label htmlFor="email" className="block text-sm font-medium mb-2">
                         {t('feedback.email')}
-                      </FormLabel>
+                      </label>
                       <Input
                         id="email"
                         type="email"
@@ -324,9 +315,9 @@ const FeedbackPage = () => {
                 <TabsContent value="rating" className="space-y-6 mt-4">
                   {isLoggedIn && drivers.length > 0 && (
                     <div>
-                      <FormLabel className="block text-sm font-medium mb-2">
+                      <label className="block text-sm font-medium mb-2">
                         Select Driver
-                      </FormLabel>
+                      </label>
                       <select
                         className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
                         value={toUserId || ""}
@@ -345,9 +336,9 @@ const FeedbackPage = () => {
 
                   {isLoggedIn && trips.length > 0 && (
                     <div>
-                      <FormLabel className="block text-sm font-medium mb-2">
+                      <label className="block text-sm font-medium mb-2">
                         Select Trip (Optional)
-                      </FormLabel>
+                      </label>
                       <select
                         className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
                         value={tripId || ""}
@@ -364,9 +355,9 @@ const FeedbackPage = () => {
                   )}
 
                   <div>
-                    <FormLabel className="block text-sm font-medium mb-3">
+                    <label className="block text-sm font-medium mb-3">
                       {t('feedback.rateExperience')}
-                    </FormLabel>
+                    </label>
                     <div className="flex items-center justify-center gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -416,9 +407,9 @@ const FeedbackPage = () => {
                 )}
 
                 <div>
-                  <FormLabel htmlFor="message" className="block text-sm font-medium mb-2">
+                  <label htmlFor="message" className="block text-sm font-medium mb-2">
                     {t('feedback.yourFeedback')}
-                  </FormLabel>
+                  </label>
                   <Textarea
                     id="message"
                     value={message}

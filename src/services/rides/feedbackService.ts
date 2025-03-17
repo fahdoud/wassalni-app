@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface FeedbackInput {
-  toUserId: string;
+  toUserId: string | null;
   rating: number;
   comment?: string;
   tripId?: string;
@@ -25,7 +25,7 @@ export const submitFeedback = async (feedback: FeedbackInput) => {
         .from("profiles")
         .select("id")
         .eq("id", feedback.toUserId)
-        .single();
+        .maybeSingle();
 
       if (!userExists) {
         // Create a system feedback entry without using foreign key
@@ -54,7 +54,7 @@ export const submitFeedback = async (feedback: FeedbackInput) => {
       .from("feedback")
       .insert({
         from_user_id: fromUserId,
-        to_user_id: feedback.toUserId || null, // Allow null to_user_id
+        to_user_id: feedback.toUserId,
         rating: feedback.rating,
         comment: feedback.comment,
         trip_id: feedback.tripId,
