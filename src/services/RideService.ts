@@ -127,7 +127,12 @@ export const createReservation = async (
     }
 
     // 2. Update the available seats in the trip
-    const { error: updateError } = await supabase.rpc(
+    type DecreaseAvailableSeatsParams = {
+      trip_id: string;
+      seats_count: number;
+    };
+    
+    const { error: updateError } = await supabase.rpc<any, DecreaseAvailableSeatsParams>(
       'decrease_available_seats', 
       {
         trip_id: tripId,
