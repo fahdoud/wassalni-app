@@ -78,7 +78,7 @@ const ReservationPage = () => {
     
     try {
       // Use our service to create the reservation
-      const success = await createReservation(
+      const { success, updatedSeats } = await createReservation(
         ride.trip_id || ride.id,
         userId,
         passengerCount
@@ -90,7 +90,8 @@ const ReservationPage = () => {
           if (prev) {
             return {
               ...prev,
-              seats: prev.seats - passengerCount
+              // Use updatedSeats from the server if available, otherwise subtract passengerCount
+              seats: updatedSeats !== undefined ? updatedSeats : (prev.seats - passengerCount)
             };
           }
           return prev;

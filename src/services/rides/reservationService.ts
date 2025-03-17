@@ -8,7 +8,7 @@ export const createReservation = async (
   tripId: string, 
   passengerId: string, 
   seatsReserved: number
-): Promise<boolean> => {
+): Promise<{ success: boolean, updatedSeats?: number }> => {
   try {
     // For mock rides, create a real reservation with a "mock" tag
     if (/^\d+$/.test(tripId)) {
@@ -32,7 +32,7 @@ export const createReservation = async (
       }
       
       console.log("Mock reservation created successfully:", reservation);
-      return true;
+      return { success: true };
     }
     
     // For real rides with UUID trip IDs
@@ -58,12 +58,19 @@ export const createReservation = async (
     console.log("Created reservation record:", reservation);
 
     // 2. Update the available seats in the trip
-    const { error: updateError } = await supabase.rpc(
+    const { data: updatedTrip, error: updateError } = await supabase.rpc(
       'decrease_available_seats', 
       {
         trip_id: tripId,
         seats_count: seatsReserved
       }
+    ).then(() => 
+      // Fetch the updated trip to get the new available_seats count
+      supabase
+        .from('trips')
+        .select('available_seats')
+        .eq('id', tripId)
+        .single()
     );
 
     if (updateError) {
@@ -73,12 +80,15 @@ export const createReservation = async (
       throw new Error(updateError.message);
     }
 
-    console.log("Reservation created successfully:", reservation);
-    return true;
+    console.log("Reservation created successfully. Updated trip:", updatedTrip);
+    return { 
+      success: true, 
+      updatedSeats: updatedTrip?.available_seats
+    };
   } catch (error) {
     console.error("Failed to create reservation:", error);
     toast.error("Failed to create reservation. Please try again.");
-    return false;
+    return { success: false };
   }
 };
 
