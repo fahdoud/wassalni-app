@@ -31,7 +31,7 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
           price,
           available_seats,
           driver_id,
-          drivers:driver_id(full_name)
+          drivers:profiles!driver_id(full_name)
         )
       `)
       .eq('passenger_id', user.id)
@@ -46,17 +46,27 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
     
     // Transform the data to match our Reservation interface
     const formattedReservations: Reservation[] = reservations.map(res => {
-      const trip = res.trips ? {
-        id: res.trips.id,
-        origin: res.trips.origin,
-        destination: res.trips.destination,
-        departure_time: res.trips.departure_time,
-        price: res.trips.price,
-        driver_id: res.trips.driver_id,
-        profiles: {
-          full_name: res.trips.drivers ? res.trips.drivers.full_name : 'Unknown Driver'
-        }
-      } : undefined;
+      // Safely access nested trip data
+      let trip = undefined;
+      
+      if (res.trips) {
+        // Handle driver name safely
+        const driverName = res.trips.drivers && typeof res.trips.drivers === 'object' 
+          ? res.trips.drivers.full_name || 'Unknown Driver' 
+          : 'Unknown Driver';
+          
+        trip = {
+          id: res.trips.id,
+          origin: res.trips.origin,
+          destination: res.trips.destination,
+          departure_time: res.trips.departure_time,
+          price: res.trips.price,
+          driver_id: res.trips.driver_id,
+          profiles: {
+            full_name: driverName
+          }
+        };
+      }
 
       return {
         id: res.id,
