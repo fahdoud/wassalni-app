@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { MessageSquare, Star, Send, ThumbsUp, AlertTriangle, HelpCircle } from "lucide-react";
+import { MessageSquare, Star, Send, ThumbsUp, AlertTriangle, Flag, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -29,12 +29,25 @@ const FEEDBACK_EXAMPLES = {
   complaint: [
     "I had an issue with a driver cancelling at the last minute.",
     "The payment system failed to process my transaction.",
-    "The pickup location was difficult to find."
+    "The pickup location was difficult to find.",
+    "My driver was late and didn't apologize."
+  ],
+  reclamation: [
+    "I was charged incorrectly for my last ride.",
+    "I want a refund for my cancelled trip.",
+    "The driver took a longer route to increase the fare.",
+    "I lost an item in the car and need assistance."
   ],
   issue: [
     "The app crashes when I try to book a ride during peak hours.",
     "I'm unable to update my profile information.",
     "The notification system isn't working properly."
+  ],
+  problems: [
+    "I can't see available trips in my area.",
+    "The map doesn't show my current location correctly.",
+    "My payment method keeps getting declined.",
+    "I can't contact my driver through the app."
   ],
   other: [
     "How can I become a driver for Wassalni?",
@@ -46,7 +59,7 @@ const FEEDBACK_EXAMPLES = {
 const FeedbackPage = () => {
   const { t } = useLanguage();
   const [feedbackType, setFeedbackType] = useState<
-    "general" | "suggestion" | "complaint" | "issue" | "other" | "rating"
+    "general" | "suggestion" | "complaint" | "reclamation" | "issue" | "problems" | "other" | "rating"
   >("general");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -81,8 +94,14 @@ const FeedbackPage = () => {
       case "complaint":
         setExampleSuggestions(FEEDBACK_EXAMPLES.complaint);
         break;
+      case "reclamation":
+        setExampleSuggestions(FEEDBACK_EXAMPLES.reclamation);
+        break;
       case "issue":
         setExampleSuggestions(FEEDBACK_EXAMPLES.issue);
+        break;
+      case "problems":
+        setExampleSuggestions(FEEDBACK_EXAMPLES.problems);
         break;
       case "other":
         setExampleSuggestions(FEEDBACK_EXAMPLES.other);
@@ -177,7 +196,9 @@ const FeedbackPage = () => {
           const feedbackRating = feedbackType === "general" ? 0 : 
                                feedbackType === "suggestion" ? 4 : 
                                feedbackType === "complaint" ? 2 : 
-                               feedbackType === "issue" ? 1 : 3;
+                               feedbackType === "reclamation" ? 1 :
+                               feedbackType === "issue" ? 1 : 
+                               feedbackType === "problems" ? 1 : 3;
           
           await submitFeedback({
             toUserId: adminId!,
@@ -233,7 +254,7 @@ const FeedbackPage = () => {
 
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-10">
             <Tabs defaultValue="general" onValueChange={(value) => setFeedbackType(value as any)}>
-              <TabsList className="grid grid-cols-2 md:grid-cols-6 gap-2 mb-8">
+              <TabsList className="grid grid-cols-2 md:grid-cols-8 gap-2 mb-8">
                 <TabsTrigger value="general" className="flex flex-col items-center gap-1 py-3 px-1">
                   <MessageSquare size={18} />
                   <span className="text-xs">General</span>
@@ -246,9 +267,17 @@ const FeedbackPage = () => {
                   <AlertTriangle size={18} />
                   <span className="text-xs">Complaints</span>
                 </TabsTrigger>
+                <TabsTrigger value="reclamation" className="flex flex-col items-center gap-1 py-3 px-1">
+                  <Flag size={18} />
+                  <span className="text-xs">Réclamation</span>
+                </TabsTrigger>
                 <TabsTrigger value="issue" className="flex flex-col items-center gap-1 py-3 px-1">
                   <HelpCircle size={18} />
                   <span className="text-xs">Issues</span>
+                </TabsTrigger>
+                <TabsTrigger value="problems" className="flex flex-col items-center gap-1 py-3 px-1">
+                  <AlertTriangle size={18} />
+                  <span className="text-xs">Problèmes</span>
                 </TabsTrigger>
                 <TabsTrigger value="other" className="flex flex-col items-center gap-1 py-3 px-1">
                   <MessageSquare size={18} />
@@ -365,7 +394,9 @@ const FeedbackPage = () => {
                 {(feedbackType === "general" || 
                   feedbackType === "suggestion" || 
                   feedbackType === "complaint" || 
+                  feedbackType === "reclamation" ||
                   feedbackType === "issue" || 
+                  feedbackType === "problems" ||
                   feedbackType === "other") && (
                   <div className="mt-4">
                     <h4 className="text-sm font-medium mb-2">Example suggestions:</h4>

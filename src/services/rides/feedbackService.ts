@@ -20,39 +20,41 @@ export const submitFeedback = async (feedback: FeedbackInput) => {
     const fromUserId = userData.user.id;
 
     // Check if the target user exists (especially for admin user)
-    const { data: userExists } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", feedback.toUserId)
-      .single();
+    if (feedback.toUserId) {
+      const { data: userExists } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", feedback.toUserId)
+        .single();
 
-    if (!userExists) {
-      // Create a system feedback entry without using foreign key
-      const { data, error } = await supabase
-        .from("feedback")
-        .insert({
-          from_user_id: fromUserId,
-          to_user_id: null, // Set to null to avoid foreign key constraint
-          rating: feedback.rating,
-          comment: feedback.comment,
-          trip_id: feedback.tripId,
-        })
-        .select();
+      if (!userExists) {
+        // Create a system feedback entry without using foreign key
+        const { data, error } = await supabase
+          .from("feedback")
+          .insert({
+            from_user_id: fromUserId,
+            to_user_id: null, // Set to null to avoid foreign key constraint
+            rating: feedback.rating,
+            comment: feedback.comment,
+            trip_id: feedback.tripId,
+          })
+          .select();
 
-      if (error) {
-        console.error("Error submitting feedback:", error);
-        throw error;
+        if (error) {
+          console.error("Error submitting feedback:", error);
+          throw error;
+        }
+
+        return data[0];
       }
-
-      return data[0];
     }
 
-    // Normal feedback submission with valid to_user_id
+    // Normal feedback submission with valid or null to_user_id
     const { data, error } = await supabase
       .from("feedback")
       .insert({
         from_user_id: fromUserId,
-        to_user_id: feedback.toUserId,
+        to_user_id: feedback.toUserId || null, // Allow null to_user_id
         rating: feedback.rating,
         comment: feedback.comment,
         trip_id: feedback.tripId,
