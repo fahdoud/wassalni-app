@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Reservation, ReservationStatus } from './types';
 import { toast } from "sonner";
@@ -55,9 +56,8 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
         // Handle driver name safely
         let driverName = 'Unknown Driver';
         
-        if (tripData.driver && 
-            typeof tripData.driver === 'object' && 
-            tripData.driver.full_name) {
+        if (tripData && tripData.driver && typeof tripData.driver === 'object') {
+          // When the driver is returned as an object with full_name
           driverName = tripData.driver.full_name || 'Unknown Driver';
         }
           

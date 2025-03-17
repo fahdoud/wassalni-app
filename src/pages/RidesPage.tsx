@@ -1,3 +1,4 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,9 +9,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getRides } from "@/services/rides";
 import { Ride } from "@/services/rides/types";
 import { getMockRides } from "@/services/rides/mockRides";
-import { Bookmark, Loader2 } from "lucide-react";
-import { supabase } from "@/services/supabase";
-import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
