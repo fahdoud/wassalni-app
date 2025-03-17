@@ -19,13 +19,11 @@ const RidesPage = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   
-  // Fetch rides data - will run on initial load and when navigating back to the page
   const fetchRides = async (forceRefresh = false) => {
     setLoading(true);
     try {
       console.log("Fetching rides, forceRefresh:", forceRefresh);
       
-      // Clear existing rides to show loading state
       if (forceRefresh) {
         setRides([]);
       }
@@ -46,18 +44,15 @@ const RidesPage = () => {
     }
   };
 
-  // Initial load of rides data
   useEffect(() => {
     fetchRides(true);
     
-    // Add an event listener for the beforeunload event to handle page refreshes
     const handleBeforeUnload = () => {
       localStorage.setItem('ridesPageReloaded', 'true');
     };
     
     window.addEventListener('beforeunload', handleBeforeUnload);
     
-    // Add an event listener for the 'focus' event to refresh data when returning to the tab
     const handleFocus = () => {
       fetchRides(true);
     };
@@ -70,9 +65,7 @@ const RidesPage = () => {
     };
   }, []);
 
-  // Add a listener for route changes to refresh rides when returning to this page
   useEffect(() => {
-    // This will run whenever the component is mounted or the location changes
     if (location.pathname === '/rides') {
       const fromReservation = sessionStorage.getItem('fromReservation');
       
