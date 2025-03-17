@@ -33,6 +33,10 @@ const UserProfileMenu = () => {
     return user.email?.slice(0, 2).toUpperCase() || "NN";
   };
 
+  // Check if profile_photo_url exists in driverDetails, otherwise use an empty string
+  const { driverDetails } = useAuth();
+  const profilePhotoUrl = driverDetails?.profile_photo_url || "";
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -41,7 +45,7 @@ const UserProfileMenu = () => {
           className="flex items-center gap-2 px-2 hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           <Avatar className="h-8 w-8">
-            <AvatarImage src={profile?.photo_url || ""} />
+            <AvatarImage src={profilePhotoUrl} />
             <AvatarFallback className="bg-wassalni-green text-white">
               {getInitials()}
             </AvatarFallback>
