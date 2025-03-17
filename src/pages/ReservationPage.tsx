@@ -11,11 +11,33 @@ import RideDetails from "@/components/reservation/RideDetails";
 import PaymentDetails from "@/components/reservation/PaymentDetails";
 import ConfirmationDetails from "@/components/reservation/ConfirmationDetails";
 import ReservationSidebar from "@/components/reservation/ReservationSidebar";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const ReservationPage = () => {
   const { t } = useLanguage();
   const { rideId } = useParams();
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getUser();
+      const isLoggedIn = !!data.user;
+      setIsAuthenticated(isLoggedIn);
+      
+      if (!isLoggedIn) {
+        toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
+        navigate("/passenger-signin", { 
+          state: { returnTo: `/reservation/${rideId}` } 
+        });
+      }
+    };
+    
+    checkAuth();
+  }, [navigate, rideId, t]);
   
   const {
     ride,
@@ -27,6 +49,11 @@ const ReservationPage = () => {
     setStep,
     handleReservation
   } = useReservation(rideId);
+
+  // If still checking auth or auth check complete but not authenticated, show loading
+  if (isAuthenticated === null || isAuthenticated === false) {
+    return <LoadingState />;
+  }
 
   if (initialLoading) {
     return <LoadingState />;

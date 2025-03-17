@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/Button";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
@@ -14,6 +13,8 @@ const PassengerSignIn = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.returnTo || '/';
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -48,8 +49,7 @@ const PassengerSignIn = () => {
         description: t('auth.successSignIn'),
       });
       
-      // Redirect to home page after successful login
-      navigate('/');
+      navigate(returnTo);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -64,7 +64,6 @@ const PassengerSignIn = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col md:flex-row">
-        {/* Left Side - Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-16">
           <div className="w-full max-w-md">
             <Link to="/" className="flex items-center gap-2 mb-8">
@@ -162,7 +161,6 @@ const PassengerSignIn = () => {
           </div>
         </div>
         
-        {/* Right Side - Image */}
         <div className="hidden md:w-1/2 md:flex bg-gradient-primary relative">
           <div className="absolute inset-0 bg-pattern opacity-10"></div>
           <div className="relative z-10 flex flex-col justify-center items-center text-wassalni-dark p-16">

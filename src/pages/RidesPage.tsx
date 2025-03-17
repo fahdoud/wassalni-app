@@ -4,11 +4,13 @@ import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getRides } from "@/services/rides";
 import { Ride } from "@/services/rides/types";
 import { getMockRides } from "@/services/rides/mockRides";
 import { Bookmark, Loader2 } from "lucide-react";
+import { supabase } from "@/services/supabase";
+import { toast } from "react-toastify";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
@@ -17,8 +19,10 @@ const RidesPage = () => {
   const [filter, setFilter] = useState("");
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
-  
+  const navigate = useNavigate();
+
   const fetchRides = async (forceRefresh = false) => {
     setLoading(true);
     try {
@@ -43,6 +47,23 @@ const RidesPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getUser();
+      setIsAuthenticated(!!data.user);
+    };
+    
+    checkAuth();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      setIsAuthenticated(event === 'SIGNED_IN');
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     fetchRides(true);
@@ -78,6 +99,19 @@ const RidesPage = () => {
       }
     }
   }, [location]);
+
+  const handleReserveClick = (rideId: string | number) => {
+    if (!isAuthenticated) {
+      toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
+      navigate("/passenger-signin", { 
+        state: { returnTo: `/reservation/${rideId}` } 
+      });
+      return;
+    }
+    
+    navigate(`/reservation/${rideId}`);
+    sessionStorage.removeItem('fromReservation');
+  };
 
   const filteredRides = filter 
     ? rides.filter(ride => 
@@ -206,9 +240,12 @@ const RidesPage = () => {
                         {ride.price} <span className="text-sm">DZD</span>
                       </p>
                       {ride.seats > 0 ? (
-                        <Link to={`/reservation/${ride.id}`} onClick={() => sessionStorage.removeItem('fromReservation')}>
-                          <Button size="sm">{t('rides.reserve')}</Button>
-                        </Link>
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleReserveClick(ride.id)}
+                        >
+                          {t('rides.reserve')}
+                        </Button>
                       ) : (
                         <Button size="sm" variant="outlined" disabled>
                           {t('rides.full')}
