@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { MessageSquare, Star, Send, ThumbsUp } from "lucide-react";
+import { MessageSquare, Star, Send, ThumbsUp, AlertTriangle, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -7,10 +8,46 @@ import Button from "@/components/Button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { submitFeedback } from "@/services/rides/index";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+
+// Example suggestions for different feedback types
+const FEEDBACK_EXAMPLES = {
+  general: [
+    "I really enjoy using this service for my daily commute.",
+    "The app is very intuitive and easy to use.",
+    "I appreciate the quick response from customer service."
+  ],
+  suggestion: [
+    "It would be great if you could add a feature to save favorite routes.",
+    "Consider adding a loyalty program for frequent riders.",
+    "Please add a dark mode option for the app."
+  ],
+  complaint: [
+    "I had an issue with a driver cancelling at the last minute.",
+    "The payment system failed to process my transaction.",
+    "The pickup location was difficult to find."
+  ],
+  issue: [
+    "The app crashes when I try to book a ride during peak hours.",
+    "I'm unable to update my profile information.",
+    "The notification system isn't working properly."
+  ],
+  other: [
+    "How can I become a driver for Wassalni?",
+    "Is there a corporate account option available?",
+    "Do you offer services for events or group transportation?"
+  ]
+};
 
 const FeedbackPage = () => {
   const { t } = useLanguage();
-  const [feedbackType, setFeedbackType] = useState<"suggestion" | "rating" | "general">("general");
+  const [feedbackType, setFeedbackType] = useState<
+    "general" | "suggestion" | "complaint" | "issue" | "other" | "rating"
+  >("general");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -22,6 +59,38 @@ const FeedbackPage = () => {
   const [toUserId, setToUserId] = useState<string | undefined>(undefined);
   const [trips, setTrips] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
+  const [exampleSuggestions, setExampleSuggestions] = useState<string[]>(FEEDBACK_EXAMPLES.general);
+  
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      message: ""
+    }
+  });
+
+  useEffect(() => {
+    // Update example suggestions when feedback type changes
+    switch (feedbackType) {
+      case "general":
+        setExampleSuggestions(FEEDBACK_EXAMPLES.general);
+        break;
+      case "suggestion":
+        setExampleSuggestions(FEEDBACK_EXAMPLES.suggestion);
+        break;
+      case "complaint":
+        setExampleSuggestions(FEEDBACK_EXAMPLES.complaint);
+        break;
+      case "issue":
+        setExampleSuggestions(FEEDBACK_EXAMPLES.issue);
+        break;
+      case "other":
+        setExampleSuggestions(FEEDBACK_EXAMPLES.other);
+        break;
+      default:
+        setExampleSuggestions([]);
+    }
+  }, [feedbackType]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -68,6 +137,10 @@ const FeedbackPage = () => {
     checkAuth();
   }, []);
 
+  const useSuggestion = (suggestion: string) => {
+    setMessage(suggestion);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -76,6 +149,7 @@ const FeedbackPage = () => {
       if (isLoggedIn) {
         if (feedbackType === "rating" && (!toUserId || rating === 0)) {
           toast.error("Please select a driver and rating");
+          setLoading(false);
           return;
         }
         
@@ -87,20 +161,28 @@ const FeedbackPage = () => {
             tripId
           });
         } else {
+          // For all non-rating feedback types, use a consistent approach
           const { data: adminData } = await supabase
             .from("profiles")
             .select("id")
             .eq("role", "admin")
             .limit(1);
-            
+          
+          // Use system feedback with no target user if no admin is found
           const adminId = adminData && adminData.length > 0 
             ? adminData[0].id 
-            : "00000000-0000-0000-0000-000000000000"; // fallback
-            
+            : null;
+          
+          // Use rating 0 for general feedback, 1-5 for others based on type
+          const feedbackRating = feedbackType === "general" ? 0 : 
+                               feedbackType === "suggestion" ? 4 : 
+                               feedbackType === "complaint" ? 2 : 
+                               feedbackType === "issue" ? 1 : 3;
+          
           await submitFeedback({
-            toUserId: adminId,
-            rating: 0,
-            comment: message
+            toUserId: adminId!,
+            rating: feedbackRating,
+            comment: `[${feedbackType.toUpperCase()}] ${message}`
           });
         }
         
@@ -150,71 +232,77 @@ const FeedbackPage = () => {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-10">
-            <div className="flex flex-wrap gap-4 mb-8 justify-center">
-              <FeedbackTypeButton
-                icon={<MessageSquare size={20} />}
-                title={t('feedback.generalFeedback')}
-                active={feedbackType === "general"}
-                onClick={() => setFeedbackType("general")}
-              />
-              <FeedbackTypeButton
-                icon={<ThumbsUp size={20} />}
-                title={t('feedback.suggestion')}
-                active={feedbackType === "suggestion"}
-                onClick={() => setFeedbackType("suggestion")}
-              />
-              <FeedbackTypeButton
-                icon={<Star size={20} />}
-                title={t('feedback.rating')}
-                active={feedbackType === "rating"}
-                onClick={() => setFeedbackType("rating")}
-              />
-            </div>
+            <Tabs defaultValue="general" onValueChange={(value) => setFeedbackType(value as any)}>
+              <TabsList className="grid grid-cols-2 md:grid-cols-6 gap-2 mb-8">
+                <TabsTrigger value="general" className="flex flex-col items-center gap-1 py-3 px-1">
+                  <MessageSquare size={18} />
+                  <span className="text-xs">General</span>
+                </TabsTrigger>
+                <TabsTrigger value="suggestion" className="flex flex-col items-center gap-1 py-3 px-1">
+                  <ThumbsUp size={18} />
+                  <span className="text-xs">Suggestions</span>
+                </TabsTrigger>
+                <TabsTrigger value="complaint" className="flex flex-col items-center gap-1 py-3 px-1">
+                  <AlertTriangle size={18} />
+                  <span className="text-xs">Complaints</span>
+                </TabsTrigger>
+                <TabsTrigger value="issue" className="flex flex-col items-center gap-1 py-3 px-1">
+                  <HelpCircle size={18} />
+                  <span className="text-xs">Issues</span>
+                </TabsTrigger>
+                <TabsTrigger value="other" className="flex flex-col items-center gap-1 py-3 px-1">
+                  <MessageSquare size={18} />
+                  <span className="text-xs">Other</span>
+                </TabsTrigger>
+                <TabsTrigger value="rating" className="flex flex-col items-center gap-1 py-3 px-1">
+                  <Star size={18} />
+                  <span className="text-xs">Rate Driver</span>
+                </TabsTrigger>
+              </TabsList>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {!isLoggedIn && (
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-2">
-                      {t('feedback.name')}
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-2">
-                      {t('feedback.email')}
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-
-              {feedbackType === "rating" && isLoggedIn && (
-                <>
-                  {drivers.length > 0 && (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {!isLoggedIn && (
+                  <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium mb-2">
+                      <FormLabel htmlFor="name" className="block text-sm font-medium mb-2">
+                        {t('feedback.name')}
+                      </FormLabel>
+                      <Input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <FormLabel htmlFor="email" className="block text-sm font-medium mb-2">
+                        {t('feedback.email')}
+                      </FormLabel>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <TabsContent value="rating" className="space-y-6 mt-4">
+                  {isLoggedIn && drivers.length > 0 && (
+                    <div>
+                      <FormLabel className="block text-sm font-medium mb-2">
                         Select Driver
-                      </label>
+                      </FormLabel>
                       <select
                         className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
                         value={toUserId || ""}
                         onChange={(e) => setToUserId(e.target.value)}
-                        required={feedbackType === "rating"}
+                        required
                       >
                         <option value="">Select a driver</option>
                         {drivers.map((driver) => (
@@ -226,11 +314,11 @@ const FeedbackPage = () => {
                     </div>
                   )}
 
-                  {trips.length > 0 && (
+                  {isLoggedIn && trips.length > 0 && (
                     <div>
-                      <label className="block text-sm font-medium mb-2">
+                      <FormLabel className="block text-sm font-medium mb-2">
                         Select Trip (Optional)
-                      </label>
+                      </FormLabel>
                       <select
                         className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
                         value={tripId || ""}
@@ -247,9 +335,9 @@ const FeedbackPage = () => {
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium mb-3">
+                    <FormLabel className="block text-sm font-medium mb-3">
                       {t('feedback.rateExperience')}
-                    </label>
+                    </FormLabel>
                     <div className="flex items-center justify-center gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -272,35 +360,57 @@ const FeedbackPage = () => {
                       ))}
                     </div>
                   </div>
-                </>
-              )}
+                </TabsContent>
 
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-2">
-                  {t('feedback.yourFeedback')}
-                </label>
-                <textarea
-                  id="message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={6}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
-                  required
-                ></textarea>
-              </div>
+                {(feedbackType === "general" || 
+                  feedbackType === "suggestion" || 
+                  feedbackType === "complaint" || 
+                  feedbackType === "issue" || 
+                  feedbackType === "other") && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">Example suggestions:</h4>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {exampleSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => useSuggestion(suggestion)}
+                          className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full px-3 py-1 transition-colors"
+                        >
+                          {suggestion.length > 40 ? suggestion.substring(0, 37) + '...' : suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-              <div className="flex justify-center">
-                <Button
-                  type="submit"
-                  className="px-8 py-3 flex items-center gap-2"
-                  size="lg"
-                  disabled={loading}
-                >
-                  {loading ? "Submitting..." : t('feedback.submit')}
-                  <Send size={18} />
-                </Button>
-              </div>
-            </form>
+                <div>
+                  <FormLabel htmlFor="message" className="block text-sm font-medium mb-2">
+                    {t('feedback.yourFeedback')}
+                  </FormLabel>
+                  <Textarea
+                    id="message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={6}
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-center">
+                  <Button
+                    type="submit"
+                    className="px-8 py-3 flex items-center gap-2"
+                    size="lg"
+                    disabled={loading}
+                  >
+                    {loading ? "Submitting..." : t('feedback.submit')}
+                    <Send size={18} />
+                  </Button>
+                </div>
+              </form>
+            </Tabs>
           </div>
 
           <div className="glass-card p-6 rounded-xl">
@@ -336,30 +446,6 @@ const FeedbackPage = () => {
 
       <Footer />
     </div>
-  );
-};
-
-interface FeedbackTypeButtonProps {
-  icon: React.ReactNode;
-  title: string;
-  active: boolean;
-  onClick: () => void;
-}
-
-const FeedbackTypeButton = ({ icon, title, active, onClick }: FeedbackTypeButtonProps) => {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center gap-2 py-3 px-5 rounded-full border transition-all ${
-        active
-          ? "bg-wassalni-green text-white border-wassalni-green dark:bg-wassalni-lightGreen dark:text-gray-900 dark:border-wassalni-lightGreen"
-          : "bg-transparent border-gray-300 hover:border-wassalni-green dark:border-gray-700 dark:hover:border-wassalni-lightGreen"
-      }`}
-    >
-      {icon}
-      <span>{title}</span>
-    </button>
   );
 };
 
