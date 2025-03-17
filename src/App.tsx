@@ -16,6 +16,7 @@ import PassengerSignUp from "./pages/PassengerSignUp";
 import DriverSignIn from "./pages/DriverSignIn";
 import DriverSignUp from "./pages/DriverSignUp";
 import FeedbackPage from "./pages/FeedbackPage";
+import ProfilePage from "./pages/ProfilePage";
 import ReservationPage from "./pages/ReservationPage";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
@@ -64,6 +65,11 @@ const App = () => (
                 <Route path="/passenger-signup" element={<PassengerSignUp />} />
                 <Route path="/driver-signin" element={<DriverSignIn />} />
                 <Route path="/driver-signup" element={<DriverSignUp />} />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/feedback" element={
                   <ProtectedRoute>
                     <FeedbackPage />
