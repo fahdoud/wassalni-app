@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import { ChevronLeft, User, Phone } from "lucide-react";
 
 import {
   Card,
@@ -114,10 +115,10 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto max-w-4xl py-24">
-        <Card>
+      <div className="container mx-auto py-24 px-4">
+        <Card className="max-w-md mx-auto shadow-lg animate-pulse">
           <CardHeader className="text-center">
-            <CardTitle>{t('profile.loading')}</CardTitle>
+            <CardTitle>Loading...</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -133,58 +134,96 @@ const ProfilePage = () => {
     : "U";
 
   return (
-    <div className="container mx-auto max-w-4xl py-24">
-      <Card>
-        <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-4">
-            <Avatar className="h-24 w-24">
+    <div className="container mx-auto py-12 px-4 min-h-screen bg-gradient-to-b from-background to-muted/30">
+      <Link 
+        to="/" 
+        className="inline-flex items-center text-wassalni-green hover:text-wassalni-green/80 transition-colors mb-6"
+      >
+        <ChevronLeft className="mr-1 h-4 w-4" />
+        Back to Home
+      </Link>
+      
+      <Card className="max-w-md mx-auto shadow-xl border-wassalni-green/10 overflow-hidden">
+        <div className="h-16 bg-gradient-to-r from-wassalni-green to-wassalni-blue opacity-90"></div>
+        <CardHeader className="space-y-1 -mt-8 relative pb-0">
+          <div className="flex justify-center">
+            <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
               <AvatarFallback className="bg-wassalni-green text-white text-2xl">
                 {initials}
               </AvatarFallback>
             </Avatar>
           </div>
-          <CardTitle className="text-2xl text-center">
-            {t('profile.title')}
+          <CardTitle className="text-2xl text-center mt-4">
+            My Profile
           </CardTitle>
           <CardDescription className="text-center">
-            {t('profile.description')}
+            Update your personal information
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        
+        <CardContent className="space-y-4 pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-wassalni-green" />
+                      Full Name
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your full name" {...field} />
+                      <Input 
+                        placeholder="Enter your full name" 
+                        {...field} 
+                        className="border-wassalni-green/30 focus-visible:ring-wassalni-green/50"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-wassalni-green" />
+                      Phone Number
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your phone number" {...field} />
+                      <Input 
+                        placeholder="Enter your phone number" 
+                        {...field} 
+                        className="border-wassalni-green/30 focus-visible:ring-wassalni-green/50"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={loading}>
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-wassalni-green hover:bg-wassalni-green/90" 
+                disabled={loading}
+              >
                 {loading ? "Updating..." : "Update Profile"}
               </Button>
             </form>
           </Form>
         </CardContent>
+        
+        <CardFooter className="flex justify-center border-t pt-6">
+          <Link to="/">
+            <Button variant="outline" className="text-wassalni-green border-wassalni-green/30 hover:bg-wassalni-green/10 hover:text-wassalni-green">
+              Return to Home
+            </Button>
+          </Link>
+        </CardFooter>
       </Card>
     </div>
   );
