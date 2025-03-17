@@ -16,7 +16,7 @@ const Logo = ({ className, size = "md" }: LogoProps) => {
   return (
     <div className={cn("relative flex items-center", className)}>
       <img 
-        src="/lovable-uploads/7fa5059b-aeb4-4ec2-a753-b027e4442bc4.png" 
+        src="/lovable-uploads/0ed09104-7848-4012-8db2-6ee6006b35af.png" 
         alt="Wassalni Logo" 
         className={cn("object-contain", sizeClasses[size])}
       />
