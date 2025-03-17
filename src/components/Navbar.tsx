@@ -100,13 +100,16 @@ const Navbar = () => {
         <div className="md:hidden flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
-          {user && <UserProfile />}
-          <button
-            className="text-gray-700 focus:outline-none dark:text-gray-300"
-            onClick={toggleMenu}
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {user ? (
+            <UserProfile />
+          ) : (
+            <button
+              className="text-gray-700 focus:outline-none dark:text-gray-300"
+              onClick={toggleMenu}
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          )}
         </div>
       </div>
 
@@ -143,16 +146,20 @@ const Navbar = () => {
                 </Link>
               </li>
               {!user && (
-                <li className="flex flex-col gap-2 pt-2">
-                  <Link to="/passenger-signin" onClick={toggleMenu}>
-                    <Button variant="outlined" className="w-full">
-                      {t('nav.signIn')}
-                    </Button>
-                  </Link>
-                  <Link to="/passenger-signup" onClick={toggleMenu}>
-                    <Button className="w-full">{t('nav.signUp')}</Button>
-                  </Link>
-                </li>
+                <>
+                  <li className="pt-2">
+                    <Link to="/passenger-signin" onClick={toggleMenu} className="block w-full">
+                      <Button variant="outlined" className="w-full">
+                        {t('nav.signIn')}
+                      </Button>
+                    </Link>
+                  </li>
+                  <li className="pt-2">
+                    <Link to="/passenger-signup" onClick={toggleMenu} className="block w-full">
+                      <Button className="w-full">{t('nav.signUp')}</Button>
+                    </Link>
+                  </li>
+                </>
               )}
             </ul>
           </nav>
