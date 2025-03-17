@@ -43,3 +43,6 @@ export const useIsMobileSimple = (): boolean => {
   const { isMobile } = useIsMobile();
   return isMobile;
 };
+
+// Default export for backward compatibility
+export default useIsMobileSimple;

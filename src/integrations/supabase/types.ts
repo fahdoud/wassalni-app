@@ -269,6 +269,83 @@ export type Database = {
           },
         ]
       }
+      reservations_trajets: {
+        Row: {
+          created_at: string | null
+          id: string
+          passager_id: string
+          places_reservees: number
+          statut: string | null
+          trajet_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          passager_id: string
+          places_reservees?: number
+          statut?: string | null
+          trajet_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          passager_id?: string
+          places_reservees?: number
+          statut?: string | null
+          trajet_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_trajets_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trajets: {
+        Row: {
+          chauffeur_id: string
+          created_at: string | null
+          date_depart: string
+          destination: string
+          id: string
+          origine: string
+          places_dispo: number
+          prix: number
+          statut: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          chauffeur_id: string
+          created_at?: string | null
+          date_depart: string
+          destination: string
+          id?: string
+          origine: string
+          places_dispo?: number
+          prix: number
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          chauffeur_id?: string
+          created_at?: string | null
+          date_depart?: string
+          destination?: string
+          id?: string
+          origine?: string
+          places_dispo?: number
+          prix?: number
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       trips: {
         Row: {
           available_seats: number

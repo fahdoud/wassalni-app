@@ -1,3 +1,4 @@
+
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
@@ -8,6 +9,10 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 import { useIsMobileSimple } from "@/hooks/use-mobile";
+
+interface ToasterProps {
+  [key: string]: any;
+}
 
 export function Toaster({ ...props }: ToasterProps) {
   const isMobile = useIsMobileSimple();

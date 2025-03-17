@@ -1,3 +1,4 @@
+
 import { MapPin, Calendar, Clock, User } from "lucide-react";
 import { Ride } from "@/services/rides/types";
 import { useLanguage } from "@/contexts/LanguageContext";

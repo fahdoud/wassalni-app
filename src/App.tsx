@@ -20,7 +20,7 @@ import { Toaster } from "@/components/ui/sonner";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
 import VerifyPhonePage from "@/pages/VerifyPhonePage";
 import OnboardingPage from "@/pages/OnboardingPage";
-import useIsMobileSimple from '@/hooks/use-mobile';
+import { useIsMobileSimple } from '@/hooks/use-mobile';
 
 function App() {
   const { theme } = useTheme();
