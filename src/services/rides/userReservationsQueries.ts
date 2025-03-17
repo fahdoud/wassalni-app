@@ -45,15 +45,8 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
     console.log("Raw reservations data:", reservations);
     
     // Transform the data to match our Reservation interface
-    const formattedReservations: Reservation[] = reservations.map(res => ({
-      id: res.id,
-      trip_id: res.trip_id,
-      passenger_id: user.id,
-      seats_reserved: res.seats_reserved,
-      status: res.status as ReservationStatus,
-      created_at: res.created_at,
-      updated_at: res.created_at,
-      trip: res.trips ? {
+    const formattedReservations: Reservation[] = reservations.map(res => {
+      const trip = res.trips ? {
         id: res.trips.id,
         origin: res.trips.origin,
         destination: res.trips.destination,
@@ -61,10 +54,21 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
         price: res.trips.price,
         driver_id: res.trips.driver_id,
         profiles: {
-          full_name: res.trips.drivers?.full_name || 'Unknown Driver'
+          full_name: res.trips.drivers ? res.trips.drivers.full_name : 'Unknown Driver'
         }
-      } : undefined
-    }));
+      } : undefined;
+
+      return {
+        id: res.id,
+        trip_id: res.trip_id,
+        passenger_id: user.id,
+        seats_reserved: res.seats_reserved,
+        status: res.status as ReservationStatus,
+        created_at: res.created_at,
+        updated_at: res.created_at,
+        trip
+      };
+    });
     
     console.log("Formatted reservations:", formattedReservations);
     return formattedReservations;

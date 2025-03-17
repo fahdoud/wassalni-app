@@ -19,7 +19,7 @@ export const getRides = async (): Promise<Ride[]> => {
         price,
         available_seats,
         driver_id,
-        drivers!inner(full_name)
+        drivers:driver_id(full_name)
       `)
       .eq('status', 'active');
     
@@ -35,7 +35,7 @@ export const getRides = async (): Promise<Ride[]> => {
       // Transform the data to match our Ride interface
       const rides: Ride[] = trips.map(trip => {
         // Get driver name from drivers join or use fallback
-        const driverName = trip.drivers?.full_name || "Unknown Driver";
+        const driverName = trip.drivers ? trip.drivers.full_name : "Unknown Driver";
 
         return {
           id: trip.id,
@@ -88,7 +88,7 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
         price,
         available_seats,
         driver_id,
-        drivers!inner(full_name)
+        drivers:driver_id(full_name)
       `)
       .eq('id', rideId)
       .single();
@@ -103,7 +103,7 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
     // Transform the trip data to our Ride interface
     const ride: Ride = {
       id: trip.id,
-      driver: trip.drivers?.full_name || "Unknown Driver",
+      driver: trip.drivers ? trip.drivers.full_name : "Unknown Driver",
       from: trip.origin,
       to: trip.destination,
       date: new Date(trip.departure_time).toISOString().split('T')[0],
