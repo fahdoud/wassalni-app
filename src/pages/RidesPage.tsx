@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -21,6 +20,7 @@ const RidesPage = () => {
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [liveSeats, setLiveSeats] = useState<Record<string, number>>({});
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -100,6 +100,46 @@ const RidesPage = () => {
       }
     }
   }, [location]);
+
+  useEffect(() => {
+    if (rides.length === 0) return;
+    
+    const channels: any[] = [];
+    
+    rides.forEach(ride => {
+      if (ride.trip_id && !/^\d+$/.test(ride.id)) {
+        const channel = supabase
+          .channel(`ride-${ride.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'trips',
+              filter: `id=eq.${ride.trip_id}`
+            },
+            (payload) => {
+              console.log("Received real-time seat update:", payload);
+              if (payload.new && 'available_seats' in payload.new) {
+                setLiveSeats(prev => ({
+                  ...prev,
+                  [ride.id]: payload.new.available_seats
+                }));
+              }
+            }
+          )
+          .subscribe();
+          
+        channels.push(channel);
+      }
+    });
+    
+    return () => {
+      channels.forEach(channel => {
+        supabase.removeChannel(channel);
+      });
+    };
+  }, [rides]);
 
   const handleReserveClick = (rideId: string | number) => {
     if (!isAuthenticated) {
@@ -184,77 +224,81 @@ const RidesPage = () => {
                   <p className="text-gray-500 dark:text-gray-400">{t('rides.noRidesFound')}</p>
                 </div>
               ) : (
-                filteredRides.map((ride) => (
-                  <div 
-                    key={ride.id}
-                    className="glass-card p-6 rounded-xl flex flex-col md:flex-row justify-between items-center gap-6"
-                  >
-                    <div className="flex-grow">
-                      <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-                            {ride.driver.charAt(0)}
+                filteredRides.map((ride) => {
+                  const currentSeats = ride.id in liveSeats ? liveSeats[ride.id] : ride.seats;
+                  
+                  return (
+                    <div 
+                      key={ride.id}
+                      className="glass-card p-6 rounded-xl flex flex-col md:flex-row justify-between items-center gap-6"
+                    >
+                      <div className="flex-grow">
+                        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+                              {ride.driver.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-medium">{ride.driver}</p>
+                              <div className="flex items-center text-yellow-500 text-sm">
+                                {'★'.repeat(Math.floor(ride.rating))}
+                                <span className="text-gray-400 ml-1">{ride.rating}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">{ride.driver}</p>
-                            <div className="flex items-center text-yellow-500 text-sm">
-                              {'★'.repeat(Math.floor(ride.rating))}
-                              <span className="text-gray-400 ml-1">{ride.rating}</span>
+                          <div className="flex-grow flex flex-col md:flex-row gap-4 md:items-center">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-wassalni-green"></div>
+                              <p className="text-gray-700 dark:text-gray-300">{ride.from}</p>
+                            </div>
+                            <div className="h-px w-10 bg-gray-300 hidden md:block"></div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-wassalni-blue"></div>
+                              <p className="text-gray-700 dark:text-gray-300">{ride.to}</p>
                             </div>
                           </div>
                         </div>
-                        <div className="flex-grow flex flex-col md:flex-row gap-4 md:items-center">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-wassalni-green"></div>
-                            <p className="text-gray-700 dark:text-gray-300">{ride.from}</p>
+                        <div className="flex flex-wrap gap-4 text-sm">
+                          <div className="px-3 py-1 bg-gray-100 rounded-full dark:bg-gray-700">
+                            {new Date(ride.date).toLocaleDateString('fr-FR', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
                           </div>
-                          <div className="h-px w-10 bg-gray-300 hidden md:block"></div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-wassalni-blue"></div>
-                            <p className="text-gray-700 dark:text-gray-300">{ride.to}</p>
+                          <div className="px-3 py-1 bg-gray-100 rounded-full dark:bg-gray-700">
+                            {ride.time}
+                          </div>
+                          <div className={`px-3 py-1 rounded-full ${
+                            currentSeats > 0 
+                              ? "bg-gray-100 dark:bg-gray-700" 
+                              : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                          }`}>
+                            {currentSeats > 0 
+                              ? `${currentSeats} ${currentSeats === 1 ? t('rides.seat') : t('rides.seats')}` 
+                              : t('rides.full')}
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-4 text-sm">
-                        <div className="px-3 py-1 bg-gray-100 rounded-full dark:bg-gray-700">
-                          {new Date(ride.date).toLocaleDateString('fr-FR', {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </div>
-                        <div className="px-3 py-1 bg-gray-100 rounded-full dark:bg-gray-700">
-                          {ride.time}
-                        </div>
-                        <div className={`px-3 py-1 rounded-full ${
-                          ride.seats > 0 
-                            ? "bg-gray-100 dark:bg-gray-700" 
-                            : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                        }`}>
-                          {ride.seats > 0 
-                            ? `${ride.seats} ${ride.seats === 1 ? t('rides.seat') : t('rides.seats')}` 
-                            : t('rides.full')}
-                        </div>
+                      <div className="flex flex-col items-center md:items-end gap-4">
+                        <p className="text-2xl font-bold text-wassalni-green dark:text-wassalni-lightGreen">
+                          {ride.price} <span className="text-sm">DZD</span>
+                        </p>
+                        {currentSeats > 0 ? (
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleReserveClick(ride.id)}
+                          >
+                            {t('rides.reserve')}
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="outlined" disabled>
+                            {t('rides.full')}
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-center md:items-end gap-4">
-                      <p className="text-2xl font-bold text-wassalni-green dark:text-wassalni-lightGreen">
-                        {ride.price} <span className="text-sm">DZD</span>
-                      </p>
-                      {ride.seats > 0 ? (
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleReserveClick(ride.id)}
-                        >
-                          {t('rides.reserve')}
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="outlined" disabled>
-                          {t('rides.full')}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}

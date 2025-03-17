@@ -1,7 +1,7 @@
-
-import { MapPin, Calendar, Clock } from "lucide-react";
+import { MapPin, Calendar, Clock, User } from "lucide-react";
 import { Ride } from "@/services/rides/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect, useState } from "react";
 
 interface ReservationSidebarProps {
   ride: Ride;
@@ -11,6 +11,11 @@ interface ReservationSidebarProps {
 
 const ReservationSidebar = ({ ride, step, passengerCount }: ReservationSidebarProps) => {
   const { t } = useLanguage();
+  const [availableSeats, setAvailableSeats] = useState(ride.seats);
+
+  useEffect(() => {
+    setAvailableSeats(ride.seats);
+  }, [ride.seats]);
 
   return (
     <div className="lg:w-80">
@@ -47,11 +52,23 @@ const ReservationSidebar = ({ ride, step, passengerCount }: ReservationSidebarPr
           </div>
         </div>
         
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <Clock size={18} className="text-gray-500 shrink-0 dark:text-gray-400" />
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">{t('reservation.time')}</p>
             <p className="font-medium">{ride.time}</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3 mb-6">
+          <User size={18} className="text-gray-500 shrink-0 dark:text-gray-400" />
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('reservation.availableSeats')}</p>
+            <p className={`font-medium ${availableSeats > 0 ? '' : 'text-red-500'}`}>
+              {availableSeats > 0 
+                ? `${availableSeats} ${availableSeats === 1 ? t('rides.seat') : t('rides.seats')}`
+                : t('rides.full')}
+            </p>
           </div>
         </div>
         

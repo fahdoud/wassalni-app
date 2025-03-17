@@ -44,8 +44,13 @@ export const useReservation = (rideId: string | undefined) => {
         const fetchedRide = await getRideById(rideId);
         if (fetchedRide) {
           setRide(fetchedRide);
+          
+          // Make sure passenger count doesn't exceed available seats
           if (fetchedRide.seats < passengerCount) {
             setPassengerCount(Math.max(1, fetchedRide.seats));
+          } else if (fetchedRide.seats === 0) {
+            // If no seats available, show message
+            toast.error("This ride is fully booked");
           }
         } else {
           toast.error("Ride not found");
@@ -69,12 +74,21 @@ export const useReservation = (rideId: string | undefined) => {
     
     console.log("Setting up real-time subscription for ride:", rideId);
     
+    // Only subscribe to real-time updates for actual database trips
     if (!/^\d+$/.test(rideId)) {
       const subscription = subscribeToRideUpdates(rideId, (updatedRide) => {
         console.log("Received ride update:", updatedRide);
+        
         setRide(updatedRide);
         
+        // Auto-adjust passenger count if it exceeds available seats
         if (updatedRide.seats < passengerCount) {
+          if (updatedRide.seats <= 0) {
+            // If ride becomes fully booked during reservation process
+            if (step === 1) {
+              toast.error("This ride is now fully booked");
+            }
+          }
           setPassengerCount(Math.max(1, updatedRide.seats));
         }
       });
@@ -83,11 +97,17 @@ export const useReservation = (rideId: string | undefined) => {
         subscription.unsubscribe();
       };
     }
-  }, [rideId, ride, passengerCount]);
+  }, [rideId, ride, passengerCount, step]);
 
   // Handle reservation submission
   const handleReservation = async () => {
     if (!ride || !userId) return;
+    
+    // Check if there are still enough seats available
+    if (ride.seats < passengerCount) {
+      toast.error(`Only ${ride.seats} seats available now. Please adjust your booking.`);
+      return;
+    }
     
     setLoading(true);
     

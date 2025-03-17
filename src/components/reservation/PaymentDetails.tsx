@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Ride } from "@/services/rides/types";
 import Button from "@/components/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -23,6 +23,13 @@ const PaymentDetails = ({
 }: PaymentDetailsProps) => {
   const { t } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  
+  // Make sure passenger count doesn't exceed available seats
+  useEffect(() => {
+    if (passengerCount > ride.seats) {
+      setPassengerCount(Math.max(1, ride.seats));
+    }
+  }, [ride.seats, passengerCount, setPassengerCount]);
 
   return (
     <div className="glass-card p-8 rounded-xl mb-6">
@@ -49,6 +56,11 @@ const PaymentDetails = ({
             +
           </button>
         </div>
+        {ride.seats < passengerCount && (
+          <p className="text-sm text-red-500 mt-1">
+            {t('reservation.notEnoughSeats')}
+          </p>
+        )}
       </div>
       
       <div className="mb-8">
@@ -108,7 +120,7 @@ const PaymentDetails = ({
           className="flex-1"
           onClick={onConfirm}
           isLoading={loading}
-          disabled={loading}
+          disabled={loading || passengerCount > ride.seats}
         >
           {t('reservation.confirmReservation')}
         </Button>

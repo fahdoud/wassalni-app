@@ -3,6 +3,8 @@ import { Ride } from "@/services/rides/types";
 import { MapPin, Calendar, Clock, User } from "lucide-react";
 import Button from "@/components/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect, useState } from "react";
+import { subscribeToRideUpdates } from "@/services/rides/rideQueries";
 
 interface RideDetailsProps {
   ride: Ride;
@@ -11,6 +13,21 @@ interface RideDetailsProps {
 
 const RideDetails = ({ ride, onContinue }: RideDetailsProps) => {
   const { t } = useLanguage();
+  const [availableSeats, setAvailableSeats] = useState(ride.seats);
+
+  // Subscribe to real-time updates for available seats
+  useEffect(() => {
+    if (!ride.id) return;
+    
+    const subscription = subscribeToRideUpdates(ride.id, (updatedRide) => {
+      console.log("Real-time seat update:", updatedRide.seats);
+      setAvailableSeats(updatedRide.seats);
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [ride.id]);
 
   return (
     <div className="glass-card p-8 rounded-xl mb-6">
@@ -65,14 +82,14 @@ const RideDetails = ({ ride, onContinue }: RideDetailsProps) => {
           <span>{ride.time}</span>
         </div>
         <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
-          ride.seats > 0 
+          availableSeats > 0 
             ? "bg-gray-100 dark:bg-gray-700"
             : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
         }`}>
-          <User size={16} className={ride.seats > 0 ? "text-wassalni-green dark:text-wassalni-lightGreen" : "text-red-500 dark:text-red-400"} />
+          <User size={16} className={availableSeats > 0 ? "text-wassalni-green dark:text-wassalni-lightGreen" : "text-red-500 dark:text-red-400"} />
           <span>
-            {ride.seats > 0 
-              ? `${ride.seats} ${ride.seats === 1 ? t('rides.seat') : t('rides.seats')}`
+            {availableSeats > 0 
+              ? `${availableSeats} ${availableSeats === 1 ? t('rides.seat') : t('rides.seats')}`
               : t('rides.full')}
           </span>
         </div>
@@ -82,9 +99,9 @@ const RideDetails = ({ ride, onContinue }: RideDetailsProps) => {
         <Button 
           className="w-full"
           onClick={onContinue}
-          disabled={ride.seats <= 0}
+          disabled={availableSeats <= 0}
         >
-          {ride.seats > 0 ? t('reservation.payment') : t('rides.full')}
+          {availableSeats > 0 ? t('reservation.payment') : t('rides.full')}
         </Button>
       </div>
     </div>
