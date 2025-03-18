@@ -1,6 +1,6 @@
 
 // Google Maps API key
-export const GOOGLE_MAPS_API_KEY = "AIzaSyAShg04o1uyNHkCNwWLwrEuV7jxZ8xiIU8";
+export const GOOGLE_MAPS_API_KEY = "AIzaSyCvCVLujxpvbeM9DHqN3TqDGyVn4Egst8A";
 
 // Function to load Google Maps API script with absolute highest priority
 export const loadGoogleMapsScript = (): Promise<void> => {

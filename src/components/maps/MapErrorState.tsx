@@ -34,12 +34,12 @@ const MapErrorState: React.FC<MapErrorStateProps> = ({ error, className, onRetry
         
         {isApiKeyError ? (
           <div className="text-sm text-gray-600 dark:text-gray-300 mt-2 bg-gray-50 dark:bg-gray-700 p-3 rounded-md border border-gray-200 dark:border-gray-600">
-            <p className="font-medium mb-2">To fix this issue:</p>
+            <p className="font-medium mb-2">API key updated. If you still see this error:</p>
             <ul className="list-disc text-left pl-5 space-y-1">
-              <li>Verify your Google Maps API key is correct</li>
-              <li>Ensure you've enabled the Google Maps JavaScript API in Google Cloud Console</li>
-              <li>Make sure billing is set up for your Google Cloud project</li>
-              <li>Check that your key has the correct restrictions (domain, IP, etc.)</li>
+              <li>Check that you've enabled the Google Maps JavaScript API in Google Cloud Console</li>
+              <li>Ensure billing is set up for your Google Cloud project</li>
+              <li>Make sure your key has the correct restrictions (domain, IP, etc.)</li>
+              <li>Try refreshing the page</li>
             </ul>
           </div>
         ) : (
