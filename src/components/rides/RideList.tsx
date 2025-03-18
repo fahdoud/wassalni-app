@@ -1,31 +1,35 @@
 
-import { useLanguage } from "@/contexts/LanguageContext";
-import { Ride } from "@/services/rides/types";
 import { useNavigate } from "react-router-dom";
+import { Ride } from "@/services/rides/types";
+import { useRealTimeSeats } from "@/hooks/useRealTimeSeats";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/Button";
-import { Loader2 } from "lucide-react";
 
 interface RideListProps {
   rides: Ride[];
   loading: boolean;
-  liveSeats: Record<string, number>;
+  liveSeats?: Record<string, number>;
 }
 
 const RideList = ({ rides, loading, liveSeats }: RideListProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // Use our refactored hook instead of passing liveSeats as a prop
+  const realTimeSeats = useRealTimeSeats<Ride>(rides);
+  
+  // Merge passed liveSeats with realTimeSeats from the hook, preferring realTimeSeats
+  const mergedSeats = { ...liveSeats, ...realTimeSeats };
 
-  const handleReserveClick = (rideId: string | number) => {
+  const handleReserveClick = (rideId: string) => {
     navigate(`/reservation/${rideId}`);
-    // Set a session flag to force refresh rides when returning
+    // Store in sessionStorage that we're coming from a reservation
     sessionStorage.setItem('fromReservation', 'true');
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-wassalni-green" />
-        <span className="ml-2 text-gray-600 dark:text-gray-300">Loading rides...</span>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-wassalni-green"></div>
       </div>
     );
   }
@@ -39,11 +43,16 @@ const RideList = ({ rides, loading, liveSeats }: RideListProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6">
+    <div className="grid grid-cols-1 gap-6 mt-8">
       {rides.map((ride) => {
-        // Use live seat count from real-time updates if available, otherwise use ride.seats
-        const currentSeats = ride.id in liveSeats ? liveSeats[ride.id] : ride.seats;
+        // Use real-time seat count if available, otherwise use the original seat count
+        const availableSeats = ride.id in mergedSeats ? mergedSeats[ride.id] : ride.seats;
         
+        // Get proper text for seats (singular/plural)
+        const seatsText = availableSeats === 1 
+          ? t('rides.seat') 
+          : t('rides.seats');
+          
         return (
           <div 
             key={ride.id}
@@ -86,12 +95,12 @@ const RideList = ({ rides, loading, liveSeats }: RideListProps) => {
                   {ride.time}
                 </div>
                 <div className={`px-3 py-1 rounded-full ${
-                  currentSeats > 0 
+                  availableSeats > 0 
                     ? "bg-gray-100 dark:bg-gray-700" 
                     : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
                 }`}>
-                  {currentSeats > 0 
-                    ? `${currentSeats} ${currentSeats === 1 ? t('rides.seat') : t('rides.seats')}` 
+                  {availableSeats > 0 
+                    ? `${availableSeats} ${seatsText}` 
                     : t('rides.full')}
                 </div>
               </div>
@@ -100,15 +109,17 @@ const RideList = ({ rides, loading, liveSeats }: RideListProps) => {
               <p className="text-2xl font-bold text-wassalni-green dark:text-wassalni-lightGreen">
                 {ride.price} <span className="text-sm">DZD</span>
               </p>
-              {currentSeats > 0 ? (
+              {availableSeats > 0 ? (
                 <Button 
                   size="sm" 
                   onClick={() => handleReserveClick(ride.id)}
+                  className="relative overflow-hidden group"
                 >
-                  {t('rides.reserve')}
+                  <span className="relative z-10">{t('rides.reserve')}</span>
+                  <span className="absolute inset-0 bg-wassalni-blue scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
                 </Button>
               ) : (
-                <Button size="sm" variant="outlined" disabled>
+                <Button size="sm" variant="outlined" disabled className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700">
                   {t('rides.full')}
                 </Button>
               )}

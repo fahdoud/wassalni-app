@@ -13,7 +13,7 @@ interface TrajetListProps {
 
 const TrajetList = ({ trajets, loading }: TrajetListProps) => {
   const navigate = useNavigate();
-  const placesDispoEnTempsReel = useRealTimeSeats(trajets);
+  const placesDispoEnTempsReel = useRealTimeSeats<Trajet>(trajets);
 
   const handleReserveClick = (trajetId: string) => {
     navigate(`/reservation/${trajetId}`);
