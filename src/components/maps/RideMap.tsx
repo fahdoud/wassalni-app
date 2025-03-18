@@ -120,15 +120,17 @@ const RideMap: React.FC<RideMapProps> = ({
       setIsMapReady(true);
       
       // Add a listener to handle resize events
-      window.addEventListener('resize', () => {
+      const handleResize = () => {
         if (newMap) {
           newMap.setCenter(originLocation);
           window.google.maps.event.trigger(newMap, 'resize');
         }
-      });
+      };
+      
+      window.addEventListener('resize', handleResize);
       
       return () => {
-        window.removeEventListener('resize', () => {});
+        window.removeEventListener('resize', handleResize);
       };
     } catch (err) {
       console.error('Error initializing map:', err);
@@ -194,9 +196,9 @@ const RideMap: React.FC<RideMapProps> = ({
           map.fitBounds(bounds);
           
           // Adjust zoom if too zoomed in
-          const listener = window.google.maps.event.addListener(map, 'idle', () => {
+          const zoomListener = window.google.maps.event.addListener(map, 'idle', () => {
             if (map.getZoom() > 16) map.setZoom(16);
-            window.google.maps.event.removeListener(listener);
+            window.google.maps.event.removeListener(zoomListener);
           });
         } else {
           console.error('Directions request failed due to ' + status);

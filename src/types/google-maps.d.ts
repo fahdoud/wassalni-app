@@ -5,7 +5,14 @@ declare namespace google {
       constructor(mapDiv: Element, opts?: MapOptions);
       setCenter(latLng: LatLng | LatLngLiteral): void;
       setZoom(zoom: number): void;
+      getZoom(): number;
       setOptions(options: MapOptions): void;
+      fitBounds(bounds: LatLngBounds): void;
+    }
+
+    class LatLngBounds {
+      constructor();
+      extend(latLng: LatLng | LatLngLiteral): void;
     }
 
     class Marker {
@@ -90,6 +97,16 @@ declare namespace google {
     }
 
     type DirectionsStatus = "OK" | "NOT_FOUND" | "ZERO_RESULTS" | "MAX_WAYPOINTS_EXCEEDED" | "INVALID_REQUEST" | "OVER_QUERY_LIMIT" | "REQUEST_DENIED" | "UNKNOWN_ERROR";
+    
+    namespace event {
+      function addListener(instance: any, eventName: string, handler: Function): MapsEventListener;
+      function removeListener(listener: MapsEventListener): void;
+      function trigger(instance: any, eventName: string): void;
+    }
+
+    interface MapsEventListener {
+      remove(): void;
+    }
   }
 }
 
