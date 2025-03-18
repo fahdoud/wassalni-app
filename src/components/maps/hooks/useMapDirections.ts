@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { loadGoogleMapsScript } from '../utils/googleMapsLoader';
 
@@ -33,10 +32,8 @@ export const useMapDirections = ({
   const [isMapReady, setIsMapReady] = useState(false);
   const [mapInitialized, setMapInitialized] = useState(false);
   
-  // Reset state when retry is attempted
   useEffect(() => {
     if (retryCount > 0) {
-      console.log(`Retry attempt ${retryCount}, resetting map state`);
       setError(null);
       setIsLoaded(false);
       setIsMapReady(false);
@@ -45,7 +42,6 @@ export const useMapDirections = ({
     }
   }, [retryCount]);
   
-  // Immediately set isLoaded if Google Maps is already available
   useEffect(() => {
     if (window.google && window.google.maps) {
       console.log('Google Maps already available, setting isLoaded true immediately');
@@ -53,7 +49,6 @@ export const useMapDirections = ({
     }
   }, []);
   
-  // Load Google Maps API
   useEffect(() => {
     if (isLoaded) return; // Skip if already loaded
     
@@ -63,22 +58,14 @@ export const useMapDirections = ({
         await loadGoogleMapsScript();
         console.log('Google Maps script loaded successfully and ready to use');
         setIsLoaded(true);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error loading Google Maps:', err);
-        // Provide more specific error messages based on the error
-        if (err.message.includes('billing')) {
-          setError('Google Maps requires billing to be enabled on your Google Cloud account. Please visit the Google Cloud Console to set up billing.');
-        } else if (err.message.includes('API key')) {
-          setError('Google Maps API key error. Please check if the key is valid and properly configured in Google Cloud Console.');
-        } else {
-          setError('Failed to load Google Maps. Please check your internet connection and try again.');
-        }
+        setError('Failed to load Google Maps. The API key may need to be configured properly with billing enabled.');
       }
     };
     
     initializeMap();
     
-    // Safety timeout to detect loading failures
     const timeout = setTimeout(() => {
       if (window.google && window.google.maps && !isLoaded) {
         console.log('Forcing isLoaded after timeout');
@@ -87,12 +74,11 @@ export const useMapDirections = ({
         console.log('Map did not load after timeout');
         setError('Google Maps API did not load. Please check if the API key is valid and billing is enabled.');
       }
-    }, 5000);
+    }, 3000);
     
     return () => clearTimeout(timeout);
   }, [isLoaded, error]);
   
-  // Initialize map once Google Maps is loaded
   useEffect(() => {
     if (!isLoaded || !mapRef.current || mapInitialized || !window.google || !window.google.maps) {
       return;
@@ -121,11 +107,9 @@ export const useMapDirections = ({
       setIsMapReady(true);
       setMapInitialized(true);
       
-      // Force map resize to ensure proper rendering
       window.google.maps.event.trigger(newMap, 'resize');
       newMap.setCenter(originLocation);
       
-      // Additional resize after a short delay to ensure map displays correctly
       setTimeout(() => {
         if (newMap) {
           window.google.maps.event.trigger(newMap, 'resize');
@@ -133,7 +117,6 @@ export const useMapDirections = ({
         }
       }, 50);
       
-      // Handle window resizing
       const handleResize = () => {
         if (newMap) {
           window.google.maps.event.trigger(newMap, 'resize');
@@ -152,7 +135,6 @@ export const useMapDirections = ({
     }
   }, [isLoaded, originLocation, mapInitialized]);
   
-  // Add markers and directions once map is ready
   useEffect(() => {
     if (!map || !isMapReady || !window.google || !window.google.maps) {
       return;
@@ -160,12 +142,10 @@ export const useMapDirections = ({
     
     console.log('Adding markers and directions');
     
-    // Clear existing features
     map.data?.forEach((feature) => {
       map.data?.remove(feature);
     });
     
-    // Create origin marker
     const originMarker = new window.google.maps.Marker({
       position: originLocation,
       map,
@@ -176,7 +156,6 @@ export const useMapDirections = ({
       }
     });
     
-    // Create destination marker
     const destinationMarker = new window.google.maps.Marker({
       position: destinationLocation,
       map,
@@ -187,7 +166,6 @@ export const useMapDirections = ({
       }
     });
     
-    // Create direct path as fallback
     const directPath = new window.google.maps.Polyline({
       path: [originLocation, destinationLocation],
       geodesic: true,
@@ -197,13 +175,11 @@ export const useMapDirections = ({
       map: map
     });
     
-    // Fit bounds to show both markers
     const bounds = new window.google.maps.LatLngBounds();
     bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
     bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
     map.fitBounds(bounds);
     
-    // Try to fetch directions
     try {
       const directionsService = new window.google.maps.DirectionsService();
       const directionsRenderer = new window.google.maps.DirectionsRenderer({
