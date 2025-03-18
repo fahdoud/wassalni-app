@@ -35,7 +35,7 @@ export const getRides = async (): Promise<Ride[]> => {
           typeof trip.profiles === 'object' && 
           trip.profiles !== null &&
           'full_name' in trip.profiles &&
-          typeof trip.profiles.full_name === 'string') {
+          trip.profiles.full_name) {
         driverName = trip.profiles.full_name;
       }
       
@@ -125,7 +125,7 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
         typeof trip.profiles === 'object' && 
         trip.profiles !== null &&
         'full_name' in trip.profiles &&
-        typeof trip.profiles.full_name === 'string') {
+        trip.profiles.full_name) {
       driverName = trip.profiles.full_name;
     }
     
@@ -222,7 +222,7 @@ export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) =>
               typeof trip.profiles === 'object' && 
               trip.profiles !== null &&
               'full_name' in trip.profiles &&
-              typeof trip.profiles.full_name === 'string') {
+              trip.profiles.full_name) {
             driverName = trip.profiles.full_name;
           }
           

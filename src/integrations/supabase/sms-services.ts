@@ -52,7 +52,6 @@ export const sendSMSNotification = async (userId: string, phone: string, message
  */
 export const checkPhoneVerified = async (userId: string) => {
   try {
-    // Update to use RPC instead of direct query
     const { data, error } = await supabase.rpc('check_phone_verified', { 
       user_id: userId 
     });

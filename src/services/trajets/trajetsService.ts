@@ -38,7 +38,7 @@ export const getTrajets = async (): Promise<Trajet[]> => {
           typeof trajet.profiles === 'object' && 
           trajet.profiles !== null && 
           'full_name' in trajet.profiles && 
-          typeof trajet.profiles.full_name === 'string') {
+          trajet.profiles.full_name) {
         chauffeurName = trajet.profiles.full_name;
       }
       
@@ -117,7 +117,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
         typeof trajet.profiles === 'object' && 
         trajet.profiles !== null && 
         'full_name' in trajet.profiles && 
-        typeof trajet.profiles.full_name === 'string') {
+        trajet.profiles.full_name) {
       chauffeurName = trajet.profiles.full_name;
     }
     

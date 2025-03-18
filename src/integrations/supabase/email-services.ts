@@ -62,7 +62,6 @@ export const sendWelcomeEmail = async (userId: string, email: string, fullName: 
  */
 export const checkEmailVerified = async (userId: string) => {
   try {
-    // Update to use RPC instead of direct query
     const { data, error } = await supabase.rpc('check_email_verified', { 
       user_id: userId 
     });

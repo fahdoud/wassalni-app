@@ -1,4 +1,3 @@
-
 export type Database = {
   public: {
     Tables: {
@@ -316,6 +315,18 @@ export type Database = {
         Args: {
           p_trip_id: string;
           p_seats_count: number;
+        };
+        Returns: boolean;
+      };
+      check_email_verified: {
+        Args: {
+          user_id: string;
+        };
+        Returns: boolean;
+      };
+      check_phone_verified: {
+        Args: {
+          user_id: string;
         };
         Returns: boolean;
       };
