@@ -23,6 +23,7 @@ export type Database = {
           registration_number: string | null
           updated_at: string
           user_id: string
+          vehicle_photo_url: string | null
           verification_status: string | null
         }
         Insert: {
@@ -38,6 +39,7 @@ export type Database = {
           registration_number?: string | null
           updated_at?: string
           user_id: string
+          vehicle_photo_url?: string | null
           verification_status?: string | null
         }
         Update: {
@@ -53,6 +55,7 @@ export type Database = {
           registration_number?: string | null
           updated_at?: string
           user_id?: string
+          vehicle_photo_url?: string | null
           verification_status?: string | null
         }
         Relationships: []
@@ -264,6 +267,48 @@ export type Database = {
         }
         Relationships: []
       }
+      proposed_trips: {
+        Row: {
+          available_seats: number
+          created_at: string | null
+          departure_time: string
+          description: string | null
+          destination: string
+          driver_id: string
+          id: string
+          origin: string
+          price: number
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          available_seats?: number
+          created_at?: string | null
+          departure_time: string
+          description?: string | null
+          destination: string
+          driver_id: string
+          id?: string
+          origin: string
+          price: number
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string | null
+          departure_time?: string
+          description?: string | null
+          destination?: string
+          driver_id?: string
+          id?: string
+          origin?: string
+          price?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       reservations: {
         Row: {
           created_at: string | null
@@ -459,6 +504,30 @@ export type Database = {
           origin?: string
           price?: number
           status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      vehicle_photos: {
+        Row: {
+          created_at: string | null
+          driver_id: string
+          id: string
+          photo_url: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          driver_id: string
+          id?: string
+          photo_url: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          driver_id?: string
+          id?: string
+          photo_url?: string
           updated_at?: string | null
         }
         Relationships: []
