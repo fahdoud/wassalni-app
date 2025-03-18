@@ -17,7 +17,7 @@ export const getRides = async (): Promise<Ride[]> => {
         available_seats,
         status,
         driver_id,
-        profiles:driver_id(full_name)
+        profiles(full_name)
       `)
       .eq('status', 'active')
       .order('departure_time', { ascending: true });
@@ -31,10 +31,12 @@ export const getRides = async (): Promise<Ride[]> => {
       // Safe extraction of driver name with type checking
       let driverName = 'Unknown Driver';
       
-      // Check and access profiles safely with optional chaining and nullish coalescing
-      const profileName = trip.profiles?.full_name;
-      if (profileName) {
-        driverName = profileName;
+      // Access profiles data safely with optional chaining and nullish coalescing
+      if (trip.profiles && typeof trip.profiles === 'object' && 'full_name' in trip.profiles) {
+        const profileName = trip.profiles.full_name;
+        if (profileName) {
+          driverName = profileName as string;
+        }
       }
       
       // Format date and time
@@ -106,7 +108,7 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
         available_seats,
         status,
         driver_id,
-        profiles:driver_id(full_name)
+        profiles(full_name)
       `)
       .eq('id', rideId)
       .single();
@@ -119,10 +121,12 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
     // Safe extraction of driver name with type checking
     let driverName = 'Unknown Driver';
     
-    // Check and access profiles safely with optional chaining and nullish coalescing
-    const profileName = trip.profiles?.full_name;
-    if (profileName) {
-      driverName = profileName;
+    // Access profiles data safely with optional chaining and nullish coalescing
+    if (trip.profiles && typeof trip.profiles === 'object' && 'full_name' in trip.profiles) {
+      const profileName = trip.profiles.full_name;
+      if (profileName) {
+        driverName = profileName as string;
+      }
     }
     
     // Format date and time
@@ -201,7 +205,7 @@ export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) =>
               available_seats,
               status,
               driver_id,
-              profiles:driver_id(full_name)
+              profiles(full_name)
             `)
             .eq('id', rideId)
             .single();
@@ -214,10 +218,12 @@ export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) =>
           // Safe extraction of driver name with type checking
           let driverName = 'Unknown Driver';
           
-          // Check and access profiles safely with optional chaining and nullish coalescing
-          const profileName = trip.profiles?.full_name;
-          if (profileName) {
-            driverName = profileName;
+          // Access profiles data safely with optional chaining and nullish coalescing
+          if (trip.profiles && typeof trip.profiles === 'object' && 'full_name' in trip.profiles) {
+            const profileName = trip.profiles.full_name;
+            if (profileName) {
+              driverName = profileName as string;
+            }
           }
           
           // Format date and time

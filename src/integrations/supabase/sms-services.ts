@@ -52,18 +52,16 @@ export const sendSMSNotification = async (userId: string, phone: string, message
  */
 export const checkPhoneVerified = async (userId: string) => {
   try {
-    // Since we can't use RPC functions that aren't defined in database-types.ts,
-    // let's use a workaround to query the profiles table for now
+    // Using direct table query instead of RPC
     const { data } = await supabase
-      .from('profiles')
-      .select('id')
+      .from('phone_verification')
+      .select('verified')
       .eq('id', userId)
       .single();
       
-    // For development purposes, just return true
-    // In production, this should be implemented with proper verification
+    // Return the verification status if available, otherwise default to true for development
     console.log("Phone verification check for:", userId);
-    return true;
+    return data?.verified ?? true;
   } catch (error) {
     console.error("Error checking phone verification status:", error);
     return false;

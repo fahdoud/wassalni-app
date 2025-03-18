@@ -17,7 +17,7 @@ export const getTrajets = async (): Promise<Trajet[]> => {
         statut,
         created_at,
         chauffeur_id,
-        profiles:chauffeur_id(full_name)
+        profiles(full_name)
       `)
       .eq('statut', 'actif')
       .order('date_depart', { ascending: true });
@@ -32,10 +32,12 @@ export const getTrajets = async (): Promise<Trajet[]> => {
       // Use optional chaining for safer access
       let chauffeurName = 'Chauffeur Inconnu';
       
-      // Check if profile name exists using optional chaining
-      const profileName = trajet.profiles?.full_name;
-      if (profileName) {
-        chauffeurName = profileName;
+      // Access profiles data safely with optional chaining and nullish coalescing
+      if (trajet.profiles && typeof trajet.profiles === 'object' && 'full_name' in trajet.profiles) {
+        const profileName = trajet.profiles.full_name;
+        if (profileName) {
+          chauffeurName = profileName as string;
+        }
       }
       
       // Format date and time
@@ -95,7 +97,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
         statut,
         created_at,
         chauffeur_id,
-        profiles:chauffeur_id(full_name)
+        profiles(full_name)
       `)
       .eq('id', trajetId)
       .single();
@@ -108,10 +110,12 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
     // Use optional chaining for safer access
     let chauffeurName = 'Chauffeur Inconnu';
       
-    // Check if profile name exists using optional chaining
-    const profileName = trajet.profiles?.full_name;
-    if (profileName) {
-      chauffeurName = profileName;
+    // Access profiles data safely with optional chaining and nullish coalescing
+    if (trajet.profiles && typeof trajet.profiles === 'object' && 'full_name' in trajet.profiles) {
+      const profileName = trajet.profiles.full_name;
+      if (profileName) {
+        chauffeurName = profileName as string;
+      }
     }
     
     // Format date and time
