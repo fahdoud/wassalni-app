@@ -14,9 +14,14 @@ declare namespace google {
     class Data {
       forEach(callback: (feature: Data.Feature) => void): void;
       remove(feature: Data.Feature): void;
-      
-      namespace Feature {
-        // Feature namespace content
+    }
+
+    // Define the Data.Feature interface properly
+    namespace Data {
+      interface Feature {
+        // Feature properties go here
+        getProperty(name: string): any;
+        setProperty(name: string, value: any): void;
       }
     }
 
