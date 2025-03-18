@@ -31,13 +31,14 @@ export const useMapDirections = ({
   const [isMapReady, setIsMapReady] = useState(false);
   const [mapInitialized, setMapInitialized] = useState(false);
   
-  // Load Google Maps API with higher priority
+  // Charge l'API Google Maps avec priorité élevée
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        console.log('Starting Google Maps initialization');
+        console.log('Starting Google Maps initialization with high priority');
+        // Utilise la méthode améliorée pour charger l'API Google Maps
         await loadGoogleMapsScript();
-        console.log('Google Maps script loaded successfully');
+        console.log('Google Maps script loaded successfully and ready to use');
         setIsLoaded(true);
       } catch (err) {
         console.error('Error loading Google Maps:', err);
@@ -45,10 +46,11 @@ export const useMapDirections = ({
       }
     };
     
+    // Démarre immédiatement le chargement
     initializeMap();
   }, []);
   
-  // Initialize map once Google Maps is loaded
+  // Initialise la carte une fois Google Maps chargé
   useEffect(() => {
     if (!isLoaded || !mapRef.current || mapInitialized || !window.google || !window.google.maps) {
       return;
@@ -63,6 +65,7 @@ export const useMapDirections = ({
         fullscreenControl: true,
         streetViewControl: false,
         zoomControl: true,
+        gestureHandling: 'cooperative',
         styles: [
           {
             featureType: "poi",
@@ -76,11 +79,11 @@ export const useMapDirections = ({
       setIsMapReady(true);
       setMapInitialized(true);
       
-      // Force map resize immediately to ensure it renders properly
+      // Force le redimensionnement immédiat de la carte pour s'assurer qu'elle se dessine correctement
       window.google.maps.event.trigger(newMap, 'resize');
       newMap.setCenter(originLocation);
       
-      // Add a listener to handle resize events
+      // Ajoute un écouteur pour gérer les événements de redimensionnement
       const handleResize = () => {
         if (newMap) {
           newMap.setCenter(originLocation);
@@ -99,7 +102,7 @@ export const useMapDirections = ({
     }
   }, [isLoaded, originLocation, mapInitialized]);
   
-  // Add markers and directions once map is initialized
+  // Ajoute des marqueurs et des directions une fois la carte initialisée
   useEffect(() => {
     if (!map || !isMapReady || !window.google || !window.google.maps) {
       console.log('Map not ready for adding markers and directions');
@@ -108,34 +111,34 @@ export const useMapDirections = ({
     
     console.log('Adding markers and directions');
     
-    // Clear any existing markers
+    // Efface les marqueurs existants
     map.data?.forEach((feature) => {
       map.data?.remove(feature);
     });
     
-    // Create marker for origin
+    // Crée un marqueur pour l'origine
     const originMarker = new window.google.maps.Marker({
       position: originLocation,
       map,
-      title: 'Pick-up Location',
+      title: 'Point de ramassage',
       icon: {
         url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
         scaledSize: new window.google.maps.Size(40, 40)
       }
     });
     
-    // Create marker for destination
+    // Crée un marqueur pour la destination
     const destinationMarker = new window.google.maps.Marker({
       position: destinationLocation,
       map,
-      title: 'Drop-off Location',
+      title: 'Point de dépose',
       icon: {
         url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
         scaledSize: new window.google.maps.Size(40, 40)
       }
     });
     
-    // Create DirectionsService and DirectionsRenderer
+    // Crée DirectionsService et DirectionsRenderer
     const directionsService = new window.google.maps.DirectionsService();
     const directionsRenderer = new window.google.maps.DirectionsRenderer({
       map,
@@ -147,7 +150,7 @@ export const useMapDirections = ({
       }
     });
     
-    // Request directions
+    // Demande d'itinéraire
     directionsService.route(
       {
         origin: originLocation,
@@ -159,13 +162,13 @@ export const useMapDirections = ({
           console.log('Directions fetched successfully');
           directionsRenderer.setDirections(response);
           
-          // Fit bounds to include both origin and destination
+          // Ajuste les limites pour inclure à la fois l'origine et la destination
           const bounds = new window.google.maps.LatLngBounds();
           bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
           bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
           map.fitBounds(bounds);
           
-          // Adjust zoom if too zoomed in
+          // Ajuste le zoom s'il est trop zoomé
           const zoomListener = window.google.maps.event.addListener(map, 'idle', () => {
             if (map.getZoom() > 16) map.setZoom(16);
             window.google.maps.event.removeListener(zoomListener);
@@ -173,7 +176,7 @@ export const useMapDirections = ({
         } else {
           console.error('Directions request failed due to ' + status);
           
-          // Fallback: just fit bounds to markers
+          // Fallback: ajuste les limites aux marqueurs
           const bounds = new window.google.maps.LatLngBounds();
           bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
           bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
@@ -182,7 +185,7 @@ export const useMapDirections = ({
       }
     );
     
-    // Clean up
+    // Nettoyage
     return () => {
       originMarker.setMap(null);
       destinationMarker.setMap(null);

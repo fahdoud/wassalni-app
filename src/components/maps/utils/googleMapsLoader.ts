@@ -15,17 +15,17 @@ export const loadGoogleMapsScript = (): Promise<void> => {
     console.log('Loading Google Maps API script');
     const script = document.createElement('script');
     script.id = 'google-maps-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMapCallback`;
     script.async = true;
     script.defer = true;
     
     // Set high priority loading
     script.setAttribute('importance', 'high');
     
-    script.onload = () => {
-      console.log('Google Maps API loaded successfully');
-      // Small timeout to ensure API is fully initialized
-      setTimeout(() => resolve(), 100);
+    // Define global callback
+    window.initMapCallback = function() {
+      console.log('Google Maps API loaded successfully via callback');
+      resolve();
     };
     
     script.onerror = (e) => {
@@ -36,3 +36,25 @@ export const loadGoogleMapsScript = (): Promise<void> => {
     document.head.appendChild(script);
   });
 };
+
+// Preload Google Maps
+export const preloadGoogleMaps = () => {
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'script';
+  link.href = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+  document.head.appendChild(link);
+  
+  // Start loading script after a small delay
+  setTimeout(() => {
+    loadGoogleMapsScript().catch(err => console.error('Preload error:', err));
+  }, 500);
+};
+
+// Declare the global initMapCallback
+declare global {
+  interface Window {
+    initMapCallback: () => void;
+    google: any;
+  }
+}

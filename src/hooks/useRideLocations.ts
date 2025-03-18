@@ -25,6 +25,16 @@ export const useRideLocations = (ride: Ride | null) => {
     };
   }, []);
 
+  // Set default locations immediately so they're available when needed
+  useEffect(() => {
+    // Définir des coordonnées par défaut de Constantine immédiatement
+    const defaultLocations = {
+      origin: { lat: 36.365, lng: 6.614 },
+      destination: { lat: 36.365, lng: 6.624 }
+    };
+    setRideLocations(defaultLocations);
+  }, []);
+
   useEffect(() => {
     if (ride) {
       // Get the predefined Constantine locations
@@ -33,8 +43,8 @@ export const useRideLocations = (ride: Ride | null) => {
       // Try to find locations by name, fallback to defaults
       const origin = constantineLocations[ride.from] || constantineLocations["Constantine"];
       const destination = constantineLocations[ride.to] || {
-        lat: origin.lat + Math.random() * 0.1,
-        lng: origin.lng + Math.random() * 0.1
+        lat: origin.lat + 0.05,
+        lng: origin.lng + 0.05
       };
       
       console.log("Setting ride locations:", { origin, destination });

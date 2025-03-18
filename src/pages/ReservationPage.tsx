@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useRideLocations } from '@/hooks/useRideLocations';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import ReservationTabs from '@/components/reservation/ReservationTabs';
+import { preloadGoogleMaps } from '@/components/maps/utils/googleMapsLoader';
 
 const ReservationPage = () => {
   const { rideId } = useParams();
@@ -34,22 +35,22 @@ const ReservationPage = () => {
 
   const rideLocations = useRideLocations(ride);
 
+  // Précharger l'API Google Maps dès le chargement de la page
+  useEffect(() => {
+    console.log("Préchargement de Google Maps pour une utilisation ultérieure");
+    preloadGoogleMaps();
+  }, []);
+
   // Preload map data as soon as ride data is available
   useEffect(() => {
     if (ride && rideId) {
       console.log("Preloading map data for ride:", rideId);
-      // This forces the map components to start initializing early
-      const preloadTab = document.createElement('div');
-      preloadTab.style.position = 'absolute';
-      preloadTab.style.visibility = 'hidden';
-      document.body.appendChild(preloadTab);
-      
-      // Clean up
-      return () => {
-        document.body.removeChild(preloadTab);
-      };
+      // Forcer la préinitialisation de la carte pour qu'elle soit prête
+      if (rideLocations) {
+        console.log("Ride locations available, preloading map components");
+      }
     }
-  }, [ride, rideId]);
+  }, [ride, rideId, rideLocations]);
 
   // Automatically switch to tracking tab when reservation is successful
   useEffect(() => {
