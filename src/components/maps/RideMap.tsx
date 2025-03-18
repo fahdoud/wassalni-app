@@ -68,7 +68,7 @@ const RideMap: React.FC<RideMapProps> = ({
       if (!document.getElementById('google-maps-script')) {
         const script = document.createElement('script');
         script.id = 'google-maps-script';
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
         script.async = true;
         script.defer = true;
         
@@ -124,7 +124,7 @@ const RideMap: React.FC<RideMapProps> = ({
       const handleResize = () => {
         if (newMap) {
           newMap.setCenter(originLocation);
-          window.google.maps.event.trigger(newMap, 'resize');
+          google.maps.event.trigger(newMap, 'resize');
         }
       };
       
@@ -197,9 +197,9 @@ const RideMap: React.FC<RideMapProps> = ({
           map.fitBounds(bounds);
           
           // Adjust zoom if too zoomed in
-          const zoomListener = window.google.maps.event.addListener(map, 'idle', () => {
+          const zoomListener = google.maps.event.addListener(map, 'idle', () => {
             if (map.getZoom() > 16) map.setZoom(16);
-            window.google.maps.event.removeListener(zoomListener);
+            google.maps.event.removeListener(zoomListener);
           });
         } else {
           console.error('Directions request failed due to ' + status);

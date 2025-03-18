@@ -174,6 +174,7 @@ const ReservationPage = () => {
                   <PaymentDetails 
                     price={price} 
                     seats={seats} 
+                    setPassengerCount={setSeats}
                     onSubmit={makeReservation} 
                     error={reservationError}
                     isAuthenticated={isAuthenticated}
@@ -248,14 +249,14 @@ const ReservationPage = () => {
                           {rideLocations && (
                             <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                               <div className="space-y-1">
-                                <p className="font-medium text-gray-600 dark:text-gray-300">Pick-up</p>
-                                <p>{ride?.from}</p>
+                                <p className="font-medium text-gray-600 dark:text-gray-300">{t('reservation.pickup')}</p>
+                                <p className="whitespace-normal break-words">{ride?.from}</p>
                                 <p className="text-xs text-gray-500">{ride?.time}</p>
                               </div>
                               <div className="space-y-1">
-                                <p className="font-medium text-gray-600 dark:text-gray-300">Drop-off</p>
-                                <p>{ride?.to}</p>
-                                <p className="text-xs text-gray-500">Estimated arrival</p>
+                                <p className="font-medium text-gray-600 dark:text-gray-300">{t('reservation.dropoff')}</p>
+                                <p className="whitespace-normal break-words">{ride?.to}</p>
+                                <p className="text-xs text-gray-500">{t('reservation.estimatedArrival')}</p>
                               </div>
                             </div>
                           )}
