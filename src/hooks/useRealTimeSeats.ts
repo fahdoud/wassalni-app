@@ -104,9 +104,11 @@ export const useRealTimeSeats = <T extends SeatTrackable>(items: T[]) => {
                 console.log(`Réservation de ${seatsReserved} places pour le ${isTrajet ? 'trajet' : 'ride'} ${item.id}`);
                 
                 setSeatsAvailable(prev => {
+                  const currentItem = item;
+                  // Safely access the seat count based on item type
                   const currentSeats = prev[item.id] || (isTrajet 
-                    ? (item as Trajet).places_dispo 
-                    : (item as Ride).seats);
+                    ? (currentItem as unknown as Trajet).places_dispo ?? 0
+                    : (currentItem as unknown as Ride).seats ?? 0);
                     
                   const newSeats = Math.max(0, currentSeats - seatsReserved);
                   console.log(`Mise à jour des places: ${currentSeats} -> ${newSeats}`);
