@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { MapPin, Calendar, Clock, User } from "lucide-react";
 import { Trajet } from "@/services/trajets/types";
@@ -23,12 +22,15 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
       setIsAuthenticated(!!data.user);
+      console.log("Auth status in TrajetList:", !!data.user);
     };
     
     checkAuth();
     
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      setIsAuthenticated(event === 'SIGNED_IN');
+      const isAuthed = event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED';
+      console.log("Auth state changed in TrajetList:", event, isAuthed);
+      setIsAuthenticated(isAuthed);
     });
     
     return () => {
@@ -77,14 +79,15 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
   }, [trajets]);
 
   const handleReserveClick = (trajetId: string) => {
-    // Si l'utilisateur est authentifié, rediriger directement vers la page de réservation
+    console.log("Reserve clicked, auth status:", isAuthenticated);
+    
     if (isAuthenticated) {
+      console.log("User is authenticated, navigating to reservation page");
       navigate(`/reservation/${trajetId}`);
-      sessionStorage.removeItem('fromReservation');
       return;
     }
     
-    // Si l'utilisateur n'est pas authentifié, afficher un message et rediriger vers la connexion
+    console.log("User is not authenticated, redirecting to login page");
     toast.error(t('auth.loginRequired') || "Veuillez vous connecter pour faire une réservation");
     navigate("/passenger-signin", { 
       state: { returnTo: `/reservation/${trajetId}` } 

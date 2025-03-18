@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -40,7 +39,9 @@ const ReservationPage = () => {
   useEffect(() => {
     const fetchUser = async () => {
       setCheckingAuth(true);
+      console.log("Fetching user in ReservationPage");
       const { data: { user } } = await supabase.auth.getUser();
+      console.log("User data in ReservationPage:", user ? "User found" : "No user");
       setUser(user);
       
       if (user) {
@@ -62,10 +63,13 @@ const ReservationPage = () => {
   useEffect(() => {
     // Only redirect if we've completed checking auth status and the user is not authenticated
     if (!checkingAuth && !isLoading && !isAuthenticated && rideId) {
+      console.log("Not authenticated, redirecting to login page");
       toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
       navigate("/passenger-signin", { 
         state: { returnTo: `/reservation/${rideId}` } 
       });
+    } else {
+      console.log("Auth status in redirect check:", { checkingAuth, isLoading, isAuthenticated });
     }
   }, [checkingAuth, isLoading, isAuthenticated, rideId, navigate, t]);
 

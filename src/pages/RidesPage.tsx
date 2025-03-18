@@ -28,12 +28,15 @@ const RidesPage = () => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
       setIsAuthenticated(!!data.user);
+      console.log("Auth status in RidesPage:", !!data.user);
     };
     
     checkAuth();
     
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      setIsAuthenticated(event === 'SIGNED_IN');
+      const isAuthed = event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED';
+      console.log("Auth state changed in RidesPage:", event, isAuthed);
+      setIsAuthenticated(isAuthed);
     });
     
     return () => {
@@ -142,13 +145,16 @@ const RidesPage = () => {
   }, [rides]);
 
   const handleReserveClick = (rideId: string | number) => {
+    console.log("Reserve clicked, auth status:", isAuthenticated);
+    
     if (isAuthenticated) {
+      console.log("User is authenticated, navigating to reservation page");
       navigate(`/reservation/${rideId}`);
-      sessionStorage.removeItem('fromReservation');
       return;
     }
     
-    toast.error(t('auth.loginRequired') || "Veuillez vous connecter pour faire une réservation");
+    console.log("User is not authenticated, redirecting to login page");
+    toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
     navigate("/passenger-signin", { 
       state: { returnTo: `/reservation/${rideId}` } 
     });
