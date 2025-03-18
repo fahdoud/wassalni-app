@@ -8,14 +8,16 @@ declare namespace google {
       getZoom(): number;
       setOptions(options: MapOptions): void;
       fitBounds(bounds: LatLngBounds | LatLngBoundsLiteral): void;
-      data?: Data;
+      data: Data;
     }
 
     class Data {
       forEach(callback: (feature: Data.Feature) => void): void;
       remove(feature: Data.Feature): void;
       
-      namespace Feature {}
+      namespace Feature {
+        // Feature namespace content
+      }
     }
 
     class LatLngBounds {
