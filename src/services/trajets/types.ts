@@ -7,11 +7,12 @@ export interface Trajet {
   date: string;
   heure: string;
   prix: number;
+  places: number;
   places_dispo: number;
   note: number;
   chauffeur_id?: string;
   est_mock?: boolean;
-  trip_id?: string; // Add the trip_id property as optional
+  trip_id?: string;
 }
 
 export type StatutReservation = 'en_attente' | 'confirmée' | 'annulée' | 'terminée' | 'mock';
@@ -23,7 +24,11 @@ export interface ReservationTrajet {
   places_reservees: number;
   statut: StatutReservation;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
+  origine?: string;
+  destination?: string;
+  prix?: number;
+  date_reservation?: string;
   trajet?: {
     id: string;
     origine: string;

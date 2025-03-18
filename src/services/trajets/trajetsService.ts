@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Trajet, ReservationTrajet } from "./types";
 import { toast } from "sonner";
@@ -53,6 +54,7 @@ export const getTrajets = async (): Promise<Trajet[]> => {
         heure: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         prix: trajet.prix,
         places: trajet.places_dispo,
+        places_dispo: trajet.places_dispo,
         note: 4, // Default rating
         trajet_id: trajet.id
       };
@@ -77,8 +79,9 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
         heure: "10:00",
         prix: 500,
         places: 4,
+        places_dispo: 4,
         note: 4.5,
-        is_mock: true
+        est_mock: true
       };
     }
     
@@ -131,6 +134,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
       heure: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       prix: trajet.prix,
       places: trajet.places_dispo,
+      places_dispo: trajet.places_dispo,
       note: 4, // Default rating
       trajet_id: trajet.id
     };
@@ -148,6 +152,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
       heure: "",
       prix: 0,
       places: 0,
+      places_dispo: 0,
       note: 0,
     };
   }
@@ -155,25 +160,41 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
 
 export const bookTrajet = async (trajetId: string, userId: string, seats: number): Promise<boolean> => {
   try {
+    // Get the trajet to book
     const trajet = await getTrajetById(trajetId);
     
     // Check if trajet exists and has available seats
-    if (!trajet || trajet.places < seats) {
+    if (!trajet || trajet.places_dispo < seats) {
       toast.error("Pas assez de places disponibles");
       return false;
     }
     
-    // Use the reservations table instead of a non-existent reservations_trajets table
+    // First update the trajets table to reduce available seats
+    if (!/^\d+$/.test(trajetId)) {
+      // Only update real trajets, not mock ones
+      const { error: updateError } = await supabase
+        .from('trajets')
+        .update({ places_dispo: trajet.places_dispo - seats })
+        .eq('id', trajetId);
+        
+      if (updateError) {
+        console.error("Error updating trajet places_dispo:", updateError);
+        toast.error("Erreur lors de la mise à jour des places disponibles");
+        return false;
+      }
+    }
+    
+    // Then create a reservation record
     const { data, error } = await supabase
       .from('reservations')
       .insert({
-        trip_id: trajetId,  // Use trip_id for trajet_id
+        trip_id: trajetId,
         passenger_id: userId,
         seats_reserved: seats,
-        status: 'pending',
+        status: 'confirmée',
         origin: trajet.origine,
         destination: trajet.destination,
-        price: trajet.prix,
+        price: trajet.prix * seats,
         reservation_date: new Date().toISOString()
       });
     
