@@ -18,7 +18,7 @@ export const getMockRides = (): Ride[] => {
     },
     {
       id: "2",
-      driver: "Sara B.",
+      driver: "Samir B.",  // Changed from Sara B. to Samir B.
       from: "City Center",
       to: "El Khroub",
       date: "2023-06-24",
@@ -42,7 +42,7 @@ export const getMockRides = (): Ride[] => {
     },
     {
       id: "4",
-      driver: "Fatima Z.",
+      driver: "Fares Z.",  // Changed from Fatima Z. to Fares Z.
       from: "Zighoud Youcef",
       to: "Ain Abid",
       date: "2023-06-24",
