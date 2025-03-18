@@ -10,8 +10,9 @@ import LoadingState from '@/components/reservation/LoadingState';
 import { useReservation } from '@/hooks/useReservation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Car, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ChatInterface from '@/components/chat/ChatInterface';
 import RideMap from '@/components/maps/RideMap';
 
@@ -54,6 +55,7 @@ const ReservationPage = () => {
         "El Khroub": { lat: 36.263, lng: 6.697 },
         "Hamma Bouziane": { lat: 36.412, lng: 6.599 },
         "Zighoud Youcef": { lat: 36.531, lng: 6.709 },
+        "City Center": { lat: 36.365, lng: 6.614 },
         // Default to center of Constantine
         "Constantine": { lat: 36.365, lng: 6.614 }
       };
@@ -200,38 +202,65 @@ const ReservationPage = () => {
                 {reservationSuccess && (
                   <TabsContent value="tracking">
                     <div className="space-y-6">
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">
-                          {t('reservation.liveTracking')}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-300 mb-4">
-                          {t('reservation.trackingDescription')}
-                        </p>
-                      </div>
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Car className="h-5 w-5 text-wassalni-green" />
+                            {t('reservation.liveTracking')}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                            {t('reservation.trackingDescription')}
+                          </p>
+                          
+                          {rideLocations && (
+                            <RideMap 
+                              rideId={rideId || ''} 
+                              originLocation={rideLocations.origin}
+                              destinationLocation={rideLocations.destination}
+                            />
+                          )}
+                        </CardContent>
+                      </Card>
                       
-                      {rideLocations && (
-                        <RideMap 
-                          rideId={rideId || ''} 
-                          originLocation={rideLocations.origin}
-                          destinationLocation={rideLocations.destination}
-                        />
-                      )}
-                      
-                      <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700">
-                        <h4 className="font-medium mb-2">{t('reservation.driverInfo')}</h4>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-wassalni-green flex items-center justify-center text-white">
-                            {ride?.driver.charAt(0)}
-                          </div>
-                          <div>
-                            <p className="font-medium">{ride?.driver}</p>
-                            <div className="flex items-center text-yellow-500 text-sm">
-                              {'★'.repeat(Math.floor(ride?.rating || 0))}
-                              <span className="text-gray-400 ml-1">{ride?.rating}</span>
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <MapPin className="h-5 w-5 text-wassalni-green" />
+                            {t('reservation.driverInfo')}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-wassalni-green flex items-center justify-center text-white">
+                              {ride?.driver.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-medium">{ride?.driver}</p>
+                              <div className="flex items-center text-yellow-500 text-sm">
+                                {'★'.repeat(Math.floor(ride?.rating || 0))}
+                                <span className="text-gray-400 ml-1">{ride?.rating}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
+                          
+                          {rideLocations && (
+                            <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                              <div className="space-y-1">
+                                <p className="font-medium text-gray-600 dark:text-gray-300">Pick-up</p>
+                                <p>{ride?.from}</p>
+                                <p className="text-xs text-gray-500">{ride?.time}</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="font-medium text-gray-600 dark:text-gray-300">Drop-off</p>
+                                <p>{ride?.to}</p>
+                                <p className="text-xs text-gray-500">Estimated arrival</p>
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
                     </div>
                   </TabsContent>
                 )}
