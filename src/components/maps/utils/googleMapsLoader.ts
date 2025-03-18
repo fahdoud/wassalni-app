@@ -51,10 +51,5 @@ export const preloadGoogleMaps = () => {
   }, 500);
 };
 
-// Declare the global initMapCallback
-declare global {
-  interface Window {
-    initMapCallback: () => void;
-    google: any;
-  }
-}
+// Note: We don't need to declare the Window interface here
+// It is now properly declared in src/types/google-maps.d.ts

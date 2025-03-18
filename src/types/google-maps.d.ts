@@ -62,6 +62,7 @@ declare namespace google {
       fullscreenControl?: boolean;
       streetViewControl?: boolean;
       zoomControl?: boolean;
+      gestureHandling?: 'cooperative' | 'greedy' | 'none' | 'auto'; // Add this missing property
       styles?: any[];
     }
 
@@ -242,7 +243,9 @@ declare namespace google {
   }
 }
 
+// Fix the window interface to avoid conflicts
 interface Window {
   google: typeof google;
   initMap?: () => void;
+  initMapCallback?: () => void;
 }
