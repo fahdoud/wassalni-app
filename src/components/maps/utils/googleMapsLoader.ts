@@ -52,6 +52,27 @@ export const loadGoogleMapsScript = (): Promise<void> => {
       reject(new Error('Failed to load Google Maps API'));
     };
     
+    // Handle API key errors
+    window.gm_authFailure = function() {
+      console.error('Google Maps authentication failed - your API key may be invalid, disabled, or missing required billing information');
+      const mapElements = document.querySelectorAll('[class*="map"]');
+      mapElements.forEach(element => {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'p-4 bg-red-50 border border-red-300 rounded-lg text-center';
+        errorDiv.innerHTML = `
+          <div class="text-red-500 font-bold mb-2">Google Maps Error</div>
+          <p class="text-sm text-gray-700">API key issue detected. Please check:</p>
+          <ul class="text-xs text-left text-gray-600 mt-2 list-disc pl-5">
+            <li>API key is valid</li>
+            <li>Google Maps JavaScript API is enabled</li>
+            <li>Billing is enabled on your Google Cloud account</li>
+            <li>Check browser console for specific errors</li>
+          </ul>
+        `;
+        element.appendChild(errorDiv);
+      });
+    };
+    
     // Insert at the beginning of head for highest priority
     document.head.insertBefore(script, document.head.firstChild);
   });
@@ -85,6 +106,3 @@ export const preloadGoogleMaps = () => {
   // 4. Start loading script immediately
   loadGoogleMapsScript().catch(err => console.error('Preload error:', err));
 };
-
-// Note: We don't need to declare the Window interface here
-// It is now properly declared in src/types/google-maps.d.ts

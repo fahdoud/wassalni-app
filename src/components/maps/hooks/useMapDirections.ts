@@ -9,6 +9,7 @@ interface Location {
 interface UseMapDirectionsProps {
   originLocation: Location;
   destinationLocation: Location;
+  retryCount?: number;
 }
 
 interface UseMapDirectionsReturn {
@@ -21,7 +22,8 @@ interface UseMapDirectionsReturn {
 
 export const useMapDirections = ({ 
   originLocation, 
-  destinationLocation 
+  destinationLocation,
+  retryCount = 0
 }: UseMapDirectionsProps): UseMapDirectionsReturn => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -29,6 +31,16 @@ export const useMapDirections = ({
   const [error, setError] = useState<string | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [mapInitialized, setMapInitialized] = useState(false);
+  
+  useEffect(() => {
+    if (retryCount > 0) {
+      setError(null);
+      setIsLoaded(false);
+      setIsMapReady(false);
+      setMapInitialized(false);
+      setMap(null);
+    }
+  }, [retryCount]);
   
   useEffect(() => {
     if (window.google && window.google.maps) {
@@ -48,7 +60,7 @@ export const useMapDirections = ({
         setIsLoaded(true);
       } catch (err) {
         console.error('Error loading Google Maps:', err);
-        setError('Failed to load Google Maps. Please refresh the page.');
+        setError('Failed to load Google Maps. The API key may need to be configured properly with billing enabled.');
       }
     };
     
@@ -58,11 +70,14 @@ export const useMapDirections = ({
       if (window.google && window.google.maps && !isLoaded) {
         console.log('Forcing isLoaded after timeout');
         setIsLoaded(true);
+      } else if (!window.google?.maps && !error) {
+        console.log('Map did not load after timeout');
+        setError('Google Maps API did not load. Please check if the API key is valid and billing is enabled.');
       }
-    }, 2000);
+    }, 3000);
     
     return () => clearTimeout(timeout);
-  }, [isLoaded]);
+  }, [isLoaded, error]);
   
   useEffect(() => {
     if (!isLoaded || !mapRef.current || mapInitialized || !window.google || !window.google.maps) {
@@ -116,7 +131,7 @@ export const useMapDirections = ({
       };
     } catch (err) {
       console.error('Error initializing map:', err);
-      setError('Failed to initialize map. Please try again later.');
+      setError('Failed to initialize map. Please verify that your Google Cloud billing account is properly set up.');
     }
   }, [isLoaded, originLocation, mapInitialized]);
   
@@ -165,48 +180,55 @@ export const useMapDirections = ({
     bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
     map.fitBounds(bounds);
     
-    const directionsService = new window.google.maps.DirectionsService();
-    const directionsRenderer = new window.google.maps.DirectionsRenderer({
-      map,
-      suppressMarkers: true,
-      polylineOptions: {
-        strokeColor: '#4CAF50',
-        strokeOpacity: 0.8,
-        strokeWeight: 5
-      }
-    });
-    
-    directionsService.route(
-      {
-        origin: originLocation,
-        destination: destinationLocation,
-        travelMode: window.google.maps.TravelMode.DRIVING
-      },
-      (response, status) => {
-        if (status === 'OK') {
-          directPath.setMap(null);
-          
-          console.log('Directions fetched successfully');
-          directionsRenderer.setDirections(response);
-          
-          const bounds = new window.google.maps.LatLngBounds();
-          bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
-          bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
-          map.fitBounds(bounds);
-          
-          const zoomListener = window.google.maps.event.addListener(map, 'idle', () => {
-            if (map.getZoom() > 16) map.setZoom(16);
-            window.google.maps.event.removeListener(zoomListener);
-          });
+    try {
+      const directionsService = new window.google.maps.DirectionsService();
+      const directionsRenderer = new window.google.maps.DirectionsRenderer({
+        map,
+        suppressMarkers: true,
+        polylineOptions: {
+          strokeColor: '#4CAF50',
+          strokeOpacity: 0.8,
+          strokeWeight: 5
         }
-      }
-    );
+      });
+      
+      directionsService.route(
+        {
+          origin: originLocation,
+          destination: destinationLocation,
+          travelMode: window.google.maps.TravelMode.DRIVING
+        },
+        (response, status) => {
+          if (status === 'OK') {
+            directPath.setMap(null);
+            
+            console.log('Directions fetched successfully');
+            directionsRenderer.setDirections(response);
+            
+            const bounds = new window.google.maps.LatLngBounds();
+            bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
+            bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
+            map.fitBounds(bounds);
+            
+            const zoomListener = window.google.maps.event.addListener(map, 'idle', () => {
+              if (map.getZoom() > 16) map.setZoom(16);
+              window.google.maps.event.removeListener(zoomListener);
+            });
+          } else {
+            console.warn('Directions request failed, using direct line instead. Status:', status);
+            // Keep the direct line visible when directions fail
+          }
+        }
+      );
+    } catch (err) {
+      console.error('Error fetching directions:', err);
+      // The straight line is already visible as a fallback
+    }
     
     return () => {
       originMarker.setMap(null);
       destinationMarker.setMap(null);
       directPath.setMap(null);
-      directionsRenderer.setMap(null);
     };
   }, [map, isMapReady, originLocation, destinationLocation]);
   

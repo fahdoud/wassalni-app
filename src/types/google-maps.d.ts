@@ -1,268 +1,392 @@
-declare namespace google {
-  namespace maps {
-    class Map {
-      constructor(mapDiv: Element, opts?: MapOptions);
-      setCenter(latLng: LatLng | LatLngLiteral): void;
-      setZoom(zoom: number): void;
-      getZoom(): number;
-      setOptions(options: MapOptions): void;
-      fitBounds(bounds: LatLngBounds | LatLngBoundsLiteral): void;
-      data: Data;
+
+declare namespace google.maps {
+  export class Map {
+    constructor(mapDiv: Element | null, opts?: MapOptions);
+    data?: Data;
+    setCenter(latLng: LatLng | LatLngLiteral): void;
+    getCenter(): LatLng;
+    setZoom(zoom: number): void;
+    getZoom(): number;
+    fitBounds(bounds: LatLngBounds | LatLngBoundsLiteral, padding?: number | Padding): void;
+  }
+
+  export interface MapOptions {
+    center?: LatLng | LatLngLiteral;
+    zoom?: number;
+    mapTypeControl?: boolean;
+    fullscreenControl?: boolean;
+    streetViewControl?: boolean;
+    zoomControl?: boolean;
+    gestureHandling?: 'cooperative' | 'greedy' | 'none' | 'auto';
+    styles?: MapTypeStyle[];
+  }
+
+  export interface MapTypeStyle {
+    featureType?: string;
+    elementType?: string;
+    stylers: MapTypeStyler[];
+  }
+
+  export interface MapTypeStyler {
+    visibility?: string;
+    color?: string;
+    weight?: number;
+    [k: string]: any;
+  }
+
+  export class LatLng {
+    constructor(lat: number, lng: number, noWrap?: boolean);
+    lat(): number;
+    lng(): number;
+    toString(): string;
+  }
+
+  export interface LatLngLiteral {
+    lat: number;
+    lng: number;
+  }
+
+  export class LatLngBounds {
+    constructor(sw?: LatLng | LatLngLiteral, ne?: LatLng | LatLngLiteral);
+    extend(latLng: LatLng | LatLngLiteral): LatLngBounds;
+    getCenter(): LatLng;
+    toString(): string;
+    isEmpty(): boolean;
+  }
+
+  export interface LatLngBoundsLiteral {
+    east: number;
+    north: number;
+    south: number;
+    west: number;
+  }
+
+  export interface Padding {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  }
+
+  export class Marker {
+    constructor(opts?: MarkerOptions);
+    setMap(map: Map | null): void;
+    setPosition(latLng: LatLng | LatLngLiteral): void;
+    getPosition(): LatLng;
+    setTitle(title: string): void;
+    getTitle(): string;
+  }
+
+  export interface MarkerOptions {
+    position: LatLng | LatLngLiteral;
+    map?: Map;
+    title?: string;
+    icon?: string | Icon | Symbol;
+    label?: string | MarkerLabel;
+    animation?: Animation;
+    draggable?: boolean;
+    clickable?: boolean;
+    visible?: boolean;
+    zIndex?: number;
+  }
+
+  export interface MarkerLabel {
+    color?: string;
+    fontFamily?: string;
+    fontSize?: string;
+    fontWeight?: string;
+    text: string;
+  }
+
+  export interface Icon {
+    url: string;
+    scaledSize?: Size;
+    size?: Size;
+    origin?: Point;
+    anchor?: Point;
+  }
+
+  export class Size {
+    constructor(width: number, height: number, widthUnit?: string, heightUnit?: string);
+    width: number;
+    height: number;
+  }
+
+  export class Point {
+    constructor(x: number, y: number);
+    x: number;
+    y: number;
+  }
+
+  export interface Symbol {
+    path: SymbolPath | string;
+    fillColor?: string;
+    fillOpacity?: number;
+    scale?: number;
+    strokeColor?: string;
+    strokeOpacity?: number;
+    strokeWeight?: number;
+  }
+
+  export enum SymbolPath {
+    BACKWARD_CLOSED_ARROW,
+    BACKWARD_OPEN_ARROW,
+    CIRCLE,
+    FORWARD_CLOSED_ARROW,
+    FORWARD_OPEN_ARROW
+  }
+
+  export enum Animation {
+    BOUNCE,
+    DROP
+  }
+
+  export class Data {
+    forEach(callback: (feature: Data.Feature) => void): void;
+    remove(feature: Data.Feature): void;
+  }
+
+  export namespace Data {
+    export class Feature {
+      getGeometry(): Data.Geometry;
+      getProperty(name: string): any;
+      setProperty(name: string, value: any): void;
     }
 
-    class Data {
-      forEach(callback: (feature: Data.Feature) => void): void;
-      remove(feature: Data.Feature): void;
-    }
+    export type Geometry = Point | MultiPoint | LineString | MultiLineString | Polygon | MultiPolygon;
+  }
 
-    // Define the Data.Feature interface properly
-    namespace Data {
-      interface Feature {
-        // Feature properties go here
-        getProperty(name: string): any;
-        setProperty(name: string, value: any): void;
-      }
-    }
+  export class DirectionsService {
+    route(request: DirectionsRequest, callback: (result: DirectionsResult | null, status: DirectionsStatus) => void): void;
+  }
 
-    class LatLngBounds {
-      constructor();
-      extend(latLng: LatLng | LatLngLiteral): void;
-      getCenter(): LatLng;
-    }
+  export interface DirectionsRequest {
+    origin: string | LatLng | LatLngLiteral | Place;
+    destination: string | LatLng | LatLngLiteral | Place;
+    travelMode: TravelMode;
+    transitOptions?: TransitOptions;
+    drivingOptions?: DrivingOptions;
+    unitSystem?: UnitSystem;
+    waypoints?: DirectionsWaypoint[];
+    optimizeWaypoints?: boolean;
+    provideRouteAlternatives?: boolean;
+    avoidFerries?: boolean;
+    avoidHighways?: boolean;
+    avoidTolls?: boolean;
+    region?: string;
+  }
 
-    interface LatLngBoundsLiteral {
-      east: number;
-      north: number;
-      south: number;
-      west: number;
-    }
+  export interface DirectionsResult {
+    routes: DirectionsRoute[];
+  }
 
-    class Marker {
-      constructor(opts?: MarkerOptions);
-      setMap(map: Map | null): void;
-      setPosition(latLng: LatLng | LatLngLiteral): void;
-      getPosition(): LatLng;
-    }
+  export interface DirectionsRoute {
+    bounds: LatLngBounds;
+    legs: DirectionsLeg[];
+    overview_path: LatLng[];
+    overview_polyline: string;
+    warnings: string[];
+    waypoint_order: number[];
+  }
 
-    class DirectionsService {
-      route(request: DirectionsRequest, callback: (result: DirectionsResult, status: DirectionsStatus) => void): void;
-    }
+  export interface DirectionsLeg {
+    distance: Distance;
+    duration: Duration;
+    end_address: string;
+    end_location: LatLng;
+    start_address: string;
+    start_location: LatLng;
+    steps: DirectionsStep[];
+  }
 
-    class DirectionsRenderer {
-      constructor(opts?: DirectionsRendererOptions);
-      setMap(map: Map | null): void;
-      setDirections(directions: DirectionsResult): void;
-    }
+  export interface DirectionsStep {
+    distance: Distance;
+    duration: Duration;
+    instructions: string;
+    path: LatLng[];
+    travel_mode: TravelMode;
+    transit: TransitDetails;
+  }
 
-    // Add Polyline class to fix the TS error
-    class Polyline {
-      constructor(opts?: PolylineOptions);
-      setMap(map: Map | null): void;
-      getPath(): MVCArray<LatLng>;
-      setPath(path: LatLng[] | LatLngLiteral[] | MVCArray<LatLng>): void;
-    }
+  export interface Distance {
+    text: string;
+    value: number;
+  }
 
-    // Add MVCArray for Polyline
-    class MVCArray<T> {
-      constructor(array?: T[]);
-      getArray(): T[];
-      getAt(i: number): T;
-      getLength(): number;
-      forEach(callback: (elem: T, i: number) => void): void;
-    }
+  export interface Duration {
+    text: string;
+    value: number;
+  }
 
-    interface MapOptions {
-      center?: LatLng | LatLngLiteral;
-      zoom?: number;
-      mapTypeControl?: boolean;
-      fullscreenControl?: boolean;
-      streetViewControl?: boolean;
-      zoomControl?: boolean;
-      gestureHandling?: 'cooperative' | 'greedy' | 'none' | 'auto'; // Add this missing property
-      styles?: any[];
-    }
+  export interface TransitDetails {
+    arrival_stop: TransitStop;
+    arrival_time: Time;
+    departure_stop: TransitStop;
+    departure_time: Time;
+    headsign: string;
+    headway: number;
+    line: TransitLine;
+    num_stops: number;
+  }
 
-    interface MarkerOptions {
-      position?: LatLng | LatLngLiteral;
-      map?: Map;
-      title?: string;
-      icon?: string | Icon;
-      animation?: Animation;
-    }
+  export interface TransitStop {
+    location: LatLng;
+    name: string;
+  }
 
-    enum Animation {
-      BOUNCE,
-      DROP
-    }
+  export interface Time {
+    text: string;
+    time_zone: string;
+    value: Date;
+  }
 
-    interface Icon {
-      url: string;
-      scaledSize?: Size;
-      size?: Size;
-      origin?: Point;
-      anchor?: Point;
-    }
+  export interface TransitLine {
+    agencies: TransitAgency[];
+    color: string;
+    icon: string;
+    name: string;
+    short_name: string;
+    text_color: string;
+    url: string;
+    vehicle: TransitVehicle;
+  }
 
-    class Size {
-      constructor(width: number, height: number);
-    }
+  export interface TransitAgency {
+    name: string;
+    phone: string;
+    url: string;
+  }
 
-    class Point {
-      constructor(x: number, y: number);
-      x: number;
-      y: number;
-    }
+  export interface TransitVehicle {
+    icon: string;
+    local_icon: string;
+    name: string;
+    type: string;
+  }
 
-    interface LatLngLiteral {
-      lat: number;
-      lng: number;
-    }
+  export interface DirectionsWaypoint {
+    location: string | LatLng | LatLngLiteral | Place;
+    stopover?: boolean;
+  }
 
-    class LatLng {
-      constructor(lat: number, lng: number);
-      lat(): number;
-      lng(): number;
-      toJSON(): LatLngLiteral;
-      toString(): string;
-      equals(other: LatLng): boolean;
-    }
+  export interface TransitOptions {
+    arrivalTime?: Date;
+    departureTime?: Date;
+    modes?: TransitMode[];
+    routingPreference?: TransitRoutePreference;
+  }
 
-    interface DirectionsRequest {
-      origin: LatLng | LatLngLiteral | string;
-      destination: LatLng | LatLngLiteral | string;
-      travelMode: TravelMode;
-      waypoints?: DirectionsWaypoint[];
-      optimizeWaypoints?: boolean;
-      provideRouteAlternatives?: boolean;
-      avoidFerries?: boolean;
-      avoidHighways?: boolean;
-      avoidTolls?: boolean;
-      region?: string;
-    }
+  export enum TransitMode {
+    BUS,
+    RAIL,
+    SUBWAY,
+    TRAIN,
+    TRAM
+  }
 
-    interface DirectionsWaypoint {
-      location: LatLng | LatLngLiteral | string;
-      stopover?: boolean;
-    }
+  export enum TransitRoutePreference {
+    FEWER_TRANSFERS,
+    LESS_WALKING
+  }
 
-    interface DirectionsResult {
-      routes: DirectionsRoute[];
-    }
+  export interface DrivingOptions {
+    departureTime: Date;
+    trafficModel?: TrafficModel;
+  }
 
-    interface DirectionsRoute {
-      legs: DirectionsLeg[];
-      overview_path: LatLng[];
-      overview_polyline: string;
-      warnings: string[];
-      waypoint_order: number[];
-      bounds: LatLngBounds;
-    }
+  export enum TrafficModel {
+    BEST_GUESS,
+    OPTIMISTIC,
+    PESSIMISTIC
+  }
 
-    interface DirectionsLeg {
-      distance: Distance;
-      duration: Duration;
-      start_location: LatLng;
-      end_location: LatLng;
-      steps: DirectionsStep[];
-    }
+  export enum UnitSystem {
+    IMPERIAL,
+    METRIC
+  }
 
-    interface DirectionsStep {
-      distance: Distance;
-      duration: Duration;
-      instructions: string;
-      path: LatLng[];
-    }
+  export enum TravelMode {
+    BICYCLING,
+    DRIVING,
+    TRANSIT,
+    WALKING
+  }
 
-    interface Distance {
-      text: string;
-      value: number;
-    }
+  export type DirectionsStatus = 'OK' | 'NOT_FOUND' | 'ZERO_RESULTS' | 'MAX_WAYPOINTS_EXCEEDED' | 'MAX_ROUTE_LENGTH_EXCEEDED' | 'INVALID_REQUEST' | 'OVER_QUERY_LIMIT' | 'REQUEST_DENIED' | 'UNKNOWN_ERROR';
 
-    interface Duration {
-      text: string;
-      value: number;
-    }
+  export interface Place {
+    location: LatLng | LatLngLiteral;
+    placeId: string;
+    query: string;
+  }
 
-    interface DirectionsRendererOptions {
-      map?: Map;
-      directions?: DirectionsResult;
-      panel?: Element;
-      suppressMarkers?: boolean;
-      suppressInfoWindows?: boolean;
-      polylineOptions?: PolylineOptions;
-      preserveViewport?: boolean;
-      routeIndex?: number;
-      draggable?: boolean;
-    }
+  export class DirectionsRenderer {
+    constructor(opts?: DirectionsRendererOptions);
+    setMap(map: Map | null): void;
+    setDirections(directions: DirectionsResult): void;
+    setRouteIndex(routeIndex: number): void;
+    getRouteIndex(): number;
+  }
 
-    interface PolylineOptions {
-      strokeColor?: string;
-      strokeOpacity?: number;
-      strokeWeight?: number;
-      clickable?: boolean;
-      draggable?: boolean;
-      editable?: boolean;
-      geodesic?: boolean;
-      icons?: IconSequence[];
-      path?: LatLng[] | LatLngLiteral[];
-      visible?: boolean;
-      zIndex?: number;
-      map?: Map;
-    }
+  export interface DirectionsRendererOptions {
+    map?: Map;
+    directions?: DirectionsResult;
+    panel?: Element;
+    routeIndex?: number;
+    polylineOptions?: PolylineOptions;
+    suppressMarkers?: boolean;
+    suppressInfoWindows?: boolean;
+    suppressPolylines?: boolean;
+  }
 
-    interface IconSequence {
-      icon: Symbol;
-      offset?: string;
-      repeat?: string;
-    }
+  export class Polyline {
+    constructor(opts?: PolylineOptions);
+    setMap(map: Map | null): void;
+    getPath(): MVCArray<LatLng>;
+    setPath(path: MVCArray<LatLng> | LatLng[] | LatLngLiteral[]): void;
+  }
 
-    interface Symbol {
-      path: SymbolPath | string;
-      anchor?: Point;
-      fillColor?: string;
-      fillOpacity?: number;
-      labelOrigin?: Point;
-      rotation?: number;
-      scale?: number;
-      strokeColor?: string;
-      strokeOpacity?: number;
-      strokeWeight?: number;
-    }
+  export interface PolylineOptions {
+    path?: MVCArray<LatLng> | LatLng[] | LatLngLiteral[];
+    geodesic?: boolean;
+    strokeColor?: string;
+    strokeOpacity?: number;
+    strokeWeight?: number;
+    map?: Map;
+    clickable?: boolean;
+    draggable?: boolean;
+    editable?: boolean;
+    visible?: boolean;
+    zIndex?: number;
+  }
 
-    enum SymbolPath {
-      BACKWARD_CLOSED_ARROW,
-      BACKWARD_OPEN_ARROW,
-      CIRCLE,
-      FORWARD_CLOSED_ARROW,
-      FORWARD_OPEN_ARROW
-    }
+  export class MVCArray<T> {
+    constructor(array?: T[]);
+    clear(): void;
+    getArray(): T[];
+    getAt(i: number): T;
+    getLength(): number;
+    insertAt(i: number, elem: T): void;
+    pop(): T;
+    push(elem: T): number;
+    removeAt(i: number): T;
+    setAt(i: number, elem: T): void;
+  }
 
-    enum TravelMode {
-      DRIVING = "DRIVING",
-      BICYCLING = "BICYCLING",
-      TRANSIT = "TRANSIT",
-      WALKING = "WALKING"
-    }
+  export class event {
+    static addListener(instance: any, eventName: string, handler: (...args: any[]) => void): MapsEventListener;
+    static addDomListener(instance: any, eventName: string, handler: (...args: any[]) => void): MapsEventListener;
+    static removeListener(listener: MapsEventListener): void;
+    static trigger(instance: any, eventName: string, ...args: any[]): void;
+  }
 
-    type DirectionsStatus = "OK" | "NOT_FOUND" | "ZERO_RESULTS" | "MAX_WAYPOINTS_EXCEEDED" | "INVALID_REQUEST" | "OVER_QUERY_LIMIT" | "REQUEST_DENIED" | "UNKNOWN_ERROR";
-    
-    namespace event {
-      function addListener(instance: any, eventName: string, handler: Function): MapsEventListener;
-      function removeListener(listener: MapsEventListener): void;
-      function trigger(instance: any, eventName: string): void;
-      function addDomListener(element: Element, eventName: string, handler: Function, capture?: boolean): MapsEventListener;
-      function clearInstanceListeners(instance: any): void;
-    }
-
-    interface MapsEventListener {
-      remove(): void;
-    }
+  export interface MapsEventListener {
+    remove(): void;
   }
 }
 
-// Fix the window interface to avoid conflicts
 interface Window {
   google: typeof google;
-  initMap?: () => void;
   initMapCallback?: () => void;
+  gm_authFailure?: () => void;
 }
