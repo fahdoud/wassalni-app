@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { getRideById, subscribeToRideUpdates } from '@/services/rides/rideQueries';
 import { createReservation } from '@/services/rides/reservationService';
@@ -19,16 +20,22 @@ export const useReservation = (rideId: string) => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
       const isAuthed = !!data.user;
-      console.log("Initial auth check in useReservation:", isAuthed);
+      console.log("Initial auth check in useReservation:", isAuthed, "User:", data.user?.id);
       setIsAuthenticated(isAuthed);
     };
     
     checkAuth();
     
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      const isAuthed = event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED';
-      console.log("Auth state change in useReservation:", event, isAuthed);
-      setIsAuthenticated(isAuthed);
+      console.log("Auth state change in useReservation:", event, "Session:", !!session);
+      // Consider all these events as authenticated
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED' || session?.user) {
+        console.log("User is authenticated after auth state change");
+        setIsAuthenticated(true);
+      } else if (event === 'SIGNED_OUT') {
+        console.log("User signed out");
+        setIsAuthenticated(false);
+      }
     });
     
     return () => {

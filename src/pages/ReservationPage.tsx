@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,8 +57,19 @@ const ReservationPage = () => {
     };
     
     fetchUser();
+    
+    // Listen to auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state change in ReservationPage:", event, "Session:", !!session);
+      fetchUser(); // Refetch user data when auth state changes
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
+  // Only redirect if not authenticated and we've confirmed auth status
   useEffect(() => {
     if (!checkingAuth && !isLoading && !isAuthenticated && rideId) {
       console.log("Not authenticated, redirecting to login page");
