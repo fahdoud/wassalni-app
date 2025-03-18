@@ -18,6 +18,11 @@ interface PaymentDetailsProps {
   loading?: boolean;
   error?: string | null;
   isAuthenticated?: boolean;
+  seatAvailability?: {
+    total: number;
+    remaining: number;
+    available: boolean;
+  } | null;
 }
 
 const PaymentDetails = ({
@@ -32,7 +37,8 @@ const PaymentDetails = ({
   onSubmit,
   loading,
   error,
-  isAuthenticated
+  isAuthenticated,
+  seatAvailability
 }: PaymentDetailsProps) => {
   const { t } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -59,8 +65,8 @@ const PaymentDetails = ({
     }
   };
   
-  // Calculate available seats from ride if available
-  const availableSeats = ride?.seats || 4; // Default to 4 if no ride provided
+  // Calculate available seats from seatAvailability, ride, or default
+  const availableSeats = seatAvailability?.remaining || (ride?.seats || 4);
   
   // Calculate displayed price based on what's available
   const displayPrice = price || (ride ? ride.price : 0);
@@ -91,7 +97,22 @@ const PaymentDetails = ({
             +
           </button>
         </div>
-        {ride && ride.seats < currentSeats && (
+        
+        {seatAvailability && (
+          <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            {seatAvailability.remaining > 0 ? (
+              <span>
+                {t('reservation.remainingSeats', { count: seatAvailability.remaining })}
+              </span>
+            ) : (
+              <span className="text-red-500 dark:text-red-400">
+                {t('rides.full')}
+              </span>
+            )}
+          </div>
+        )}
+        
+        {ride && availableSeats < currentSeats && (
           <p className="text-sm text-red-500 mt-1">
             {t('reservation.notEnoughSeats')}
           </p>
@@ -176,7 +197,7 @@ const PaymentDetails = ({
           className="flex-1"
           onClick={handleSubmit}
           isLoading={loading}
-          disabled={loading || (ride && currentSeats > ride.seats) || !isAuthenticated}
+          disabled={loading || (availableSeats < currentSeats) || !isAuthenticated}
         >
           {isAuthenticated 
             ? t('reservation.confirmReservation') 

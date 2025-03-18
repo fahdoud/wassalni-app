@@ -1,10 +1,10 @@
-
 import { Ride } from "@/services/rides/types";
 import { MapPin, Calendar, Clock, User } from "lucide-react";
 import Button from "@/components/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { subscribeToRideUpdates } from "@/services/rides/rideQueries";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RideDetailsProps {
   ride: Ride;
@@ -12,9 +12,21 @@ interface RideDetailsProps {
   setSeats?: (seats: number) => void;
   goToPayment?: () => void;
   onContinue?: () => void;
+  seatAvailability?: {
+    total: number;
+    remaining: number;
+    available: boolean;
+  } | null;
 }
 
-const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDetailsProps) => {
+const RideDetails = ({ 
+  ride, 
+  seats, 
+  setSeats, 
+  goToPayment, 
+  onContinue,
+  seatAvailability 
+}: RideDetailsProps) => {
   const { t } = useLanguage();
   const [availableSeats, setAvailableSeats] = useState(ride.seats);
   
@@ -31,15 +43,60 @@ const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDet
   useEffect(() => {
     if (!ride.id) return;
     
-    const subscription = subscribeToRideUpdates(ride.id, (updatedRide) => {
-      console.log("Real-time seat update:", updatedRide.seats);
-      setAvailableSeats(updatedRide.seats);
-    });
+    if (seatAvailability) {
+      // If seatAvailability is provided, use it
+      setAvailableSeats(seatAvailability.remaining);
+    } else {
+      // Otherwise use the legacy subscription
+      const subscription = subscribeToRideUpdates(ride.id, (updatedRide) => {
+        console.log("Real-time seat update:", updatedRide.seats);
+        setAvailableSeats(updatedRide.seats);
+      });
+      
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [ride.id, seatAvailability]);
+
+  // Subscribe to real-time updates for seat availability
+  useEffect(() => {
+    if (!ride.id || !ride.trip_id || /^\d+$/.test(ride.id)) {
+      // Don't subscribe for mock rides
+      return;
+    }
     
+    const tripId = ride.trip_id;
+    
+    const channel = supabase
+      .channel(`seat-channel-${tripId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'seat_availability',
+          filter: `trip_id=eq.${tripId}`
+        },
+        (payload) => {
+          console.log("Received seat availability update:", payload);
+          if (payload.new && 'remaining_seats' in payload.new) {
+            setAvailableSeats(payload.new.remaining_seats);
+          }
+        }
+      )
+      .subscribe();
+      
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
-  }, [ride.id]);
+  }, [ride.id, ride.trip_id]);
+
+  // Update available seats whenever ride.seats changes
+  useEffect(() => {
+    console.log("Ride seats updated:", ride.seats);
+    setAvailableSeats(ride.seats);
+  }, [ride.seats]);
 
   return (
     <div className="glass-card p-8 rounded-xl mb-6">
@@ -105,6 +162,15 @@ const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDet
               : t('rides.full')}
           </span>
         </div>
+        
+        {seatAvailability && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
+            <User size={16} className="text-blue-600 dark:text-blue-400" />
+            <span>
+              {t('reservation.totalSeats')}: {seatAvailability.total}
+            </span>
+          </div>
+        )}
       </div>
       
       <div className="mt-8">

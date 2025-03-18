@@ -11,9 +11,22 @@ interface ReservationSidebarProps {
   seats?: number;
   price?: number;
   reservationSuccess?: boolean;
+  seatAvailability?: {
+    total: number;
+    remaining: number;
+    available: boolean;
+  } | null;
 }
 
-const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: externalPrice, reservationSuccess }: ReservationSidebarProps) => {
+const ReservationSidebar = ({ 
+  ride, 
+  step = 1, 
+  passengerCount, 
+  seats, 
+  price: externalPrice, 
+  reservationSuccess,
+  seatAvailability
+}: ReservationSidebarProps) => {
   const { t } = useLanguage();
   const [availableSeats, setAvailableSeats] = useState(ride.seats);
   
@@ -26,11 +39,16 @@ const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: exte
   // Determine which step we're on
   const currentStep = step === 2 || reservationSuccess ? 2 : 1;
 
-  // Update availableSeats whenever ride.seats changes
+  // Update availableSeats whenever ride.seats changes or seatAvailability changes
   useEffect(() => {
-    console.log("Ride seats updated in sidebar:", ride.seats);
-    setAvailableSeats(ride.seats);
-  }, [ride.seats]);
+    if (seatAvailability) {
+      console.log("Seat availability updated in sidebar:", seatAvailability);
+      setAvailableSeats(seatAvailability.remaining);
+    } else {
+      console.log("Ride seats updated in sidebar:", ride.seats);
+      setAvailableSeats(ride.seats);
+    }
+  }, [ride.seats, seatAvailability]);
 
   return (
     <div className="lg:w-80">
@@ -75,7 +93,7 @@ const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: exte
           </div>
         </div>
         
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <User size={18} className="text-gray-500 shrink-0 dark:text-gray-400" />
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">{t('reservation.availableSeats')}</p>
@@ -86,6 +104,18 @@ const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: exte
             </p>
           </div>
         </div>
+        
+        {seatAvailability && (
+          <div className="flex items-center gap-3 mb-6">
+            <User size={18} className="text-blue-500 shrink-0 dark:text-blue-400" />
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('reservation.totalSeats')}</p>
+              <p className="font-medium text-blue-600 dark:text-blue-400">
+                {seatAvailability.total}
+              </p>
+            </div>
+          </div>
+        )}
         
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-between mb-2">

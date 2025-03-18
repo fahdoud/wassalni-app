@@ -36,7 +36,8 @@ const ReservationPage = () => {
     makeReservation,
     reservationSuccess,
     reservationError,
-    isAuthenticated
+    isAuthenticated,
+    seatAvailability
   } = useReservation(rideId || "");
 
   const rideLocations = useRideLocations(ride);
@@ -86,6 +87,7 @@ const ReservationPage = () => {
             rideLocations={rideLocations}
             userName={userName}
             userId={user?.id || ''}
+            seatAvailability={seatAvailability}
           />
         </div>
 
@@ -94,6 +96,7 @@ const ReservationPage = () => {
           seats={seats} 
           price={price} 
           reservationSuccess={reservationSuccess} 
+          seatAvailability={seatAvailability}
         />
       </div>
     </div>
