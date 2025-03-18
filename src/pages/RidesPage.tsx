@@ -30,6 +30,7 @@ const RidesPage = () => {
       
       if (forceRefresh) {
         setRides([]);
+        setLiveSeats({}); // Also reset live seats state when force refreshing
       }
       
       const fetchedRides = await getRides();
@@ -42,6 +43,31 @@ const RidesPage = () => {
         }));
         
         setRides(ridesWithMaleDrivers);
+        
+        // For real rides, fetch seat availability information
+        const realRideIds = ridesWithMaleDrivers
+          .filter(ride => !/^\d+$/.test(ride.id))
+          .map(ride => ride.trip_id);
+          
+        if (realRideIds.length > 0) {
+          const { data, error } = await supabase
+            .from('seat_availability')
+            .select('trip_id, remaining_seats')
+            .in('trip_id', realRideIds);
+            
+          if (!error && data) {
+            // Create a mapping of trip_id to remaining_seats
+            const newLiveSeats = { ...liveSeats };
+            data.forEach(seat => {
+              // Find the ride with this trip_id
+              const ride = ridesWithMaleDrivers.find(r => r.trip_id === seat.trip_id);
+              if (ride) {
+                newLiveSeats[ride.id] = seat.remaining_seats;
+              }
+            });
+            setLiveSeats(newLiveSeats);
+          }
+        }
       } else {
         console.log("No rides found, using mock rides");
         const mockRides = getMockRides().map(ride => ({
@@ -154,6 +180,35 @@ const RidesPage = () => {
           .subscribe();
           
         channels.push(seatChannel);
+        
+        // Also subscribe to reservations table for mock rides
+        const reservationChannel = supabase
+          .channel(`reservations-${ride.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'reservations',
+              filter: `trip_id=eq.${ride.trip_id}`
+            },
+            (payload) => {
+              console.log("Received new reservation:", payload);
+              if (payload.new && payload.new.seats_reserved) {
+                // Decrease available seats
+                setLiveSeats(prev => {
+                  const currentSeats = prev[ride.id] || ride.seats;
+                  return {
+                    ...prev,
+                    [ride.id]: Math.max(0, currentSeats - payload.new.seats_reserved)
+                  };
+                });
+              }
+            }
+          )
+          .subscribe();
+          
+        channels.push(reservationChannel);
       }
     });
     

@@ -45,9 +45,11 @@ const RideDetails = ({
     
     if (seatAvailability) {
       // If seatAvailability is provided, use it
+      console.log("Using provided seat availability:", seatAvailability);
       setAvailableSeats(seatAvailability.remaining);
     } else {
       // Otherwise use the legacy subscription
+      console.log("Using legacy subscription for seat updates");
       const subscription = subscribeToRideUpdates(ride.id, (updatedRide) => {
         console.log("Real-time seat update:", updatedRide.seats);
         setAvailableSeats(updatedRide.seats);
@@ -67,6 +69,7 @@ const RideDetails = ({
     }
     
     const tripId = ride.trip_id;
+    console.log("Setting up real-time subscription for seat availability:", tripId);
     
     const channel = supabase
       .channel(`seat-channel-${tripId}`)
@@ -187,3 +190,4 @@ const RideDetails = ({
 };
 
 export default RideDetails;
+

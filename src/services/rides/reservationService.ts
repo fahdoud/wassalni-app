@@ -34,10 +34,11 @@ export const createReservation = async (
       
       console.log("Mock reservation created successfully:", reservation);
       
-      // For mock rides, we manually decrement the seats in the mock data
-      // The UI will update based on the response, but next time the page loads
-      // it will show the original seat count since mock data is static
-      return { success: true };
+      // For mock rides, return a lower seat count that will be used to update the UI
+      return { 
+        success: true,
+        updatedSeats: 0 // Force UI to update with fewer seats 
+      };
     }
     
     // For real rides with UUID trip IDs
@@ -55,7 +56,17 @@ export const createReservation = async (
       throw new Error(tripError.message);
     }
     
-    if (currentTrip.available_seats < seatsReserved) {
+    // Also check seat_availability for the most accurate seat count
+    const { data: seatAvail, error: seatError } = await supabase
+      .from('seat_availability')
+      .select('remaining_seats')
+      .eq('trip_id', tripId)
+      .single();
+      
+    // Use the more accurate seat count from seat_availability if available
+    const availableSeats = seatAvail ? seatAvail.remaining_seats : currentTrip.available_seats;
+    
+    if (availableSeats < seatsReserved) {
       console.error("Not enough seats available");
       toast.error("Not enough seats available");
       return { success: false };
@@ -88,7 +99,7 @@ export const createReservation = async (
 
     console.log("Created reservation record:", reservation);
 
-    // 2. Update seat availability using the new function
+    // 2. Update seat availability using the function
     const { data: seatUpdateSuccess, error: seatUpdateError } = await supabase
       .rpc('decrease_seat_availability', {
         p_trip_id: tripId,
@@ -102,6 +113,8 @@ export const createReservation = async (
       throw new Error(seatUpdateError?.message || "Failed to update seats");
     }
     
+    console.log("Successfully decreased seat availability");
+    
     // 3. Also update the available seats in the trips table for backward compatibility
     const { data: success, error: updateError } = await supabase
       .rpc('decrease_available_seats', {
@@ -113,6 +126,8 @@ export const createReservation = async (
       console.error("Error updating available seats:", updateError);
       // No need to rollback since the primary update succeeded
       console.warn("Failed to update trips.available_seats, but seat_availability was updated successfully");
+    } else {
+      console.log("Successfully decreased available seats in trips table");
     }
 
     // 4. Send a welcome message to the ride chat

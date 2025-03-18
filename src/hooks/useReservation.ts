@@ -19,7 +19,6 @@ export const useReservation = (rideId: string) => {
     available: boolean
   } | null>(null);
   
-  // Check authentication status on load
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
@@ -32,7 +31,6 @@ export const useReservation = (rideId: string) => {
     
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state change in useReservation:", event, "Session:", !!session);
-      // Consider all these events as authenticated
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED' || session?.user) {
         console.log("User is authenticated after auth state change");
         setIsAuthenticated(true);
@@ -47,7 +45,6 @@ export const useReservation = (rideId: string) => {
     };
   }, []);
   
-  // Get the ride data
   useEffect(() => {
     const fetchRide = async () => {
       setIsLoading(true);
@@ -56,20 +53,16 @@ export const useReservation = (rideId: string) => {
         const ride = await getRideById(rideId);
         
         if (ride) {
-          // Ensure the driver is displayed as male
           if (ride.driver) {
-            // Keep the driver name but ensure they are treated as male in the UI
             ride.driverGender = 'male';
           }
           
           setRide(ride);
           setPrice(ride.price);
           
-          // For real rides, check seat availability
           if (!/^\d+$/.test(rideId)) {
             await fetchSeatAvailability(ride.trip_id || rideId);
           } else {
-            // For mock rides, use the seats from the ride
             setSeatAvailability({
               total: ride.seats,
               remaining: ride.seats,
@@ -86,6 +79,7 @@ export const useReservation = (rideId: string) => {
     
     const fetchSeatAvailability = async (tripId: string) => {
       try {
+        console.log("Fetching seat availability for trip:", tripId);
         const { data, error } = await supabase
           .from('seat_availability')
           .select('total_seats, remaining_seats, seats_available')
@@ -115,23 +109,20 @@ export const useReservation = (rideId: string) => {
     }
   }, [rideId]);
   
-  // Update price when seats change
   useEffect(() => {
     if (ride) {
       setPrice(ride.price * seats);
     }
   }, [seats, ride]);
   
-  // Subscribe to real-time updates for the ride
   useEffect(() => {
     if (!rideId || !ride || /^\d+$/.test(rideId)) {
-      // We don't subscribe to real-time updates for mock rides
       return;
     }
     
     const tripId = ride.trip_id || rideId;
+    console.log("Setting up real-time subscription for trip:", tripId);
     
-    // Subscribe to seat_availability changes
     const seatChannel = supabase
       .channel(`seat-availability-${tripId}`)
       .on(
@@ -151,7 +142,6 @@ export const useReservation = (rideId: string) => {
               available: payload.new.seats_available
             });
             
-            // Also update the ride object for backward compatibility
             setRide(prev => prev ? { 
               ...prev, 
               seats: payload.new.remaining_seats 
@@ -161,9 +151,7 @@ export const useReservation = (rideId: string) => {
       )
       .subscribe();
     
-    // Also keep the traditional ride updates
     const { unsubscribe } = subscribeToRideUpdates(rideId, (updatedRide) => {
-      // Ensure the driver is displayed as male
       if (updatedRide.driver) {
         updatedRide.driverGender = 'male';
       }
@@ -177,11 +165,9 @@ export const useReservation = (rideId: string) => {
     };
   }, [rideId, ride]);
   
-  // Make a reservation
   const makeReservation = async () => {
     setReservationError(null);
     
-    // Check if authenticated - only allow authenticated users to make reservations
     if (!isAuthenticated) {
       console.log("User is not authenticated");
       setReservationError("You must be logged in to make a reservation");
@@ -189,16 +175,13 @@ export const useReservation = (rideId: string) => {
       return;
     }
     
-    // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
     
-    // Check if ride exists
     if (!ride) {
       setReservationError("Ride not found");
       return;
     }
     
-    // Check if enough seats are available
     const availableSeats = seatAvailability?.remaining || ride.seats;
     if (availableSeats < seats) {
       setReservationError("Not enough seats available");
@@ -206,7 +189,6 @@ export const useReservation = (rideId: string) => {
     }
     
     try {
-      // Create the reservation - only for authenticated users
       const userId = user?.id;
       
       if (!userId) {
@@ -214,7 +196,6 @@ export const useReservation = (rideId: string) => {
         return;
       }
       
-      // Create the reservation
       const response = await createReservation(
         ride.trip_id || ride.id, 
         userId, 
@@ -222,9 +203,8 @@ export const useReservation = (rideId: string) => {
       );
       
       if (response.success) {
-        // Update the ride with the new seat count if provided
         if (response.updatedSeats !== undefined) {
-          // Update both the ride object and the seatAvailability state
+          console.log("Updated seat count from reservation:", response.updatedSeats);
           setRide(prev => prev ? { ...prev, seats: response.updatedSeats! } : null);
           setSeatAvailability(prev => prev ? { 
             ...prev, 
@@ -232,11 +212,12 @@ export const useReservation = (rideId: string) => {
             available: response.updatedSeats! > 0
           } : null);
         } else {
-          // For mock rides, we manually update the UI
-          setRide(prev => prev ? { ...prev, seats: prev.seats - seats } : null);
+          console.log("Manually decreasing seat count for mock ride");
+          const newSeatCount = Math.max(0, (ride.seats - seats));
+          setRide(prev => prev ? { ...prev, seats: newSeatCount } : null);
           setSeatAvailability(prev => {
             if (!prev) return null;
-            const newRemaining = prev.remaining - seats;
+            const newRemaining = Math.max(0, prev.remaining - seats);
             return {
               ...prev,
               remaining: newRemaining,
@@ -247,7 +228,6 @@ export const useReservation = (rideId: string) => {
         
         setReservationSuccess(true);
         toast.success("Reservation successful!");
-        
       } else {
         setReservationError("Failed to make reservation. Please try again.");
       }
