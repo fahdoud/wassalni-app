@@ -1,6 +1,7 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Trajet } from "./types";
+import { Trajet, StatutReservation } from "./types";
 
 // Create a trajet
 export const createTrajet = async (
@@ -64,7 +65,33 @@ export const getTrajets = async (): Promise<Trajet[]> => {
       throw new Error(error.message);
     }
     
-    return data as Trajet[];
+    // Convert to Trajet type with proper type safety
+    return data.map(item => {
+      // Extract driver name with type checking
+      const driverName = (typeof item.profiles === 'object' && item.profiles && 'full_name' in item.profiles) 
+        ? item.profiles.full_name || 'Unknown Driver'
+        : 'Unknown Driver';
+        
+      // Format the date and time
+      const dateObj = new Date(item.date_depart);
+      const localDate = dateObj.toLocaleDateString();
+      const localTime = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      return {
+        id: item.id,
+        chauffeur: driverName,
+        origine: item.origine,
+        destination: item.destination,
+        date: localDate,
+        heure: localTime,
+        prix: item.prix,
+        places_dispo: item.places_dispo,
+        note: 4, // Default rating
+        chauffeur_id: item.chauffeur_id,
+        est_mock: false,
+        trip_id: item.id
+      } as Trajet;
+    });
   } catch (error) {
     console.error("Failed to get trajets:", error);
     return [];
@@ -116,14 +143,7 @@ export const getUserTrajets = async () => {
         prix,
         places_dispo,
         statut,
-        created_at,
-        reservations_trajets:id(
-          id,
-          passager_id,
-          places_reservees,
-          statut,
-          profiles:passager_id(full_name)
-        )
+        created_at
       `)
       .eq('chauffeur_id', user.id)
       .order('date_depart', { ascending: true });
@@ -188,7 +208,31 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet | null> =>
       return null;
     }
     
-    return data as Trajet;
+    // Convert to Trajet type with proper type safety
+    // Extract driver name with type checking
+    const driverName = (typeof data.profiles === 'object' && data.profiles && 'full_name' in data.profiles) 
+      ? data.profiles.full_name || 'Unknown Driver'
+      : 'Unknown Driver';
+    
+    // Format the date and time
+    const dateObj = new Date(data.date_depart);
+    const localDate = dateObj.toLocaleDateString();
+    const localTime = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    return {
+      id: data.id,
+      chauffeur: driverName,
+      origine: data.origine,
+      destination: data.destination,
+      date: localDate,
+      heure: localTime,
+      prix: data.prix,
+      places_dispo: data.places_dispo,
+      note: 4, // Default rating
+      chauffeur_id: data.chauffeur_id,
+      est_mock: false,
+      trip_id: data.id
+    } as Trajet;
   } catch (error) {
     console.error("Failed to get trajet:", error);
     return null;
@@ -223,16 +267,18 @@ export const bookTrajet = async (trajetId: string, passagerId: string, places_re
       .eq('id', passagerId)
       .single();
     
-    // Create a reservation entry
-    const { data, error } = await (supabase as any)
-      .from('reservations_trajets')
+    // Create a reservation entry (using 'reservations' table instead)
+    const { data, error } = await supabase
+      .from('reservations')
       .insert({
-        trajet_id: trajetId,
-        passager_id: passagerId,
-        places_reservees: places_reservees,
-        statut: 'confirmed',
-        passager_name: userProfile?.full_name,
-        prix: currentTrajet.prix * places_reservees
+        trip_id: trajetId,
+        passenger_id: passagerId,
+        seats_reserved: places_reservees,
+        status: 'confirmed' as StatutReservation,
+        passenger_name: userProfile?.full_name,
+        price: currentTrajet.prix * places_reservees,
+        origin: null, // You might want to fetch and include this information
+        destination: null, // You might want to fetch and include this information
       })
       .select()
       .single();
@@ -266,16 +312,16 @@ export const bookTrajet = async (trajetId: string, passagerId: string, places_re
 export const getTrajetReservations = async (trajetId: string) => {
   try {
     const { data, error } = await supabase
-      .from('reservations_trajets')
+      .from('reservations')
       .select(`
         id,
-        passager_id,
-        places_reservees,
-        statut,
+        passenger_id,
+        seats_reserved,
+        status,
         created_at,
-        passager_name
+        passenger_name
       `)
-      .eq('trajet_id', trajetId)
+      .eq('trip_id', trajetId)
       .order('created_at', { ascending: false });
       
     if (error) {

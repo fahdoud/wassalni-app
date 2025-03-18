@@ -8,7 +8,7 @@ export type { Ride, ReservationStatus, Reservation } from './types';
 export { getMockRides } from './mockRides';
 
 // Export ride query services
-export { getRides, getRideById } from './rideQueries';
+export { getRides, getRideById, getSimilarRides, subscribeToRideUpdates } from './rideQueries';
 
 // Export reservation service
 export { createReservation, getUserReservations } from './reservationService';

@@ -3,6 +3,56 @@ import { supabase } from "@/integrations/supabase/client";
 import { Ride } from "./types";
 import { toast } from "sonner";
 
+export const getRides = async (): Promise<Ride[]> => {
+  try {
+    console.log("Fetching rides from database");
+    const { data: trips, error } = await supabase
+      .from('trips')
+      .select(`
+        id,
+        origin,
+        destination,
+        departure_time,
+        price,
+        available_seats,
+        driver_id,
+        profiles:driver_id(full_name)
+      `)
+      .eq('status', 'active')
+      .order('departure_time', { ascending: true });
+      
+    if (error) {
+      console.error("Error fetching rides:", error);
+      throw new Error(error.message);
+    }
+    
+    // Map to Ride interface
+    return trips.map(trip => {
+      // Use optional chaining and nullish coalescing for type safety
+      // This handles the case where profiles might be null or a SelectQueryError
+      const driverName = (typeof trip.profiles === 'object' && trip.profiles && 'full_name' in trip.profiles) 
+        ? trip.profiles?.full_name 
+        : 'Unknown Driver';
+      
+      return {
+        id: trip.id,
+        driver: driverName,
+        from: trip.origin,
+        to: trip.destination,
+        date: new Date(trip.departure_time).toLocaleDateString(),
+        time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        price: trip.price,
+        seats: trip.available_seats,
+        rating: 4, // Default rating (not stored in trips table)
+        trip_id: trip.id
+      };
+    });
+  } catch (error) {
+    console.error("Failed to get rides:", error);
+    return [];
+  }
+};
+
 export const getRideById = async (rideId: string): Promise<Ride> => {
   try {
     // For mock rides, return a mock ride
@@ -44,9 +94,11 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
       throw new Error(error.message);
     }
     
-    // Extract the driver name from the profiles join
-    // Fixed: Added optional chaining to prevent null reference error
-    const driverName = trip.profiles?.full_name || 'Unknown Driver';
+    // Use optional chaining and nullish coalescing for type safety
+    // This handles the case where profiles might be null or a SelectQueryError
+    const driverName = (typeof trip.profiles === 'object' && trip.profiles && 'full_name' in trip.profiles) 
+      ? trip.profiles?.full_name 
+      : 'Unknown Driver';
     
     // Map the database trip to our Ride interface
     return {
@@ -138,8 +190,11 @@ export const getSimilarRides = async (rideId: string): Promise<Ride[]> => {
     
     // Map to Ride interface
     return trips.map(trip => {
-      // Fixed: Added optional chaining to prevent null reference error
-      const driverName = trip.profiles?.full_name || 'Unknown Driver';
+      // Use optional chaining and nullish coalescing for type safety
+      // This handles the case where profiles might be null or a SelectQueryError
+      const driverName = (typeof trip.profiles === 'object' && trip.profiles && 'full_name' in trip.profiles) 
+        ? trip.profiles?.full_name 
+        : 'Unknown Driver';
       
       return {
         id: trip.id,
