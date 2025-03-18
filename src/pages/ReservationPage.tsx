@@ -22,6 +22,7 @@ const ReservationPage = () => {
   const [activeTab, setActiveTab] = useState<string>("ride-details");
   const [user, setUser] = useState<any>(null);
   const [userName, setUserName] = useState<string>("");
+  const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
   
   const { 
     ride, 
@@ -38,6 +39,7 @@ const ReservationPage = () => {
   // Get the current user
   useEffect(() => {
     const fetchUser = async () => {
+      setCheckingAuth(true);
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       
@@ -50,21 +52,22 @@ const ReservationPage = () => {
           
         setUserName(profile?.full_name || user.email || "User");
       }
+      setCheckingAuth(false);
     };
     
     fetchUser();
   }, []);
 
-  // Redirect to login if not authenticated
+  // Only redirect if not authenticated and not in the process of checking authentication
   useEffect(() => {
-    // Only check after initial loading to avoid flashing
-    if (!isLoading && !isAuthenticated && rideId) {
+    // Only redirect if we've completed checking auth status and the user is not authenticated
+    if (!checkingAuth && !isLoading && !isAuthenticated && rideId) {
       toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
       navigate("/passenger-signin", { 
         state: { returnTo: `/reservation/${rideId}` } 
       });
     }
-  }, [isLoading, isAuthenticated, rideId, navigate, t]);
+  }, [checkingAuth, isLoading, isAuthenticated, rideId, navigate, t]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -73,7 +76,7 @@ const ReservationPage = () => {
   // Show chat tab only if reservation is successful and we have a user
   const showChatTab = reservationSuccess && user && ride && !(/^\d+$/.test(ride.id));
 
-  if (isLoading) {
+  if (isLoading || checkingAuth) {
     return (
       <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
         <LoadingState />
@@ -81,9 +84,9 @@ const ReservationPage = () => {
     );
   }
 
-  // If not authenticated, don't render the page content
+  // If not authenticated, show nothing (will be redirected by the useEffect)
   if (!isAuthenticated) {
-    return null; // Will be redirected by the useEffect
+    return null;
   }
 
   return (

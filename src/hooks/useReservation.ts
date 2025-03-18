@@ -25,7 +25,7 @@ export const useReservation = (rideId: string) => {
     checkAuth();
     
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      setIsAuthenticated(event === 'SIGNED_IN');
+      setIsAuthenticated(event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED');
     });
     
     return () => {
@@ -84,7 +84,7 @@ export const useReservation = (rideId: string) => {
   const makeReservation = async () => {
     setReservationError(null);
     
-    // Check if authenticated - already handled by the component's authentication check
+    // Check if authenticated
     if (!isAuthenticated) {
       setReservationError("You must be logged in to make a reservation");
       return;
