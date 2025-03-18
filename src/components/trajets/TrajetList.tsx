@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { MapPin, Calendar, Clock, User } from "lucide-react";
 import { Trajet } from "@/services/trajets/types";
@@ -105,12 +106,12 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
                 <div className="flex-grow flex flex-col md:flex-row gap-4 md:items-center">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-wassalni-green"></div>
-                    <p className="text-gray-700 dark:text-gray-300">{trajet.origine}</p>
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-normal break-words">{trajet.origine}</p>
                   </div>
                   <div className="h-px w-10 bg-gray-300 hidden md:block"></div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-wassalni-blue"></div>
-                    <p className="text-gray-700 dark:text-gray-300">{trajet.destination}</p>
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-normal break-words">{trajet.destination}</p>
                   </div>
                 </div>
               </div>

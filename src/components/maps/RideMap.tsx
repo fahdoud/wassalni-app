@@ -10,6 +10,7 @@ interface RideMapProps {
   className?: string;
 }
 
+// Google Maps API key
 const GOOGLE_MAPS_API_KEY = "AIzaSyAShg04o1uyNHkCNwWLwrEuV7jxZ8xiIU8";
 
 const RideMap: React.FC<RideMapProps> = ({ 
@@ -67,7 +68,7 @@ const RideMap: React.FC<RideMapProps> = ({
       if (!document.getElementById('google-maps-script')) {
         const script = document.createElement('script');
         script.id = 'google-maps-script';
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
         script.async = true;
         script.defer = true;
         
@@ -102,7 +103,7 @@ const RideMap: React.FC<RideMapProps> = ({
       console.log('Initializing map with center:', originLocation);
       const newMap = new window.google.maps.Map(mapRef.current, {
         center: originLocation,
-        zoom: 13,
+        zoom: 14,
         mapTypeControl: false,
         fullscreenControl: true,
         streetViewControl: false,
@@ -120,15 +121,17 @@ const RideMap: React.FC<RideMapProps> = ({
       setIsMapReady(true);
       
       // Add a listener to handle resize events
-      window.addEventListener('resize', () => {
+      const handleResize = () => {
         if (newMap) {
           newMap.setCenter(originLocation);
-          window.google.maps.event.trigger(newMap, 'resize');
+          google.maps.event.trigger(newMap, 'resize');
         }
-      });
+      };
+      
+      window.addEventListener('resize', handleResize);
       
       return () => {
-        window.removeEventListener('resize', () => {});
+        window.removeEventListener('resize', handleResize);
       };
     } catch (err) {
       console.error('Error initializing map:', err);
@@ -194,9 +197,9 @@ const RideMap: React.FC<RideMapProps> = ({
           map.fitBounds(bounds);
           
           // Adjust zoom if too zoomed in
-          const listener = window.google.maps.event.addListener(map, 'idle', () => {
+          const zoomListener = google.maps.event.addListener(map, 'idle', () => {
             if (map.getZoom() > 16) map.setZoom(16);
-            window.google.maps.event.removeListener(listener);
+            google.maps.event.removeListener(zoomListener);
           });
         } else {
           console.error('Directions request failed due to ' + status);
