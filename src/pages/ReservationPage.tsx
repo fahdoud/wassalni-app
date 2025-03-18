@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ChatInterface from '@/components/chat/ChatInterface';
+import { toast } from 'sonner';
 
 const ReservationPage = () => {
   const { rideId } = useParams();
@@ -30,7 +31,8 @@ const ReservationPage = () => {
     price,
     makeReservation,
     reservationSuccess,
-    reservationError
+    reservationError,
+    isAuthenticated
   } = useReservation(rideId || "");
 
   // Get the current user
@@ -53,12 +55,36 @@ const ReservationPage = () => {
     fetchUser();
   }, []);
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    // Only check after initial loading to avoid flashing
+    if (!isLoading && !isAuthenticated && rideId) {
+      toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
+      navigate("/passenger-signin", { 
+        state: { returnTo: `/reservation/${rideId}` } 
+      });
+    }
+  }, [isLoading, isAuthenticated, rideId, navigate, t]);
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
 
   // Show chat tab only if reservation is successful and we have a user
   const showChatTab = reservationSuccess && user && ride && !(/^\d+$/.test(ride.id));
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
+        <LoadingState />
+      </div>
+    );
+  }
+
+  // If not authenticated, don't render the page content
+  if (!isAuthenticated) {
+    return null; // Will be redirected by the useEffect
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">

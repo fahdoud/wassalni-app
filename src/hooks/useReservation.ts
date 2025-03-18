@@ -13,6 +13,25 @@ export const useReservation = (rideId: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reservationSuccess, setReservationSuccess] = useState<boolean>(false);
   const [reservationError, setReservationError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  
+  // Check authentication status on load
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getUser();
+      setIsAuthenticated(!!data.user);
+    };
+    
+    checkAuth();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      setIsAuthenticated(event === 'SIGNED_IN');
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
   
   // Get the ride data
   useEffect(() => {
@@ -65,7 +84,13 @@ export const useReservation = (rideId: string) => {
   const makeReservation = async () => {
     setReservationError(null);
     
-    // Check if authenticated
+    // Check if authenticated - already handled by the component's authentication check
+    if (!isAuthenticated) {
+      setReservationError("You must be logged in to make a reservation");
+      return;
+    }
+    
+    // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -122,6 +147,7 @@ export const useReservation = (rideId: string) => {
     price,
     makeReservation,
     reservationSuccess,
-    reservationError
+    reservationError,
+    isAuthenticated
   };
 };
