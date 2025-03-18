@@ -101,7 +101,7 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
           
         channels.push(reservationChannel);
         
-        // Only set up seat_availability subscription if trip_id is available
+        // Add seat_availability subscription if trip_id is available
         if (trajet.trip_id) {
           const seatChannel = supabase
             .channel(`seat-${trajet.id}`)
