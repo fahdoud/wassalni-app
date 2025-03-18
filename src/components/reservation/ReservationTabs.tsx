@@ -53,25 +53,24 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
     setActiveTab(value);
   };
 
-  // Style adjustments based on the provided image
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full mb-6 bg-gray-900 p-0 h-auto rounded-none dark:bg-gray-900">
+      <TabsList className="w-full mb-6 bg-gray-900 p-0 h-auto rounded-none dark:bg-gray-900 flex">
         <TabsTrigger 
           value="ride-details" 
-          className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none"
+          className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
         >
           {t('reservation.rideDetails')}
         </TabsTrigger>
         <TabsTrigger 
           value="payment" 
-          className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none"
+          className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
         >
           {t('reservation.payment')}
         </TabsTrigger>
         <TabsTrigger 
           value="confirmation" 
-          className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none" 
+          className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate" 
           disabled={!reservationSuccess}
         >
           {t('reservation.confirmation')}
@@ -79,7 +78,7 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
         {showChatTab && (
           <TabsTrigger 
             value="chat" 
-            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none"
+            className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
           >
             {t('chat.groupChat')}
           </TabsTrigger>
@@ -87,7 +86,7 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
         {reservationSuccess && (
           <TabsTrigger 
             value="tracking" 
-            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none"
+            className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
           >
             {language === 'fr' ? 'Suivi' : t('reservation.liveTracking')}
           </TabsTrigger>
