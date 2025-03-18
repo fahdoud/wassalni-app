@@ -10,6 +10,7 @@ interface RideMapProps {
   className?: string;
 }
 
+// Google Maps API key
 const GOOGLE_MAPS_API_KEY = "AIzaSyAShg04o1uyNHkCNwWLwrEuV7jxZ8xiIU8";
 
 const RideMap: React.FC<RideMapProps> = ({ 
@@ -102,7 +103,7 @@ const RideMap: React.FC<RideMapProps> = ({
       console.log('Initializing map with center:', originLocation);
       const newMap = new window.google.maps.Map(mapRef.current, {
         center: originLocation,
-        zoom: 13,
+        zoom: 14,
         mapTypeControl: false,
         fullscreenControl: true,
         streetViewControl: false,
