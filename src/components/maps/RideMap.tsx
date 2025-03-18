@@ -27,7 +27,7 @@ const RideMap: React.FC<RideMapProps> = ({
   const [isMapReady, setIsMapReady] = useState(false);
   
   // Track whether the map is visible in the viewport
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true); // Changed to true by default to ensure initial visibility
   
   // Mock driver movement
   const [mockDriverLocation, setMockDriverLocation] = useState<{ lat: number; lng: number } | null>(
@@ -104,7 +104,7 @@ const RideMap: React.FC<RideMapProps> = ({
   
   // Initialize map once Google Maps is loaded and component is visible
   useEffect(() => {
-    if (!isLoaded || !mapRef.current || !isVisible) {
+    if (!isLoaded || !mapRef.current) {
       console.log('Not ready to initialize map yet:', { isLoaded, isVisible, mapRef: !!mapRef.current });
       return;
     }
@@ -153,7 +153,7 @@ const RideMap: React.FC<RideMapProps> = ({
       console.error('Error initializing map:', err);
       setError('Failed to initialize map. Please try again later.');
     }
-  }, [isLoaded, isVisible, originLocation]);
+  }, [isLoaded, originLocation]);
   
   // Add markers and directions once map is initialized
   useEffect(() => {

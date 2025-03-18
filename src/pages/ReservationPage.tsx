@@ -73,6 +73,13 @@ const ReservationPage = () => {
     }
   }, [ride]);
 
+  // Automatically switch to tracking tab when reservation is successful
+  useEffect(() => {
+    if (reservationSuccess) {
+      setActiveTab("tracking");
+    }
+  }, [reservationSuccess]);
+
   useEffect(() => {
     const fetchUser = async () => {
       setCheckingAuth(true);
