@@ -21,16 +21,21 @@ export interface Ride {
   };
 }
 
-export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'mock';
 
 export interface Reservation {
   id: string;
-  trip_id: string;
-  passenger_id: string;
+  trip_id: string | null;
+  passenger_id: string | null;
   seats_reserved: number;
   status: ReservationStatus;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
+  passenger_name: string | null;
+  origin: string | null;
+  destination: string | null;
+  price: number | null;
+  reservation_date: string | null;
   trip?: {
     id: string;
     origin: string;
@@ -38,8 +43,19 @@ export interface Reservation {
     departure_time: string;
     price: number;
     driver_id: string;
-    profiles: {
-      full_name: string;
-    };
+    profiles?: {
+      full_name: string | null;
+    } | null;
+  };
+  trips?: {
+    id: string;
+    origin: string;
+    destination: string;
+    departure_time: string;
+    price: number;
+    driver_id: string;
+    profiles?: {
+      full_name: string | null;
+    } | null;
   };
 }
