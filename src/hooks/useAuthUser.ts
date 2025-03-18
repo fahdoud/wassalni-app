@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const useAuthUser = () => {
   const [user, setUser] = useState<any>(null);
   const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
   const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
 
   useEffect(() => {
@@ -15,6 +16,7 @@ export const useAuthUser = () => {
       console.log("User data in AuthUser hook:", user ? "User found" : "No user");
       setUser(user);
       if (user) {
+        setUserEmail(user.email || "");
         const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
         setUserName(profile?.full_name || user.email || "User");
       }
@@ -32,5 +34,5 @@ export const useAuthUser = () => {
     };
   }, []);
 
-  return { user, userName, checkingAuth };
+  return { user, userName, userEmail, checkingAuth };
 };

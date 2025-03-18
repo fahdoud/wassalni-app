@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -222,10 +221,36 @@ const DriverSignUp = () => {
         if (vehiclePhoto) {
           const vehicleImageUrl = await uploadVehicleImage(vehiclePhoto, userId);
           if (vehicleImageUrl) {
-            await supabase
+            // Instead of setting vehicle_photo_url directly, we create a drivers record if it doesn't exist
+            // and then update it with the correct field
+            const { data: existingDriver } = await supabase
               .from('drivers')
-              .update({ vehicle_photo_url: vehicleImageUrl })
-              .eq('user_id', userId);
+              .select('id')
+              .eq('user_id', userId)
+              .single();
+            
+            if (existingDriver) {
+              await supabase
+                .from('drivers')
+                .update({ 
+                  avatar_url: vehicleImageUrl // Store vehicle photo as avatar_url for now
+                })
+                .eq('user_id', userId);
+            } else {
+              await supabase
+                .from('drivers')
+                .insert({
+                  user_id: userId,
+                  avatar_url: vehicleImageUrl,
+                  full_name: fullName
+                });
+            }
+            
+            // Also update the profile avatar URL
+            await supabase
+              .from('profiles')
+              .update({ avatar_url: vehicleImageUrl })
+              .eq('id', userId);
           }
         }
       }

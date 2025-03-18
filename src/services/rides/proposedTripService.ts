@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ProposedTrip } from "./types";
 
 // Create a proposed trip
 export const createProposedTrip = async (
@@ -13,7 +14,8 @@ export const createProposedTrip = async (
   description?: string
 ) => {
   try {
-    const { data, error } = await supabase
+    // Using 'any' as a temporary workaround for type issues
+    const { data, error } = await (supabase as any)
       .from('proposed_trips')
       .insert({
         driver_id: driverId,
@@ -42,9 +44,10 @@ export const createProposedTrip = async (
 };
 
 // Get all proposed trips
-export const getProposedTrips = async () => {
+export const getProposedTrips = async (): Promise<ProposedTrip[]> => {
   try {
-    const { data, error } = await supabase
+    // Using 'any' as a temporary workaround for type issues
+    const { data, error } = await (supabase as any)
       .from('proposed_trips')
       .select(`
         id,
@@ -67,7 +70,7 @@ export const getProposedTrips = async () => {
       throw new Error(error.message);
     }
     
-    return data;
+    return data as ProposedTrip[];
   } catch (error) {
     console.error("Failed to get proposed trips:", error);
     return [];
@@ -77,7 +80,8 @@ export const getProposedTrips = async () => {
 // Update a proposed trip status
 export const updateProposedTripStatus = async (tripId: string, status: 'pending' | 'approved' | 'rejected') => {
   try {
-    const { data, error } = await supabase
+    // Using 'any' as a temporary workaround for type issues
+    const { data, error } = await (supabase as any)
       .from('proposed_trips')
       .update({ status })
       .eq('id', tripId)

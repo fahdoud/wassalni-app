@@ -59,3 +59,19 @@ export interface Reservation {
     } | null;
   };
 }
+
+export interface ProposedTrip {
+  id: string;
+  driver_id: string;
+  origin: string;
+  destination: string;
+  departure_time: string;
+  price: number;
+  available_seats: number;
+  description?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at?: string;
+  profiles?: {
+    full_name: string | null;
+  } | null;
+}
