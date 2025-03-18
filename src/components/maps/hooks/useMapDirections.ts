@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { loadGoogleMapsScript } from '../utils/googleMapsLoader';
 
@@ -31,7 +30,6 @@ export const useMapDirections = ({
   const [isMapReady, setIsMapReady] = useState(false);
   const [mapInitialized, setMapInitialized] = useState(false);
   
-  // Immediately check if Google Maps is already loaded
   useEffect(() => {
     if (window.google && window.google.maps) {
       console.log('Google Maps already available, setting isLoaded true immediately');
@@ -39,7 +37,6 @@ export const useMapDirections = ({
     }
   }, []);
   
-  // Load Google Maps API with highest priority if not already loaded
   useEffect(() => {
     if (isLoaded) return; // Skip if already loaded
     
@@ -55,10 +52,8 @@ export const useMapDirections = ({
       }
     };
     
-    // Start loading immediately
     initializeMap();
     
-    // Set a timeout to force isLoaded after 2 seconds as a fallback
     const timeout = setTimeout(() => {
       if (window.google && window.google.maps && !isLoaded) {
         console.log('Forcing isLoaded after timeout');
@@ -69,7 +64,6 @@ export const useMapDirections = ({
     return () => clearTimeout(timeout);
   }, [isLoaded]);
   
-  // Initialize map as soon as Google Maps is loaded
   useEffect(() => {
     if (!isLoaded || !mapRef.current || mapInitialized || !window.google || !window.google.maps) {
       return;
@@ -98,11 +92,9 @@ export const useMapDirections = ({
       setIsMapReady(true);
       setMapInitialized(true);
       
-      // Force resize immediately for correct rendering
       window.google.maps.event.trigger(newMap, 'resize');
       newMap.setCenter(originLocation);
       
-      // Set another resize after a tiny delay to ensure proper sizing
       setTimeout(() => {
         if (newMap) {
           window.google.maps.event.trigger(newMap, 'resize');
@@ -110,7 +102,6 @@ export const useMapDirections = ({
         }
       }, 50);
       
-      // Add resize handler
       const handleResize = () => {
         if (newMap) {
           window.google.maps.event.trigger(newMap, 'resize');
@@ -129,7 +120,6 @@ export const useMapDirections = ({
     }
   }, [isLoaded, originLocation, mapInitialized]);
   
-  // Add markers and directions immediately once map is ready
   useEffect(() => {
     if (!map || !isMapReady || !window.google || !window.google.maps) {
       return;
@@ -137,12 +127,10 @@ export const useMapDirections = ({
     
     console.log('Adding markers and directions');
     
-    // Clear existing markers
     map.data?.forEach((feature) => {
       map.data?.remove(feature);
     });
     
-    // Create origin marker
     const originMarker = new window.google.maps.Marker({
       position: originLocation,
       map,
@@ -153,7 +141,6 @@ export const useMapDirections = ({
       }
     });
     
-    // Create destination marker
     const destinationMarker = new window.google.maps.Marker({
       position: destinationLocation,
       map,
@@ -164,7 +151,6 @@ export const useMapDirections = ({
       }
     });
     
-    // Create a polyline first for immediate visual
     const directPath = new window.google.maps.Polyline({
       path: [originLocation, destinationLocation],
       geodesic: true,
@@ -174,13 +160,11 @@ export const useMapDirections = ({
       map: map
     });
     
-    // Set appropriate bounds immediately
     const bounds = new window.google.maps.LatLngBounds();
     bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
     bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
     map.fitBounds(bounds);
     
-    // Then fetch proper directions
     const directionsService = new window.google.maps.DirectionsService();
     const directionsRenderer = new window.google.maps.DirectionsRenderer({
       map,
@@ -200,19 +184,16 @@ export const useMapDirections = ({
       },
       (response, status) => {
         if (status === 'OK') {
-          // Hide the temporary polyline when real directions arrive
           directPath.setMap(null);
           
           console.log('Directions fetched successfully');
           directionsRenderer.setDirections(response);
           
-          // Adjust bounds to include origin and destination
           const bounds = new window.google.maps.LatLngBounds();
           bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
           bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
           map.fitBounds(bounds);
           
-          // Adjust zoom if too zoomed in
           const zoomListener = window.google.maps.event.addListener(map, 'idle', () => {
             if (map.getZoom() > 16) map.setZoom(16);
             window.google.maps.event.removeListener(zoomListener);
@@ -221,7 +202,6 @@ export const useMapDirections = ({
       }
     );
     
-    // Cleanup
     return () => {
       originMarker.setMap(null);
       destinationMarker.setMap(null);

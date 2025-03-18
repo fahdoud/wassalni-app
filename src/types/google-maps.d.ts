@@ -1,4 +1,3 @@
-
 declare namespace google {
   namespace maps {
     class Map {
@@ -53,6 +52,23 @@ declare namespace google {
       constructor(opts?: DirectionsRendererOptions);
       setMap(map: Map | null): void;
       setDirections(directions: DirectionsResult): void;
+    }
+
+    // Add Polyline class to fix the TS error
+    class Polyline {
+      constructor(opts?: PolylineOptions);
+      setMap(map: Map | null): void;
+      getPath(): MVCArray<LatLng>;
+      setPath(path: LatLng[] | LatLngLiteral[] | MVCArray<LatLng>): void;
+    }
+
+    // Add MVCArray for Polyline
+    class MVCArray<T> {
+      constructor(array?: T[]);
+      getArray(): T[];
+      getAt(i: number): T;
+      getLength(): number;
+      forEach(callback: (elem: T, i: number) => void): void;
     }
 
     interface MapOptions {
@@ -191,6 +207,7 @@ declare namespace google {
       path?: LatLng[] | LatLngLiteral[];
       visible?: boolean;
       zIndex?: number;
+      map?: Map;
     }
 
     interface IconSequence {
