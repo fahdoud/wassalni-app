@@ -34,6 +34,10 @@ export const loadGoogleMapsScript = (): Promise<void> => {
           if (window.google && window.google.maps) {
             console.log('Maps loaded after brief delay');
             resolve();
+          } else {
+            // Handle case where Google Maps objects are not available despite script loading
+            console.error('Google Maps failed to initialize objects after loading');
+            reject(new Error('Failed to initialize Google Maps objects'));
           }
         }, 50);
       } else {
@@ -55,21 +59,27 @@ export const loadGoogleMapsScript = (): Promise<void> => {
     // Handle API key errors
     window.gm_authFailure = function() {
       console.error('Google Maps authentication failed - your API key may be invalid, disabled, or missing required billing information');
+      const errorMsg = 'Google Maps API key error: Please check if billing is enabled on your Google Cloud account and the API is activated.';
+      reject(new Error(errorMsg));
+      
+      // Display visual error indicators on map elements
       const mapElements = document.querySelectorAll('[class*="map"]');
       mapElements.forEach(element => {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'p-4 bg-red-50 border border-red-300 rounded-lg text-center';
-        errorDiv.innerHTML = `
-          <div class="text-red-500 font-bold mb-2">Google Maps Error</div>
-          <p class="text-sm text-gray-700">API key issue detected. Please check:</p>
-          <ul class="text-xs text-left text-gray-600 mt-2 list-disc pl-5">
-            <li>API key is valid</li>
-            <li>Google Maps JavaScript API is enabled</li>
-            <li>Billing is enabled on your Google Cloud account</li>
-            <li>Check browser console for specific errors</li>
-          </ul>
-        `;
-        element.appendChild(errorDiv);
+        if (!element.querySelector('.maps-api-error')) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'maps-api-error p-4 bg-red-50 border border-red-300 rounded-lg text-center';
+          errorDiv.innerHTML = `
+            <div class="text-red-500 font-bold mb-2">Google Maps Error</div>
+            <p class="text-sm text-gray-700">API key issue detected. Please check:</p>
+            <ul class="text-xs text-left text-gray-600 mt-2 list-disc pl-5">
+              <li>API key is valid (your key appears to be valid)</li>
+              <li>Google Maps JavaScript API is enabled in Google Cloud Console</li>
+              <li>Billing is enabled on your Google Cloud account</li>
+              <li>Any domain restrictions on the API key</li>
+            </ul>
+          `;
+          element.appendChild(errorDiv);
+        }
       });
     };
     
