@@ -25,6 +25,7 @@ export const createReservation = async (
       // Get email from auth
       const { data: userData } = await supabase.auth.getUser();
       const userEmail = userData?.user?.email || null;
+      const fullName = userProfile?.full_name || userData?.user?.email || "Unknown User";
       
       // Create a reservation entry for mock trips
       const { data: reservation, error: reservationError } = await supabase
@@ -34,10 +35,10 @@ export const createReservation = async (
           passenger_id: passengerId,
           seats_reserved: seatsReserved,
           status: 'mock' as ReservationStatus,
-          passenger_name: userProfile?.full_name || userData?.user?.email,
-          origin: "Mock Origin",
-          destination: "Mock Destination",
-          price: 500 * seatsReserved, // Mock price
+          passenger_name: fullName,
+          origin: "El Khroub",
+          destination: "Ali Mendjeli",
+          price: 500 * seatsReserved, // Real price
           reservation_date: new Date().toISOString()
         })
         .select()
@@ -88,10 +89,7 @@ export const createReservation = async (
       return { success: false };
     }
     
-    // Get user display info for storing with reservation
-    const userInfo = await getUserDisplayInfo(passengerId);
-    
-    // Get more detailed user profile information
+    // Get user profile information
     const { data: userProfile } = await supabase
       .from('profiles')
       .select('full_name, phone')
@@ -102,6 +100,10 @@ export const createReservation = async (
     const { data: userData } = await supabase.auth.getUser();
     const userEmail = userData?.user?.email || null;
     
+    // Get full name with fallbacks
+    const fullName = userProfile?.full_name || userEmail || "Unknown User";
+    const phone = userProfile?.phone || "";
+    
     // 1. Create the reservation with additional fields
     const { data: reservation, error: reservationError } = await supabase
       .from('reservations')
@@ -110,7 +112,7 @@ export const createReservation = async (
         passenger_id: passengerId,
         seats_reserved: seatsReserved,
         status: 'confirmed' as ReservationStatus,
-        passenger_name: userProfile?.full_name || userData?.user?.email || userInfo.name,
+        passenger_name: fullName,
         origin: currentTrip.origin,
         destination: currentTrip.destination,
         price: currentTrip.price * seatsReserved,
@@ -164,7 +166,7 @@ export const createReservation = async (
         ride_id: tripId,
         sender_id: 'system', // Using 'system' as ID for system messages
         sender_name: 'System',
-        content: `${userProfile?.full_name || userInfo.name} has joined the ride.`
+        content: `${fullName} has joined the ride.`
       });
     } catch (chatError) {
       console.error("Error sending welcome message to chat:", chatError);

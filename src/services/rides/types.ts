@@ -4,21 +4,27 @@
 export interface Ride {
   id: string;
   driver: string;
-  from: string;
-  to: string;
-  date: string;
-  time: string;
+  origin: string;
+  destination: string;
+  departureDate: string;
+  departureTime: string;
   price: number;
   seats: number;
-  rating: number;
+  rating?: number;
   trip_id?: string;
   is_mock?: boolean;
   driverGender?: 'male' | 'female';
+  timestamp?: number;
   // Location tracking properties
   currentLocation?: {
     lat: number;
     lng: number;
   };
+  // Legacy fields for compatibility
+  from?: string;
+  to?: string;
+  date?: string;
+  time?: string;
 }
 
 export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'mock';

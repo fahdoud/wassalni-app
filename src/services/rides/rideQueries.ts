@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Ride } from "./types";
 import { toast } from "sonner";
@@ -53,8 +52,14 @@ export const getRides = async (): Promise<Ride[]> => {
         departureTime: formattedTime,
         price: trip.price,
         seats: trip.available_seats,
+        rating: 4.5, // Default rating
         trip_id: trip.id,
-        timestamp: new Date(trip.departure_time).getTime()
+        timestamp: new Date(trip.departure_time).getTime(),
+        // Backward compatibility fields
+        from: trip.origin,
+        to: trip.destination,
+        date: formattedDate,
+        time: formattedTime
       };
     });
   } catch (error) {
@@ -79,8 +84,13 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
         departureTime: "10:00 AM",
         price: 2500,
         seats: 3,
-        driverRating: 4.7,
-        is_mock: true
+        rating: 4.7,
+        is_mock: true,
+        // Backward compatibility fields
+        from: "Demo Origin",
+        to: "Demo Destination",
+        date: "2023-06-15",
+        time: "10:00 AM"
       };
     }
     
@@ -133,9 +143,14 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
       departureTime: formattedTime,
       price: trip.price,
       seats: trip.available_seats,
-      driverRating: 4.5, // Default rating
+      rating: 4.5, // Default rating
       trip_id: trip.id,
-      timestamp: date.getTime()
+      timestamp: date.getTime(),
+      // Backward compatibility fields
+      from: trip.origin,
+      to: trip.destination,
+      date: formattedDate,
+      time: formattedTime
     };
   } catch (error) {
     console.error("Failed to get ride:", error);
@@ -151,7 +166,12 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
       departureTime: "",
       price: 0,
       seats: 0,
-      driverRating: 0
+      rating: 0,
+      // Backward compatibility fields
+      from: "Could not load ride",
+      to: "Please try again",
+      date: "",
+      time: ""
     };
   }
 };
@@ -220,9 +240,14 @@ export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) =>
             departureTime: formattedTime,
             price: trip.price,
             seats: trip.available_seats,
-            driverRating: 4.5, // Default rating
+            rating: 4.5, // Default rating
             trip_id: trip.id,
-            timestamp: date.getTime()
+            timestamp: date.getTime(),
+            // Backward compatibility fields
+            from: trip.origin,
+            to: trip.destination,
+            date: formattedDate,
+            time: formattedTime
           });
         }
       }

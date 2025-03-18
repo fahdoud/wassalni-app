@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Trajet, ReservationTrajet } from "./types";
+import { Trajet, ReservationTrajet, StatutReservation } from "./types";
 import { toast } from "sonner";
 
 export const getTrajets = async (): Promise<Trajet[]> => {
@@ -38,7 +38,7 @@ export const getTrajets = async (): Promise<Trajet[]> => {
           typeof trajet.profiles === 'object' && 
           trajet.profiles !== null && 
           'full_name' in trajet.profiles && 
-          trajet.profiles.full_name) {
+          typeof trajet.profiles.full_name === 'string') {
         chauffeurName = trajet.profiles.full_name;
       }
       
@@ -56,7 +56,7 @@ export const getTrajets = async (): Promise<Trajet[]> => {
         places: trajet.places_dispo,
         places_dispo: trajet.places_dispo,
         note: 4, // Default rating
-        trajet_id: trajet.id
+        chauffeur_id: trajet.chauffeur_id
       };
     });
   } catch (error) {
@@ -117,7 +117,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
         typeof trajet.profiles === 'object' && 
         trajet.profiles !== null && 
         'full_name' in trajet.profiles && 
-        trajet.profiles.full_name) {
+        typeof trajet.profiles.full_name === 'string') {
       chauffeurName = trajet.profiles.full_name;
     }
     
@@ -136,7 +136,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
       places: trajet.places_dispo,
       places_dispo: trajet.places_dispo,
       note: 4, // Default rating
-      trajet_id: trajet.id
+      chauffeur_id: trajet.chauffeur_id
     };
   } catch (error) {
     console.error("Failed to get trajet:", error);
@@ -160,8 +160,36 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
 
 export const bookTrajet = async (trajetId: string, userId: string, seats: number): Promise<boolean> => {
   try {
-    // Get the trajet to book
+    // Get the trajet to book and user information
     const trajet = await getTrajetById(trajetId);
+    
+    // Get user details (full name, email, phone)
+    const { data: userProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select(`
+        full_name,
+        phone
+      `)
+      .eq('id', userId)
+      .single();
+      
+    if (profileError) {
+      console.error("Error fetching user profile:", profileError);
+      toast.error("Erreur lors de la récupération du profil utilisateur");
+      return false;
+    }
+    
+    // Get email from auth user
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError) {
+      console.error("Error getting auth user:", authError);
+      toast.error("Erreur d'authentification");
+      return false;
+    }
+    
+    const userEmail = authData.user?.email || '';
+    const fullName = userProfile?.full_name || userEmail;
+    const phone = userProfile?.phone || '';
     
     // Check if trajet exists and has available seats
     if (!trajet || trajet.places_dispo < seats) {
@@ -191,7 +219,8 @@ export const bookTrajet = async (trajetId: string, userId: string, seats: number
         trip_id: trajetId,
         passenger_id: userId,
         seats_reserved: seats,
-        status: 'confirmée',
+        status: 'confirmée' as StatutReservation,
+        passenger_name: fullName,
         origin: trajet.origine,
         destination: trajet.destination,
         price: trajet.prix * seats,
@@ -216,15 +245,18 @@ export const bookTrajet = async (trajetId: string, userId: string, seats: number
 // Function to get reservations for a user
 export const getUserReservations = async (userId: string): Promise<ReservationTrajet[]> => {
   try {
-    // Use the reservations table instead of a non-existent reservations_trajets table
+    // Use the reservations table
     const { data, error } = await supabase
       .from('reservations')
       .select(`
         id,
         trip_id,
+        passenger_id,
         seats_reserved,
         status,
         created_at,
+        updated_at,
+        passenger_name,
         origin,
         destination,
         price,
@@ -241,10 +273,11 @@ export const getUserReservations = async (userId: string): Promise<ReservationTr
     return data.map(reservation => ({
       id: reservation.id,
       trajet_id: reservation.trip_id,
-      passager_id: userId,
+      passager_id: reservation.passenger_id,
       places_reservees: reservation.seats_reserved,
-      statut: reservation.status,
-      created_at: reservation.created_at,
+      statut: reservation.status as StatutReservation,
+      created_at: reservation.created_at || '',
+      updated_at: reservation.updated_at,
       origine: reservation.origin || '',
       destination: reservation.destination || '',
       prix: reservation.price || 0,

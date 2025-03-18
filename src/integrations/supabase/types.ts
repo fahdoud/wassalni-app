@@ -60,36 +60,6 @@ export type Database = {
         }
         Relationships: []
       }
-      email_verification: {
-        Row: {
-          created_at: string | null
-          email: string
-          id: string
-          token_expires_at: string | null
-          updated_at: string | null
-          verification_token: string | null
-          verified: boolean | null
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          id: string
-          token_expires_at?: string | null
-          updated_at?: string | null
-          verification_token?: string | null
-          verified?: boolean | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          id?: string
-          token_expires_at?: string | null
-          updated_at?: string | null
-          verification_token?: string | null
-          verified?: boolean | null
-        }
-        Relationships: []
-      }
       feedback: {
         Row: {
           comment: string | null
@@ -207,36 +177,6 @@ export type Database = {
         }
         Relationships: []
       }
-      phone_verification: {
-        Row: {
-          code_expires_at: string | null
-          created_at: string | null
-          id: string
-          phone: string
-          updated_at: string | null
-          verification_code: string | null
-          verified: boolean | null
-        }
-        Insert: {
-          code_expires_at?: string | null
-          created_at?: string | null
-          id: string
-          phone: string
-          updated_at?: string | null
-          verification_code?: string | null
-          verified?: boolean | null
-        }
-        Update: {
-          code_expires_at?: string | null
-          created_at?: string | null
-          id?: string
-          phone?: string
-          updated_at?: string | null
-          verification_code?: string | null
-          verified?: boolean | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -263,48 +203,6 @@ export type Database = {
           id?: string
           phone?: string | null
           role?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      proposed_trips: {
-        Row: {
-          available_seats: number
-          created_at: string | null
-          departure_time: string
-          description: string | null
-          destination: string
-          driver_id: string
-          id: string
-          origin: string
-          price: number
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          available_seats?: number
-          created_at?: string | null
-          departure_time: string
-          description?: string | null
-          destination: string
-          driver_id: string
-          id?: string
-          origin: string
-          price: number
-          status?: string
-          updated_at?: string | null
-        }
-        Update: {
-          available_seats?: number
-          created_at?: string | null
-          departure_time?: string
-          description?: string | null
-          destination?: string
-          driver_id?: string
-          id?: string
-          origin?: string
-          price?: number
-          status?: string
           updated_at?: string | null
         }
         Relationships: []

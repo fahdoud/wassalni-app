@@ -15,7 +15,7 @@ export interface Trajet {
   trip_id?: string;
 }
 
-export type StatutReservation = 'en_attente' | 'confirmée' | 'annulée' | 'terminée' | 'mock';
+export type StatutReservation = 'en_attente' | 'confirmée' | 'annulée' | 'terminée' | 'mock' | string;
 
 export interface ReservationTrajet {
   id: string;
