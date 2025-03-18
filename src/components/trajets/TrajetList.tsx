@@ -1,11 +1,11 @@
 
 import { useEffect, useState } from "react";
-import { MapPin, Calendar, Clock, User } from "lucide-react";
 import { Trajet } from "@/services/trajets/types";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Button from "@/components/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { toast } from "sonner";
 
 interface TrajetListProps {
   trajets: Trajet[];
@@ -173,6 +173,11 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
         
         console.log(`Affichage du trajet ${trajet.id}: ${placesActuelles} places disponibles`);
         
+        // Get proper text for seats (singular/plural)
+        const placesText = placesActuelles === 1 
+          ? t('rides.seat') 
+          : t('rides.seats');
+        
         return (
           <div 
             key={trajet.id}
@@ -220,7 +225,7 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
                     : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
                 }`}>
                   {placesActuelles > 0 
-                    ? `${placesActuelles} ${placesActuelles === 1 ? t('rides.seat') : t('rides.seats')}` 
+                    ? `${placesActuelles} ${placesText}` 
                     : t('rides.full')}
                 </div>
               </div>

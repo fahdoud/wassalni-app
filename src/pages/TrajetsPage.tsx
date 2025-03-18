@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getTrajets } from "@/services/trajets/trajetsService";
 import { Trajet } from "@/services/trajets/types";
-import { Loader2 } from "lucide-react";
 import TrajetList from "@/components/trajets/TrajetList";
+import { toast } from "sonner";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
@@ -36,6 +36,7 @@ const TrajetsPage = () => {
       }
     } catch (error) {
       console.error("Erreur lors de la récupération des trajets:", error);
+      toast.error(t('rides.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -51,14 +52,22 @@ const TrajetsPage = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     
     const handleFocus = () => {
+      console.log("Window focused - refreshing trajets");
       fetchTrajets(true);
     };
     
     window.addEventListener('focus', handleFocus);
     
+    // Set up an interval to refresh trajets every 30 seconds
+    const refreshInterval = setInterval(() => {
+      console.log("Periodic refresh of trajets");
+      fetchTrajets();
+    }, 30000);
+    
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('focus', handleFocus);
+      clearInterval(refreshInterval);
     };
   }, []);
 
