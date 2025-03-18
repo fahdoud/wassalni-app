@@ -302,44 +302,6 @@ export type Database = {
           },
         ]
       }
-      reservations_trajets: {
-        Row: {
-          created_at: string | null
-          id: string
-          passager_id: string
-          places_reservees: number
-          statut: string | null
-          trajet_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          passager_id: string
-          places_reservees?: number
-          statut?: string | null
-          trajet_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          passager_id?: string
-          places_reservees?: number
-          statut?: string | null
-          trajet_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reservations_trajets_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       ride_messages: {
         Row: {
           content: string

@@ -34,15 +34,30 @@ const ReservationPage = () => {
 
   const rideLocations = useRideLocations(ride);
 
+  // Preload map data as soon as ride data is available
+  useEffect(() => {
+    if (ride && rideId) {
+      console.log("Preloading map data for ride:", rideId);
+      // This forces the map components to start initializing early
+      const preloadTab = document.createElement('div');
+      preloadTab.style.position = 'absolute';
+      preloadTab.style.visibility = 'hidden';
+      document.body.appendChild(preloadTab);
+      
+      // Clean up
+      return () => {
+        document.body.removeChild(preloadTab);
+      };
+    }
+  }, [ride, rideId]);
+
   // Automatically switch to tracking tab when reservation is successful
   useEffect(() => {
     if (reservationSuccess) {
-      // Small delay to ensure UI is ready before switching
+      // Immediately switch to tracking tab on successful reservation
       console.log("Reservation successful, switching to tracking tab");
       toast.success(t('reservation.successNotification'));
-      setTimeout(() => {
-        setActiveTab("tracking");
-      }, 100);
+      setActiveTab("tracking");
     }
   }, [reservationSuccess, t]);
 

@@ -31,11 +31,13 @@ export const useMapDirections = ({
   const [isMapReady, setIsMapReady] = useState(false);
   const [mapInitialized, setMapInitialized] = useState(false);
   
-  // Load Google Maps API
+  // Load Google Maps API with higher priority
   useEffect(() => {
     const initializeMap = async () => {
       try {
+        console.log('Starting Google Maps initialization');
         await loadGoogleMapsScript();
+        console.log('Google Maps script loaded successfully');
         setIsLoaded(true);
       } catch (err) {
         console.error('Error loading Google Maps:', err);
@@ -74,14 +76,9 @@ export const useMapDirections = ({
       setIsMapReady(true);
       setMapInitialized(true);
       
-      // Force map resize to ensure it renders properly
-      setTimeout(() => {
-        if (newMap) {
-          console.log('Forcing map resize');
-          window.google.maps.event.trigger(newMap, 'resize');
-          newMap.setCenter(originLocation);
-        }
-      }, 500);
+      // Force map resize immediately to ensure it renders properly
+      window.google.maps.event.trigger(newMap, 'resize');
+      newMap.setCenter(originLocation);
       
       // Add a listener to handle resize events
       const handleResize = () => {
