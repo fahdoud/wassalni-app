@@ -35,7 +35,6 @@ const ReservationPage = () => {
     isAuthenticated
   } = useReservation(rideId || "");
 
-  // Get the current user
   useEffect(() => {
     const fetchUser = async () => {
       setCheckingAuth(true);
@@ -59,12 +58,10 @@ const ReservationPage = () => {
     fetchUser();
   }, []);
 
-  // Only redirect if not authenticated and not in the process of checking authentication
   useEffect(() => {
-    // Only redirect if we've completed checking auth status and the user is not authenticated
     if (!checkingAuth && !isLoading && !isAuthenticated && rideId) {
       console.log("Not authenticated, redirecting to login page");
-      toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
+      toast.error(t('auth.loginRequired'));
       navigate("/passenger-signin", { 
         state: { returnTo: `/reservation/${rideId}` } 
       });
@@ -77,7 +74,6 @@ const ReservationPage = () => {
     setActiveTab(value);
   };
 
-  // Show chat tab only if reservation is successful and we have a user
   const showChatTab = reservationSuccess && user && ride && !(/^\d+$/.test(ride.id));
 
   if (isLoading || checkingAuth) {
@@ -86,11 +82,6 @@ const ReservationPage = () => {
         <LoadingState />
       </div>
     );
-  }
-
-  // If not authenticated, show nothing (will be redirected by the useEffect)
-  if (!isAuthenticated) {
-    return null;
   }
 
   return (

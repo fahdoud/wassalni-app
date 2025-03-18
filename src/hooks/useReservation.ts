@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { getRideById, subscribeToRideUpdates } from '@/services/rides/rideQueries';
 import { createReservation } from '@/services/rides/reservationService';
@@ -19,13 +18,17 @@ export const useReservation = (rideId: string) => {
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
-      setIsAuthenticated(!!data.user);
+      const isAuthed = !!data.user;
+      console.log("Initial auth check in useReservation:", isAuthed);
+      setIsAuthenticated(isAuthed);
     };
     
     checkAuth();
     
-    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      setIsAuthenticated(event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED');
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      const isAuthed = event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED';
+      console.log("Auth state change in useReservation:", event, isAuthed);
+      setIsAuthenticated(isAuthed);
     });
     
     return () => {
