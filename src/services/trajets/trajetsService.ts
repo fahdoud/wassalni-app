@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Trajet, ReservationTrajet, StatutReservation } from "./types";
 import { toast } from "sonner";
@@ -30,16 +29,13 @@ export const getTrajets = async (): Promise<Trajet[]> => {
     
     // Map to Trajet interface
     return trajets.map(trajet => {
-      // Use a more robust type check for the profiles object
+      // Use optional chaining for safer access
       let chauffeurName = 'Chauffeur Inconnu';
       
-      // Check if profiles exists, is an object, and has full_name property
-      if (trajet.profiles && 
-          typeof trajet.profiles === 'object' && 
-          trajet.profiles !== null && 
-          'full_name' in trajet.profiles && 
-          trajet.profiles.full_name) {
-        chauffeurName = trajet.profiles.full_name;
+      // Check if profile name exists using optional chaining
+      const profileName = trajet.profiles?.full_name;
+      if (profileName) {
+        chauffeurName = profileName;
       }
       
       // Format date and time
@@ -109,16 +105,13 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet> => {
       throw new Error(error.message);
     }
     
-    // Use a more robust type check for the profiles object
+    // Use optional chaining for safer access
     let chauffeurName = 'Chauffeur Inconnu';
       
-    // Check if profiles exists, is an object, and has full_name property
-    if (trajet.profiles && 
-        typeof trajet.profiles === 'object' && 
-        trajet.profiles !== null && 
-        'full_name' in trajet.profiles && 
-        trajet.profiles.full_name) {
-      chauffeurName = trajet.profiles.full_name;
+    // Check if profile name exists using optional chaining
+    const profileName = trajet.profiles?.full_name;
+    if (profileName) {
+      chauffeurName = profileName;
     }
     
     // Format date and time

@@ -31,12 +31,10 @@ export const getRides = async (): Promise<Ride[]> => {
       // Safe extraction of driver name with type checking
       let driverName = 'Unknown Driver';
       
-      if (trip.profiles && 
-          typeof trip.profiles === 'object' && 
-          trip.profiles !== null &&
-          'full_name' in trip.profiles &&
-          trip.profiles.full_name) {
-        driverName = trip.profiles.full_name;
+      // Check and access profiles safely with optional chaining and nullish coalescing
+      const profileName = trip.profiles?.full_name;
+      if (profileName) {
+        driverName = profileName;
       }
       
       // Format date and time
@@ -121,12 +119,10 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
     // Safe extraction of driver name with type checking
     let driverName = 'Unknown Driver';
     
-    if (trip.profiles && 
-        typeof trip.profiles === 'object' && 
-        trip.profiles !== null &&
-        'full_name' in trip.profiles &&
-        trip.profiles.full_name) {
-      driverName = trip.profiles.full_name;
+    // Check and access profiles safely with optional chaining and nullish coalescing
+    const profileName = trip.profiles?.full_name;
+    if (profileName) {
+      driverName = profileName;
     }
     
     // Format date and time
@@ -218,12 +214,10 @@ export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) =>
           // Safe extraction of driver name with type checking
           let driverName = 'Unknown Driver';
           
-          if (trip.profiles && 
-              typeof trip.profiles === 'object' && 
-              trip.profiles !== null &&
-              'full_name' in trip.profiles &&
-              trip.profiles.full_name) {
-            driverName = trip.profiles.full_name;
+          // Check and access profiles safely with optional chaining and nullish coalescing
+          const profileName = trip.profiles?.full_name;
+          if (profileName) {
+            driverName = profileName;
           }
           
           // Format date and time
