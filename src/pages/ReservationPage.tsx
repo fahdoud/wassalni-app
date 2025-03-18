@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ChatInterface from '@/components/chat/ChatInterface';
 import RideMap from '@/components/maps/RideMap';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from "sonner";
 
 const ReservationPage = () => {
   const { rideId } = useParams();
@@ -70,6 +71,8 @@ const ReservationPage = () => {
         lat: origin.lat + Math.random() * 0.1,
         lng: origin.lng + Math.random() * 0.1
       };
+      
+      console.log("Setting ride locations:", { origin, destination });
       setRideLocations({ origin, destination });
     }
   }, [ride]);
@@ -78,11 +81,13 @@ const ReservationPage = () => {
   useEffect(() => {
     if (reservationSuccess) {
       // Small delay to ensure UI is ready before switching
+      console.log("Reservation successful, switching to tracking tab");
+      toast.success(t('reservation.successNotification'));
       setTimeout(() => {
         setActiveTab("tracking");
       }, 100);
     }
-  }, [reservationSuccess]);
+  }, [reservationSuccess, t]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -214,6 +219,7 @@ const ReservationPage = () => {
                         
                         {rideLocations ? (
                           <RideMap 
+                            key={`map-${rideId}-${reservationSuccess}`}
                             rideId={rideId || ''} 
                             originLocation={rideLocations.origin} 
                             destinationLocation={rideLocations.destination}

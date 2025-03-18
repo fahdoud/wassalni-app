@@ -27,10 +27,7 @@ const RideMap: React.FC<RideMapProps> = ({
   const [isMapReady, setIsMapReady] = useState(false);
   const [mapInitialized, setMapInitialized] = useState(false);
   
-  // Always start visible
-  const [isVisible, setIsVisible] = useState(true);
-  
-  // Mock driver movement
+  // Starting driver location (if not provided)
   const [mockDriverLocation, setMockDriverLocation] = useState<{ lat: number; lng: number } | null>(
     driverLocation || { 
       lat: originLocation.lat - 0.008, 
@@ -38,84 +35,59 @@ const RideMap: React.FC<RideMapProps> = ({
     }
   );
   
-  // Observer to detect when map is visible
+  // Function to load Google Maps API script synchronously
   useEffect(() => {
-    if (!mapRef.current) return;
-    
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
-    
-    observer.observe(mapRef.current);
-    
-    return () => {
-      if (mapRef.current) {
-        observer.unobserve(mapRef.current);
-      }
-    };
-  }, [mapRef]);
-  
-  // Function to load Google Maps API script
-  useEffect(() => {
-    // Check if Google Maps API is already loaded
-    if (window.google && window.google.maps) {
-      console.log('Google Maps API already loaded');
-      setIsLoaded(true);
-      return;
-    }
-    
-    const loadGoogleMapsApi = () => {
-      // Only add the script tag if it doesn't exist
-      if (!document.getElementById('google-maps-script')) {
-        console.log('Loading Google Maps API script');
+    const loadGoogleMapsScript = () => {
+      return new Promise<void>((resolve, reject) => {
+        // Check if Google Maps API is already loaded
+        if (window.google && window.google.maps) {
+          console.log('Google Maps API already loaded');
+          resolve();
+          return;
+        }
+        
+        console.log('Loading Google Maps API script synchronously');
         const script = document.createElement('script');
         script.id = 'google-maps-script';
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`;
-        script.async = true;
-        script.defer = true;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.async = false; // Load synchronously
+        script.defer = false;
         
-        // Define global callback function that Google Maps will call when loaded
-        window.initMap = () => {
-          console.log('Google Maps API initialized via callback');
-          setIsLoaded(true);
+        script.onload = () => {
+          console.log('Google Maps API loaded successfully');
+          resolve();
         };
         
         script.onerror = (e) => {
           console.error('Failed to load Google Maps API:', e);
-          setError('Failed to load Google Maps. Please try again later.');
+          reject(new Error('Failed to load Google Maps API'));
         };
         
         document.head.appendChild(script);
+      });
+    };
+    
+    const initializeMap = async () => {
+      try {
+        // Load the script first
+        await loadGoogleMapsScript();
+        setIsLoaded(true);
+      } catch (err) {
+        console.error('Error loading Google Maps:', err);
+        setError('Failed to load Google Maps. Please refresh the page.');
       }
     };
     
-    loadGoogleMapsApi();
-    
-    // Cleanup function
-    return () => {
-      // Clean up global callback if component unmounts before API loads
-      if (window.initMap) {
-        window.initMap = undefined;
-      }
-    };
+    initializeMap();
   }, []);
   
   // Initialize map once Google Maps is loaded
   useEffect(() => {
-    if (!isLoaded || !mapRef.current || mapInitialized) {
+    if (!isLoaded || !mapRef.current || mapInitialized || !window.google || !window.google.maps) {
       return;
     }
     
     try {
-      if (!window.google || !window.google.maps) {
-        console.error('Google Maps API not available despite isLoaded=true');
-        setError('Google Maps API not available. Please refresh the page.');
-        return;
-      }
-      
       console.log('Initializing map with center:', originLocation);
       const newMap = new window.google.maps.Map(mapRef.current, {
         center: originLocation,
@@ -137,9 +109,10 @@ const RideMap: React.FC<RideMapProps> = ({
       setIsMapReady(true);
       setMapInitialized(true);
       
-      // Force map resize after a short delay to ensure proper rendering
+      // Force map resize to ensure it renders properly
       setTimeout(() => {
         if (newMap) {
+          console.log('Forcing map resize');
           window.google.maps.event.trigger(newMap, 'resize');
           newMap.setCenter(originLocation);
         }
@@ -166,9 +139,17 @@ const RideMap: React.FC<RideMapProps> = ({
   
   // Add markers and directions once map is initialized
   useEffect(() => {
-    if (!map || !isMapReady || !window.google || !window.google.maps) return;
+    if (!map || !isMapReady || !window.google || !window.google.maps) {
+      console.log('Map not ready for adding markers and directions');
+      return;
+    }
     
     console.log('Adding markers and directions');
+    
+    // Clear any existing markers
+    map.data?.forEach((feature) => {
+      map.data?.remove(feature);
+    });
     
     // Create marker for origin
     const originMarker = new window.google.maps.Marker({
@@ -213,6 +194,7 @@ const RideMap: React.FC<RideMapProps> = ({
       },
       (response, status) => {
         if (status === 'OK') {
+          console.log('Directions fetched successfully');
           directionsRenderer.setDirections(response);
           
           // Fit bounds to include both origin and destination
@@ -228,38 +210,30 @@ const RideMap: React.FC<RideMapProps> = ({
           });
         } else {
           console.error('Directions request failed due to ' + status);
+          
+          // Fallback: just fit bounds to markers
+          const bounds = new window.google.maps.LatLngBounds();
+          bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
+          bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
+          map.fitBounds(bounds);
         }
       }
     );
     
-    // Clean up on unmount
-    return () => {
-      originMarker.setMap(null);
-      destinationMarker.setMap(null);
-      directionsRenderer.setMap(null);
-    };
-  }, [map, isMapReady, originLocation, destinationLocation]);
-  
-  // Add driver marker and simulate movement
-  useEffect(() => {
-    if (!map || !isMapReady || !mockDriverLocation || !window.google || !window.google.maps) return;
-    
-    // Create marker for driver
-    const driverMarker = new window.google.maps.Marker({
-      position: mockDriverLocation,
-      map,
-      title: 'Driver',
-      icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/cabs/cab.png',
-        scaledSize: new window.google.maps.Size(40, 40)
-      }
-    });
-    
-    // Only simulate movement when component is visible
-    let interval: number | null = null;
-    
-    if (isVisible) {
-      interval = window.setInterval(() => {
+    // Add driver marker and simulate movement
+    if (mockDriverLocation) {
+      const driverMarker = new window.google.maps.Marker({
+        position: mockDriverLocation,
+        map,
+        title: 'Driver',
+        icon: {
+          url: 'https://maps.google.com/mapfiles/ms/icons/cabs/cab.png',
+          scaledSize: new window.google.maps.Size(40, 40)
+        }
+      });
+      
+      // Simulate driver movement
+      const interval = setInterval(() => {
         const randomMovement = () => (Math.random() - 0.5) * 0.001;
         
         // Move driver toward destination
@@ -282,24 +256,30 @@ const RideMap: React.FC<RideMapProps> = ({
           const newLat = prev.lat + (deltaLat / distance) * 0.001 + randomMovement();
           const newLng = prev.lng + (deltaLng / distance) * 0.001 + randomMovement();
           
+          // Update marker position
+          driverMarker.setPosition({ lat: newLat, lng: newLng });
+          
           return { lat: newLat, lng: newLng };
         });
       }, 2000);
+      
+      // Clean up
+      return () => {
+        clearInterval(interval);
+        driverMarker.setMap(null);
+        originMarker.setMap(null);
+        destinationMarker.setMap(null);
+        directionsRenderer.setMap(null);
+      };
     }
     
-    // Update marker position when mockDriverLocation changes
-    if (mockDriverLocation) {
-      driverMarker.setPosition(mockDriverLocation);
-    }
-    
-    // Clean up
+    // Clean up if no driver
     return () => {
-      if (interval) {
-        window.clearInterval(interval);
-      }
-      driverMarker.setMap(null);
+      originMarker.setMap(null);
+      destinationMarker.setMap(null);
+      directionsRenderer.setMap(null);
     };
-  }, [map, isMapReady, mockDriverLocation, destinationLocation, isVisible]);
+  }, [map, isMapReady, originLocation, destinationLocation, mockDriverLocation]);
   
   if (error) {
     return (
