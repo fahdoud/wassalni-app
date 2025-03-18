@@ -28,11 +28,17 @@ export const getRides = async (): Promise<Ride[]> => {
     
     // Map to Ride interface
     return trips.map(trip => {
-      // Use optional chaining and nullish coalescing for type safety
-      // This handles the case where profiles might be null or a SelectQueryError
-      const driverName = (typeof trip.profiles === 'object' && trip.profiles && 'full_name' in trip.profiles) 
-        ? trip.profiles?.full_name 
-        : 'Unknown Driver';
+      // Use a more robust type check for the profiles object
+      let driverName = 'Unknown Driver';
+      
+      // Check if profiles exists, is an object, and has full_name property
+      if (trip.profiles && 
+          typeof trip.profiles === 'object' && 
+          trip.profiles !== null && 
+          'full_name' in trip.profiles && 
+          trip.profiles.full_name) {
+        driverName = trip.profiles.full_name;
+      }
       
       return {
         id: trip.id,
@@ -94,11 +100,17 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
       throw new Error(error.message);
     }
     
-    // Use optional chaining and nullish coalescing for type safety
-    // This handles the case where profiles might be null or a SelectQueryError
-    const driverName = (typeof trip.profiles === 'object' && trip.profiles && 'full_name' in trip.profiles) 
-      ? trip.profiles?.full_name 
-      : 'Unknown Driver';
+    // Use a more robust type check for the profiles object
+    let driverName = 'Unknown Driver';
+      
+    // Check if profiles exists, is an object, and has full_name property
+    if (trip.profiles && 
+        typeof trip.profiles === 'object' && 
+        trip.profiles !== null && 
+        'full_name' in trip.profiles && 
+        trip.profiles.full_name) {
+      driverName = trip.profiles.full_name;
+    }
     
     // Map the database trip to our Ride interface
     return {
@@ -190,11 +202,17 @@ export const getSimilarRides = async (rideId: string): Promise<Ride[]> => {
     
     // Map to Ride interface
     return trips.map(trip => {
-      // Use optional chaining and nullish coalescing for type safety
-      // This handles the case where profiles might be null or a SelectQueryError
-      const driverName = (typeof trip.profiles === 'object' && trip.profiles && 'full_name' in trip.profiles) 
-        ? trip.profiles?.full_name 
-        : 'Unknown Driver';
+      // Use a more robust type check for the profiles object
+      let driverName = 'Unknown Driver';
+      
+      // Check if profiles exists, is an object, and has full_name property
+      if (trip.profiles && 
+          typeof trip.profiles === 'object' && 
+          trip.profiles !== null && 
+          'full_name' in trip.profiles && 
+          trip.profiles.full_name) {
+        driverName = trip.profiles.full_name;
+      }
       
       return {
         id: trip.id,
@@ -260,8 +278,17 @@ export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) =>
           return;
         }
         
-        // Fixed: Added optional chaining to prevent null reference error
-        const driverName = trip.profiles?.full_name || 'Unknown Driver';
+        // Use a more robust type check for the profiles object
+        let driverName = 'Unknown Driver';
+        
+        // Check if profiles exists, is an object, and has full_name property
+        if (trip.profiles && 
+            typeof trip.profiles === 'object' && 
+            trip.profiles !== null && 
+            'full_name' in trip.profiles && 
+            trip.profiles.full_name) {
+          driverName = trip.profiles.full_name;
+        }
         
         const updatedRide: Ride = {
           id: trip.id,
