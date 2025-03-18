@@ -61,6 +61,9 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
                   ...prev,
                   [trajet.id]: newPlacesDispo
                 }));
+                
+                // Show notification about seat update
+                toast.info(t('rides.seatsUpdated'));
               }
             }
           )
@@ -94,6 +97,9 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
                     [trajet.id]: newPlaces
                   };
                 });
+                
+                // Show notification about seat update from reservation
+                toast.info(t('rides.reservationMade'));
               }
             }
           )
@@ -123,6 +129,9 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
                     ...prev,
                     [trajet.id]: remainingSeats
                   }));
+                  
+                  // Show notification about seat update
+                  toast.info(t('rides.seatsUpdated'));
                 }
               }
             )
@@ -130,6 +139,42 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
             
           channels.push(seatChannel);
         }
+        
+        // Also listen for reservations_trajets table
+        const reservationTrajetChannel = supabase
+          .channel(`reservation-trajet-${trajet.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'reservations_trajets',
+              filter: `trajet_id=eq.${trajet.id}`
+            },
+            (payload) => {
+              console.log("Nouvelle réservation trajet détectée:", payload);
+              if (payload.new && payload.new.places_reservees) {
+                const placesReservees = payload.new.places_reservees;
+                console.log(`Réservation de ${placesReservees} places pour le trajet ${trajet.id}`);
+                
+                setPlacesDispoEnTempsReel(prev => {
+                  const currentPlaces = prev[trajet.id] || trajet.places_dispo;
+                  const newPlaces = Math.max(0, currentPlaces - placesReservees);
+                  console.log(`Mise à jour des places après réservation: ${currentPlaces} -> ${newPlaces}`);
+                  return {
+                    ...prev,
+                    [trajet.id]: newPlaces
+                  };
+                });
+                
+                // Show notification about seat update from reservation
+                toast.info(t('rides.reservationMade'));
+              }
+            }
+          )
+          .subscribe();
+          
+        channels.push(reservationTrajetChannel);
       }
     });
     
@@ -139,7 +184,7 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
         supabase.removeChannel(channel);
       });
     };
-  }, [trajets]);
+  }, [trajets, t]);
 
   const handleReserveClick = (trajetId: string) => {
     navigate(`/reservation/${trajetId}`);
@@ -238,11 +283,13 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
                 <Button 
                   size="sm" 
                   onClick={() => handleReserveClick(trajet.id)}
+                  className="relative overflow-hidden group"
                 >
-                  {t('rides.reserve')}
+                  <span className="relative z-10">{t('rides.reserve')}</span>
+                  <span className="absolute inset-0 bg-wassalni-blue scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
                 </Button>
               ) : (
-                <Button size="sm" variant="outlined" disabled>
+                <Button size="sm" variant="outlined" disabled className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700">
                   {t('rides.full')}
                 </Button>
               )}
