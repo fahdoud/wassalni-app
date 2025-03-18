@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapPin, Calendar, Clock, User } from "lucide-react";
 import { Trajet } from "@/services/trajets/types";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Button from "@/components/Button";
@@ -15,28 +14,7 @@ interface TrajetListProps {
 const TrajetList = ({ trajets, loading }: TrajetListProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [placesDispoEnTempsReel, setPlacesDispoEnTempsReel] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getUser();
-      setIsAuthenticated(!!data.user);
-      console.log("Auth status in TrajetList:", !!data.user);
-    };
-    
-    checkAuth();
-    
-    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      const isAuthed = event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED';
-      console.log("Auth state changed in TrajetList:", event, isAuthed);
-      setIsAuthenticated(isAuthed);
-    });
-    
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     if (trajets.length === 0) return;
@@ -79,19 +57,7 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
   }, [trajets]);
 
   const handleReserveClick = (trajetId: string) => {
-    console.log("Reserve clicked, auth status:", isAuthenticated);
-    
-    if (isAuthenticated) {
-      console.log("User is authenticated, navigating to reservation page");
-      navigate(`/reservation/${trajetId}`);
-      return;
-    }
-    
-    console.log("User is not authenticated, redirecting to login page");
-    toast.error(t('auth.loginRequired') || "Veuillez vous connecter pour faire une réservation");
-    navigate("/passenger-signin", { 
-      state: { returnTo: `/reservation/${trajetId}` } 
-    });
+    navigate(`/reservation/${trajetId}`);
   };
 
   if (loading) {

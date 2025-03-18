@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ChatInterface from '@/components/chat/ChatInterface';
-import { toast } from 'sonner';
 
 const ReservationPage = () => {
   const { rideId } = useParams();
@@ -68,19 +66,6 @@ const ReservationPage = () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
-
-  // Only redirect if not authenticated and we've confirmed auth status
-  useEffect(() => {
-    if (!checkingAuth && !isLoading && !isAuthenticated && rideId) {
-      console.log("Not authenticated, redirecting to login page");
-      toast.error(t('auth.loginRequired'));
-      navigate("/passenger-signin", { 
-        state: { returnTo: `/reservation/${rideId}` } 
-      });
-    } else {
-      console.log("Auth status in redirect check:", { checkingAuth, isLoading, isAuthenticated });
-    }
-  }, [checkingAuth, isLoading, isAuthenticated, rideId, navigate, t]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);

@@ -10,7 +10,6 @@ import { Ride } from "@/services/rides/types";
 import { getMockRides } from "@/services/rides/mockRides";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
@@ -19,30 +18,9 @@ const RidesPage = () => {
   const [filter, setFilter] = useState("");
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [liveSeats, setLiveSeats] = useState<Record<string, number>>({});
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getUser();
-      setIsAuthenticated(!!data.user);
-      console.log("Auth status in RidesPage:", !!data.user);
-    };
-    
-    checkAuth();
-    
-    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      const isAuthed = event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED';
-      console.log("Auth state changed in RidesPage:", event, isAuthed);
-      setIsAuthenticated(isAuthed);
-    });
-    
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
 
   const fetchRides = async (forceRefresh = false) => {
     setLoading(true);
@@ -145,19 +123,7 @@ const RidesPage = () => {
   }, [rides]);
 
   const handleReserveClick = (rideId: string | number) => {
-    console.log("Reserve clicked, auth status:", isAuthenticated);
-    
-    if (isAuthenticated) {
-      console.log("User is authenticated, navigating to reservation page");
-      navigate(`/reservation/${rideId}`);
-      return;
-    }
-    
-    console.log("User is not authenticated, redirecting to login page");
-    toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
-    navigate("/passenger-signin", { 
-      state: { returnTo: `/reservation/${rideId}` } 
-    });
+    navigate(`/reservation/${rideId}`);
   };
 
   const filteredRides = filter 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { getRideById, subscribeToRideUpdates } from '@/services/rides/rideQueries';
 import { createReservation } from '@/services/rides/reservationService';
@@ -94,19 +93,15 @@ export const useReservation = (rideId: string) => {
   const makeReservation = async () => {
     setReservationError(null);
     
-    // Check if authenticated
+    // Check if authenticated but allow guest users to continue
     if (!isAuthenticated) {
-      setReservationError("You must be logged in to make a reservation");
-      return;
+      console.log("User is not authenticated but continuing with reservation");
+      // Note: This is where you would normally check for authentication
+      // but we're allowing unauthenticated users to continue
     }
     
     // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      setReservationError("You must be logged in to make a reservation");
-      return;
-    }
     
     // Check if ride exists
     if (!ride) {
@@ -121,10 +116,13 @@ export const useReservation = (rideId: string) => {
     }
     
     try {
+      // Create the reservation - we'll use the user ID if authenticated, otherwise use a guest ID
+      const userId = user ? user.id : 'guest-user';
+      
       // Create the reservation
       const response = await createReservation(
         ride.id, 
-        user.id, 
+        userId, 
         seats
       );
       
