@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,6 +10,7 @@ import { Ride } from "@/services/rides/types";
 import { getMockRides } from "@/services/rides/mockRides";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
@@ -63,6 +63,9 @@ const RidesPage = () => {
               const ride = ridesWithMaleDrivers.find(r => r.trip_id === seat.trip_id);
               if (ride) {
                 newLiveSeats[ride.id] = seat.remaining_seats;
+                
+                // Also update the ride.seats property for consistency
+                ride.seats = seat.remaining_seats;
               }
             });
             setLiveSeats(newLiveSeats);
@@ -117,6 +120,7 @@ const RidesPage = () => {
         console.log("Returning from reservation page, force refreshing rides");
         fetchRides(true);
         sessionStorage.removeItem('fromReservation');
+        toast.success("Available seats have been updated");
       } else {
         fetchRides();
       }
@@ -145,10 +149,22 @@ const RidesPage = () => {
             (payload) => {
               console.log("Received real-time seat update from trips:", payload);
               if (payload.new && 'available_seats' in payload.new) {
+                const newSeatCount = payload.new.available_seats;
+                console.log(`Updating seat count for ride ${ride.id} to ${newSeatCount}`);
+                
                 setLiveSeats(prev => ({
                   ...prev,
-                  [ride.id]: payload.new.available_seats
+                  [ride.id]: newSeatCount
                 }));
+                
+                // Also update the ride object directly
+                setRides(prevRides => 
+                  prevRides.map(r => 
+                    r.id === ride.id 
+                      ? {...r, seats: newSeatCount} 
+                      : r
+                  )
+                );
               }
             }
           )
@@ -170,10 +186,22 @@ const RidesPage = () => {
             (payload) => {
               console.log("Received real-time seat update from seat_availability:", payload);
               if (payload.new && 'remaining_seats' in payload.new) {
+                const newSeatCount = payload.new.remaining_seats;
+                console.log(`Updating seat count for ride ${ride.id} to ${newSeatCount} (from seat_availability)`);
+                
                 setLiveSeats(prev => ({
                   ...prev,
-                  [ride.id]: payload.new.remaining_seats
+                  [ride.id]: newSeatCount
                 }));
+                
+                // Also update the ride object directly
+                setRides(prevRides => 
+                  prevRides.map(r => 
+                    r.id === ride.id 
+                      ? {...r, seats: newSeatCount} 
+                      : r
+                  )
+                );
               }
             }
           )
@@ -196,13 +224,33 @@ const RidesPage = () => {
               console.log("Received new reservation:", payload);
               if (payload.new && payload.new.seats_reserved) {
                 // Decrease available seats
+                const seatsReserved = payload.new.seats_reserved;
+                console.log(`New reservation with ${seatsReserved} seats for ride ${ride.id}`);
+                
                 setLiveSeats(prev => {
                   const currentSeats = prev[ride.id] || ride.seats;
+                  const newSeatCount = Math.max(0, currentSeats - seatsReserved);
+                  console.log(`Decreasing seats for ride ${ride.id} from ${currentSeats} to ${newSeatCount}`);
                   return {
                     ...prev,
-                    [ride.id]: Math.max(0, currentSeats - payload.new.seats_reserved)
+                    [ride.id]: newSeatCount
                   };
                 });
+                
+                // Also update the ride object directly
+                setRides(prevRides => 
+                  prevRides.map(r => {
+                    if (r.id === ride.id) {
+                      const newSeatCount = Math.max(0, r.seats - seatsReserved);
+                      console.log(`Updating ride object seat count from ${r.seats} to ${newSeatCount}`);
+                      return {...r, seats: newSeatCount};
+                    }
+                    return r;
+                  })
+                );
+
+                // Show notification about seat update
+                toast.info(`Seats updated for a ride from ${ride.from} to ${ride.to}`);
               }
             }
           )

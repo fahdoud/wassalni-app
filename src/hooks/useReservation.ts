@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { getRideById, subscribeToRideUpdates } from '@/services/rides/rideQueries';
 import { createReservation } from '@/services/rides/reservationService';
@@ -98,6 +99,9 @@ export const useReservation = (rideId: string) => {
             remaining: data.remaining_seats,
             available: data.seats_available
           });
+          
+          // Also update the ride's seat count to match
+          setRide(prev => prev ? { ...prev, seats: data.remaining_seats } : null);
         }
       } catch (error) {
         console.error("Error in fetchSeatAvailability:", error);
@@ -136,16 +140,24 @@ export const useReservation = (rideId: string) => {
         (payload) => {
           console.log("Seat availability real-time update:", payload);
           if (payload.new) {
-            setSeatAvailability({
-              total: payload.new.total_seats,
-              remaining: payload.new.remaining_seats,
-              available: payload.new.seats_available
-            });
+            const newRemainingSeats = payload.new.remaining_seats;
+            setSeatAvailability(prev => prev ? {
+              ...prev,
+              remaining: newRemainingSeats,
+              available: newRemainingSeats > 0
+            } : null);
             
+            // Also update the ride's seat count
             setRide(prev => prev ? { 
               ...prev, 
-              seats: payload.new.remaining_seats 
+              seats: newRemainingSeats
             } : null);
+            
+            // If user has selected more seats than available, adjust
+            if (seats > newRemainingSeats) {
+              setSeats(Math.max(1, newRemainingSeats));
+              toast.info("Adjusted seats due to availability changes");
+            }
           }
         }
       )
@@ -156,14 +168,18 @@ export const useReservation = (rideId: string) => {
         updatedRide.driverGender = 'male';
       }
       
-      setRide(updatedRide);
+      // Only update if seats actually changed to prevent cycling
+      if (ride.seats !== updatedRide.seats) {
+        console.log(`Ride seats updated from ${ride.seats} to ${updatedRide.seats}`);
+        setRide(updatedRide);
+      }
     });
     
     return () => {
       unsubscribe();
       supabase.removeChannel(seatChannel);
     };
-  }, [rideId, ride]);
+  }, [rideId, ride, seats]);
   
   const makeReservation = async () => {
     setReservationError(null);
@@ -185,6 +201,7 @@ export const useReservation = (rideId: string) => {
     const availableSeats = seatAvailability?.remaining || ride.seats;
     if (availableSeats < seats) {
       setReservationError("Not enough seats available");
+      toast.error("Not enough seats available");
       return;
     }
     
@@ -196,6 +213,7 @@ export const useReservation = (rideId: string) => {
         return;
       }
       
+      console.log(`Making reservation for ${seats} seats on ride ${ride.id}`);
       const response = await createReservation(
         ride.trip_id || ride.id, 
         userId, 
@@ -230,10 +248,12 @@ export const useReservation = (rideId: string) => {
         toast.success("Reservation successful!");
       } else {
         setReservationError("Failed to make reservation. Please try again.");
+        toast.error("Failed to make reservation");
       }
     } catch (error) {
       console.error("Error making reservation:", error);
       setReservationError("An error occurred. Please try again.");
+      toast.error("An error occurred while making reservation");
     }
   };
   
