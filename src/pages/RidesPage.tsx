@@ -97,6 +97,7 @@ const RidesPage = () => {
     }
   }, [location]);
 
+  // Subscribe to real-time seat availability updates
   useEffect(() => {
     if (rides.length === 0) return;
     
@@ -104,7 +105,8 @@ const RidesPage = () => {
     
     rides.forEach(ride => {
       if (ride.trip_id && !/^\d+$/.test(ride.id)) {
-        const channel = supabase
+        // First subscribe to trips table updates (legacy)
+        const tripChannel = supabase
           .channel(`ride-${ride.id}`)
           .on(
             'postgres_changes',
@@ -115,7 +117,7 @@ const RidesPage = () => {
               filter: `id=eq.${ride.trip_id}`
             },
             (payload) => {
-              console.log("Received real-time seat update:", payload);
+              console.log("Received real-time seat update from trips:", payload);
               if (payload.new && 'available_seats' in payload.new) {
                 setLiveSeats(prev => ({
                   ...prev,
@@ -126,7 +128,32 @@ const RidesPage = () => {
           )
           .subscribe();
           
-        channels.push(channel);
+        channels.push(tripChannel);
+        
+        // Also subscribe to seat_availability table for more accurate updates
+        const seatChannel = supabase
+          .channel(`seat-availability-${ride.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'seat_availability',
+              filter: `trip_id=eq.${ride.trip_id}`
+            },
+            (payload) => {
+              console.log("Received real-time seat update from seat_availability:", payload);
+              if (payload.new && 'remaining_seats' in payload.new) {
+                setLiveSeats(prev => ({
+                  ...prev,
+                  [ride.id]: payload.new.remaining_seats
+                }));
+              }
+            }
+          )
+          .subscribe();
+          
+        channels.push(seatChannel);
       }
     });
     
@@ -139,6 +166,8 @@ const RidesPage = () => {
 
   const handleReserveClick = (rideId: string | number) => {
     navigate(`/reservation/${rideId}`);
+    // Set a session flag to force refresh rides when returning
+    sessionStorage.setItem('fromReservation', 'true');
   };
 
   const filteredRides = filter 
@@ -212,6 +241,7 @@ const RidesPage = () => {
                 </div>
               ) : (
                 filteredRides.map((ride) => {
+                  // Use live seat count from real-time updates if available, otherwise use ride.seats
                   const currentSeats = ride.id in liveSeats ? liveSeats[ride.id] : ride.seats;
                   
                   return (
