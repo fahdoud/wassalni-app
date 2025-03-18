@@ -142,16 +142,16 @@ const RidesPage = () => {
   }, [rides]);
 
   const handleReserveClick = (rideId: string | number) => {
-    if (!isAuthenticated) {
-      toast.error(t('auth.loginRequired') || "Please log in to make a reservation");
-      navigate("/passenger-signin", { 
-        state: { returnTo: `/reservation/${rideId}` } 
-      });
+    if (isAuthenticated) {
+      navigate(`/reservation/${rideId}`);
+      sessionStorage.removeItem('fromReservation');
       return;
     }
     
-    navigate(`/reservation/${rideId}`);
-    sessionStorage.removeItem('fromReservation');
+    toast.error(t('auth.loginRequired') || "Veuillez vous connecter pour faire une réservation");
+    navigate("/passenger-signin", { 
+      state: { returnTo: `/reservation/${rideId}` } 
+    });
   };
 
   const filteredRides = filter 

@@ -77,16 +77,18 @@ const TrajetList = ({ trajets, loading }: TrajetListProps) => {
   }, [trajets]);
 
   const handleReserveClick = (trajetId: string) => {
-    if (!isAuthenticated) {
-      toast.error(t('auth.loginRequired') || "Veuillez vous connecter pour faire une réservation");
-      navigate("/passenger-signin", { 
-        state: { returnTo: `/reservation/${trajetId}` } 
-      });
+    // Si l'utilisateur est authentifié, rediriger directement vers la page de réservation
+    if (isAuthenticated) {
+      navigate(`/reservation/${trajetId}`);
+      sessionStorage.removeItem('fromReservation');
       return;
     }
     
-    navigate(`/reservation/${trajetId}`);
-    sessionStorage.removeItem('fromReservation');
+    // Si l'utilisateur n'est pas authentifié, afficher un message et rediriger vers la connexion
+    toast.error(t('auth.loginRequired') || "Veuillez vous connecter pour faire une réservation");
+    navigate("/passenger-signin", { 
+      state: { returnTo: `/reservation/${trajetId}` } 
+    });
   };
 
   if (loading) {
