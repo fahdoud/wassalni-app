@@ -6,13 +6,25 @@ import { useEffect, useState } from "react";
 
 interface ReservationSidebarProps {
   ride: Ride;
-  step: number;
-  passengerCount: number;
+  step?: number;
+  passengerCount?: number;
+  seats?: number;
+  price?: number;
+  reservationSuccess?: boolean;
 }
 
-const ReservationSidebar = ({ ride, step, passengerCount }: ReservationSidebarProps) => {
+const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: externalPrice, reservationSuccess }: ReservationSidebarProps) => {
   const { t } = useLanguage();
   const [availableSeats, setAvailableSeats] = useState(ride.seats);
+  
+  // Use either seats or passengerCount for backward compatibility
+  const currentSeats = seats || passengerCount || 1;
+  
+  // Use provided price or calculate from ride
+  const price = externalPrice || ride.price;
+  
+  // Determine which step we're on
+  const currentStep = step === 2 || reservationSuccess ? 2 : 1;
 
   // Update availableSeats whenever ride.seats changes
   useEffect(() => {
@@ -78,18 +90,18 @@ const ReservationSidebar = ({ ride, step, passengerCount }: ReservationSidebarPr
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-between mb-2">
             <span className="text-gray-600 dark:text-gray-300">{t('reservation.price')}</span>
-            <span className="font-medium">{ride.price} DZD</span>
+            <span className="font-medium">{price} DZD</span>
           </div>
-          {step === 2 && (
+          {currentStep === 2 && (
             <div className="flex justify-between mb-2">
               <span className="text-gray-600 dark:text-gray-300">{t('reservation.passengers')}</span>
-              <span className="font-medium">× {passengerCount}</span>
+              <span className="font-medium">× {currentSeats}</span>
             </div>
           )}
           <div className="flex justify-between mt-2 pt-2 border-t border-gray-200 font-medium dark:border-gray-700">
             <span>{t('reservation.total')}</span>
             <span className="text-wassalni-green dark:text-wassalni-lightGreen">
-              {step === 1 ? ride.price : ride.price * passengerCount} DZD
+              {currentStep === 1 ? price : price * currentSeats} DZD
             </span>
           </div>
         </div>

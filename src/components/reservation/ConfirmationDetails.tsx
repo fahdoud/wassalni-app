@@ -7,12 +7,16 @@ import { useNavigate } from "react-router-dom";
 
 interface ConfirmationDetailsProps {
   ride: Ride;
-  passengerCount: number;
+  seats?: number;
+  passengerCount?: number;
 }
 
-const ConfirmationDetails = ({ ride, passengerCount }: ConfirmationDetailsProps) => {
+const ConfirmationDetails = ({ ride, seats, passengerCount }: ConfirmationDetailsProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  
+  // Use either seats or passengerCount for backward compatibility
+  const currentSeats = seats || passengerCount || 1;
 
   return (
     <div className="glass-card p-8 rounded-xl mb-6 text-center">
@@ -50,11 +54,11 @@ const ConfirmationDetails = ({ ride, passengerCount }: ConfirmationDetailsProps)
         </div>
         <div className="flex justify-between mb-4">
           <span className="text-gray-600 dark:text-gray-300">{t('reservation.passengers')}</span>
-          <span className="font-medium">{passengerCount}</span>
+          <span className="font-medium">{currentSeats}</span>
         </div>
         <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
           <span className="text-gray-600 dark:text-gray-300">{t('reservation.total')}</span>
-          <span className="font-medium text-wassalni-green dark:text-wassalni-lightGreen">{ride.price * passengerCount} DZD</span>
+          <span className="font-medium text-wassalni-green dark:text-wassalni-lightGreen">{ride.price * currentSeats} DZD</span>
         </div>
       </div>
       

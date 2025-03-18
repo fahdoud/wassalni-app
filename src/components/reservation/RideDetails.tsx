@@ -8,12 +8,24 @@ import { subscribeToRideUpdates } from "@/services/rides/rideQueries";
 
 interface RideDetailsProps {
   ride: Ride;
-  onContinue: () => void;
+  seats?: number;
+  setSeats?: (seats: number) => void;
+  goToPayment?: () => void;
+  onContinue?: () => void;
 }
 
-const RideDetails = ({ ride, onContinue }: RideDetailsProps) => {
+const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDetailsProps) => {
   const { t } = useLanguage();
   const [availableSeats, setAvailableSeats] = useState(ride.seats);
+  
+  // Handle both onContinue and goToPayment for backward compatibility
+  const handleContinue = () => {
+    if (goToPayment) {
+      goToPayment();
+    } else if (onContinue) {
+      onContinue();
+    }
+  };
 
   // Subscribe to real-time updates for available seats
   useEffect(() => {
@@ -98,7 +110,7 @@ const RideDetails = ({ ride, onContinue }: RideDetailsProps) => {
       <div className="mt-8">
         <Button 
           className="w-full"
-          onClick={onContinue}
+          onClick={handleContinue}
           disabled={availableSeats <= 0}
         >
           {availableSeats > 0 ? t('reservation.payment') : t('rides.full')}
