@@ -25,9 +25,10 @@ const RideMap: React.FC<RideMapProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [mapInitialized, setMapInitialized] = useState(false);
   
-  // Track whether the map is visible in the viewport
-  const [isVisible, setIsVisible] = useState(true); // Changed to true by default to ensure initial visibility
+  // Always start visible
+  const [isVisible, setIsVisible] = useState(true);
   
   // Mock driver movement
   const [mockDriverLocation, setMockDriverLocation] = useState<{ lat: number; lng: number } | null>(
@@ -102,10 +103,9 @@ const RideMap: React.FC<RideMapProps> = ({
     };
   }, []);
   
-  // Initialize map once Google Maps is loaded and component is visible
+  // Initialize map once Google Maps is loaded
   useEffect(() => {
-    if (!isLoaded || !mapRef.current) {
-      console.log('Not ready to initialize map yet:', { isLoaded, isVisible, mapRef: !!mapRef.current });
+    if (!isLoaded || !mapRef.current || mapInitialized) {
       return;
     }
     
@@ -135,6 +135,15 @@ const RideMap: React.FC<RideMapProps> = ({
       
       setMap(newMap);
       setIsMapReady(true);
+      setMapInitialized(true);
+      
+      // Force map resize after a short delay to ensure proper rendering
+      setTimeout(() => {
+        if (newMap) {
+          window.google.maps.event.trigger(newMap, 'resize');
+          newMap.setCenter(originLocation);
+        }
+      }, 500);
       
       // Add a listener to handle resize events
       const handleResize = () => {
@@ -153,7 +162,7 @@ const RideMap: React.FC<RideMapProps> = ({
       console.error('Error initializing map:', err);
       setError('Failed to initialize map. Please try again later.');
     }
-  }, [isLoaded, originLocation]);
+  }, [isLoaded, originLocation, mapInitialized]);
   
   // Add markers and directions once map is initialized
   useEffect(() => {
@@ -339,6 +348,10 @@ const RideMap: React.FC<RideMapProps> = ({
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-full bg-blue-500"></div>
           <span className="text-xs text-gray-600 dark:text-gray-300">Drop-off</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+          <span className="text-xs text-gray-600 dark:text-gray-300">Driver</span>
         </div>
       </div>
     </div>
