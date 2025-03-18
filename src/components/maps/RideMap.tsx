@@ -59,21 +59,26 @@ const RideMap: React.FC<RideMapProps> = ({
   
   // Function to load Google Maps API script
   useEffect(() => {
-    if (window.google?.maps) {
+    // Check if Google Maps API is already loaded
+    if (window.google && window.google.maps) {
+      console.log('Google Maps API already loaded');
       setIsLoaded(true);
       return;
     }
     
     const loadGoogleMapsApi = () => {
+      // Only add the script tag if it doesn't exist
       if (!document.getElementById('google-maps-script')) {
+        console.log('Loading Google Maps API script');
         const script = document.createElement('script');
         script.id = 'google-maps-script';
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`;
         script.async = true;
         script.defer = true;
         
-        script.onload = () => {
-          console.log('Google Maps API loaded successfully');
+        // Define global callback function that Google Maps will call when loaded
+        window.initMap = () => {
+          console.log('Google Maps API initialized via callback');
           setIsLoaded(true);
         };
         
@@ -87,15 +92,26 @@ const RideMap: React.FC<RideMapProps> = ({
     };
     
     loadGoogleMapsApi();
+    
+    // Cleanup function
+    return () => {
+      // Clean up global callback if component unmounts before API loads
+      if (window.initMap) {
+        window.initMap = undefined;
+      }
+    };
   }, []);
   
   // Initialize map once Google Maps is loaded and component is visible
   useEffect(() => {
-    if (!isLoaded || !mapRef.current || !isVisible) return;
+    if (!isLoaded || !mapRef.current || !isVisible) {
+      console.log('Not ready to initialize map yet:', { isLoaded, isVisible, mapRef: !!mapRef.current });
+      return;
+    }
     
     try {
       if (!window.google || !window.google.maps) {
-        console.error('Google Maps API not available');
+        console.error('Google Maps API not available despite isLoaded=true');
         setError('Google Maps API not available. Please refresh the page.');
         return;
       }
@@ -124,7 +140,7 @@ const RideMap: React.FC<RideMapProps> = ({
       const handleResize = () => {
         if (newMap) {
           newMap.setCenter(originLocation);
-          google.maps.event.trigger(newMap, 'resize');
+          window.google.maps.event.trigger(newMap, 'resize');
         }
       };
       
@@ -197,9 +213,9 @@ const RideMap: React.FC<RideMapProps> = ({
           map.fitBounds(bounds);
           
           // Adjust zoom if too zoomed in
-          const zoomListener = google.maps.event.addListener(map, 'idle', () => {
+          const zoomListener = window.google.maps.event.addListener(map, 'idle', () => {
             if (map.getZoom() > 16) map.setZoom(16);
-            google.maps.event.removeListener(zoomListener);
+            window.google.maps.event.removeListener(zoomListener);
           });
         } else {
           console.error('Directions request failed due to ' + status);
@@ -328,5 +344,12 @@ const RideMap: React.FC<RideMapProps> = ({
     </div>
   );
 };
+
+// Add this to make the global callback TypeScript compatible
+declare global {
+  interface Window {
+    initMap: () => void;
+  }
+}
 
 export default RideMap;

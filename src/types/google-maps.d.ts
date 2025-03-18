@@ -7,12 +7,20 @@ declare namespace google {
       setZoom(zoom: number): void;
       getZoom(): number;
       setOptions(options: MapOptions): void;
-      fitBounds(bounds: LatLngBounds): void;
+      fitBounds(bounds: LatLngBounds | LatLngBoundsLiteral): void;
     }
 
     class LatLngBounds {
       constructor();
       extend(latLng: LatLng | LatLngLiteral): void;
+      getCenter(): LatLng;
+    }
+
+    interface LatLngBoundsLiteral {
+      east: number;
+      north: number;
+      south: number;
+      west: number;
     }
 
     class Marker {
@@ -64,6 +72,8 @@ declare namespace google {
 
     class LatLng {
       constructor(lat: number, lng: number);
+      lat(): number;
+      lng(): number;
     }
 
     interface DirectionsRequest {
@@ -112,4 +122,5 @@ declare namespace google {
 
 interface Window {
   google: typeof google;
+  initMap?: () => void;
 }
