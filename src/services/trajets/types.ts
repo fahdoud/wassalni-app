@@ -11,6 +11,7 @@ export interface Trajet {
   note: number;
   chauffeur_id?: string;
   est_mock?: boolean;
+  trip_id?: string; // Add the trip_id property as optional
 }
 
 export type StatutReservation = 'en_attente' | 'confirmée' | 'annulée' | 'terminée' | 'mock';
