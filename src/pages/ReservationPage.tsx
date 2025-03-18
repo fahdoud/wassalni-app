@@ -21,6 +21,12 @@ const ReservationPage = () => {
   
   const { user, userName, checkingAuth } = useAuthUser();
   
+  // Start preloading Google Maps immediately on component mount, before anything else
+  useEffect(() => {
+    console.log("Immediately preloading Google Maps on component mount");
+    preloadGoogleMaps();
+  }, []);
+  
   const {
     ride,
     isLoading,
@@ -35,27 +41,9 @@ const ReservationPage = () => {
 
   const rideLocations = useRideLocations(ride);
 
-  // Précharger l'API Google Maps dès le chargement de la page
-  useEffect(() => {
-    console.log("Préchargement de Google Maps pour une utilisation ultérieure");
-    preloadGoogleMaps();
-  }, []);
-
-  // Preload map data as soon as ride data is available
-  useEffect(() => {
-    if (ride && rideId) {
-      console.log("Preloading map data for ride:", rideId);
-      // Forcer la préinitialisation de la carte pour qu'elle soit prête
-      if (rideLocations) {
-        console.log("Ride locations available, preloading map components");
-      }
-    }
-  }, [ride, rideId, rideLocations]);
-
-  // Automatically switch to tracking tab when reservation is successful
+  // Automatic tab switching after successful reservation
   useEffect(() => {
     if (reservationSuccess) {
-      // Immediately switch to tracking tab on successful reservation
       console.log("Reservation successful, switching to tracking tab");
       toast.success(t('reservation.successNotification'));
       setActiveTab("tracking");

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import MapErrorState from './MapErrorState';
 import MapLoadingState from './MapLoadingState';
 import MapLegend from './MapLegend';
@@ -41,20 +41,26 @@ const RideMap: React.FC<RideMapProps> = ({
     return <MapErrorState error={error} className={className} />;
   }
   
-  // Handle loading state
-  if (!isLoaded) {
-    return <MapLoadingState className={className} />;
-  }
-  
-  // Handle initializing state
-  if (!isMapReady) {
-    return <MapLoadingState className={className} isInitializing={true} />;
-  }
-  
-  // Render the map
+  // Render the map container immediately, even while loading
   return (
     <div className="space-y-2">
+      {/* Always render the map container to ensure it's available immediately */}
       <div ref={mapRef} className={`${className} shadow-md border border-gray-200 dark:border-gray-700`} />
+      
+      {/* Show loading state on top if still loading */}
+      {!isLoaded && (
+        <div className="absolute inset-0 z-10">
+          <MapLoadingState className={className} />
+        </div>
+      )}
+      
+      {/* Show initializing state on top if loaded but not ready */}
+      {isLoaded && !isMapReady && (
+        <div className="absolute inset-0 z-10">
+          <MapLoadingState className={className} isInitializing={true} />
+        </div>
+      )}
+      
       <MapLegend />
     </div>
   );

@@ -31,12 +31,21 @@ export const useMapDirections = ({
   const [isMapReady, setIsMapReady] = useState(false);
   const [mapInitialized, setMapInitialized] = useState(false);
   
-  // Charge l'API Google Maps avec priorité élevée
+  // Immediately check if Google Maps is already loaded
   useEffect(() => {
+    if (window.google && window.google.maps) {
+      console.log('Google Maps already available, setting isLoaded true immediately');
+      setIsLoaded(true);
+    }
+  }, []);
+  
+  // Load Google Maps API with highest priority if not already loaded
+  useEffect(() => {
+    if (isLoaded) return; // Skip if already loaded
+    
     const initializeMap = async () => {
       try {
-        console.log('Starting Google Maps initialization with high priority');
-        // Utilise la méthode améliorée pour charger l'API Google Maps
+        console.log('Starting Google Maps initialization with highest priority');
         await loadGoogleMapsScript();
         console.log('Google Maps script loaded successfully and ready to use');
         setIsLoaded(true);
@@ -46,11 +55,21 @@ export const useMapDirections = ({
       }
     };
     
-    // Démarre immédiatement le chargement
+    // Start loading immediately
     initializeMap();
-  }, []);
+    
+    // Set a timeout to force isLoaded after 2 seconds as a fallback
+    const timeout = setTimeout(() => {
+      if (window.google && window.google.maps && !isLoaded) {
+        console.log('Forcing isLoaded after timeout');
+        setIsLoaded(true);
+      }
+    }, 2000);
+    
+    return () => clearTimeout(timeout);
+  }, [isLoaded]);
   
-  // Initialise la carte une fois Google Maps chargé
+  // Initialize map as soon as Google Maps is loaded
   useEffect(() => {
     if (!isLoaded || !mapRef.current || mapInitialized || !window.google || !window.google.maps) {
       return;
@@ -79,15 +98,23 @@ export const useMapDirections = ({
       setIsMapReady(true);
       setMapInitialized(true);
       
-      // Force le redimensionnement immédiat de la carte pour s'assurer qu'elle se dessine correctement
+      // Force resize immediately for correct rendering
       window.google.maps.event.trigger(newMap, 'resize');
       newMap.setCenter(originLocation);
       
-      // Ajoute un écouteur pour gérer les événements de redimensionnement
+      // Set another resize after a tiny delay to ensure proper sizing
+      setTimeout(() => {
+        if (newMap) {
+          window.google.maps.event.trigger(newMap, 'resize');
+          newMap.setCenter(originLocation);
+        }
+      }, 50);
+      
+      // Add resize handler
       const handleResize = () => {
         if (newMap) {
-          newMap.setCenter(originLocation);
           window.google.maps.event.trigger(newMap, 'resize');
+          newMap.setCenter(originLocation);
         }
       };
       
@@ -102,21 +129,20 @@ export const useMapDirections = ({
     }
   }, [isLoaded, originLocation, mapInitialized]);
   
-  // Ajoute des marqueurs et des directions une fois la carte initialisée
+  // Add markers and directions immediately once map is ready
   useEffect(() => {
     if (!map || !isMapReady || !window.google || !window.google.maps) {
-      console.log('Map not ready for adding markers and directions');
       return;
     }
     
     console.log('Adding markers and directions');
     
-    // Efface les marqueurs existants
+    // Clear existing markers
     map.data?.forEach((feature) => {
       map.data?.remove(feature);
     });
     
-    // Crée un marqueur pour l'origine
+    // Create origin marker
     const originMarker = new window.google.maps.Marker({
       position: originLocation,
       map,
@@ -127,7 +153,7 @@ export const useMapDirections = ({
       }
     });
     
-    // Crée un marqueur pour la destination
+    // Create destination marker
     const destinationMarker = new window.google.maps.Marker({
       position: destinationLocation,
       map,
@@ -138,7 +164,23 @@ export const useMapDirections = ({
       }
     });
     
-    // Crée DirectionsService et DirectionsRenderer
+    // Create a polyline first for immediate visual
+    const directPath = new window.google.maps.Polyline({
+      path: [originLocation, destinationLocation],
+      geodesic: true,
+      strokeColor: '#4CAF50',
+      strokeOpacity: 0.7,
+      strokeWeight: 4,
+      map: map
+    });
+    
+    // Set appropriate bounds immediately
+    const bounds = new window.google.maps.LatLngBounds();
+    bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
+    bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
+    map.fitBounds(bounds);
+    
+    // Then fetch proper directions
     const directionsService = new window.google.maps.DirectionsService();
     const directionsRenderer = new window.google.maps.DirectionsRenderer({
       map,
@@ -150,7 +192,6 @@ export const useMapDirections = ({
       }
     });
     
-    // Demande d'itinéraire
     directionsService.route(
       {
         origin: originLocation,
@@ -159,36 +200,32 @@ export const useMapDirections = ({
       },
       (response, status) => {
         if (status === 'OK') {
+          // Hide the temporary polyline when real directions arrive
+          directPath.setMap(null);
+          
           console.log('Directions fetched successfully');
           directionsRenderer.setDirections(response);
           
-          // Ajuste les limites pour inclure à la fois l'origine et la destination
+          // Adjust bounds to include origin and destination
           const bounds = new window.google.maps.LatLngBounds();
           bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
           bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
           map.fitBounds(bounds);
           
-          // Ajuste le zoom s'il est trop zoomé
+          // Adjust zoom if too zoomed in
           const zoomListener = window.google.maps.event.addListener(map, 'idle', () => {
             if (map.getZoom() > 16) map.setZoom(16);
             window.google.maps.event.removeListener(zoomListener);
           });
-        } else {
-          console.error('Directions request failed due to ' + status);
-          
-          // Fallback: ajuste les limites aux marqueurs
-          const bounds = new window.google.maps.LatLngBounds();
-          bounds.extend(new window.google.maps.LatLng(originLocation.lat, originLocation.lng));
-          bounds.extend(new window.google.maps.LatLng(destinationLocation.lat, destinationLocation.lng));
-          map.fitBounds(bounds);
         }
       }
     );
     
-    // Nettoyage
+    // Cleanup
     return () => {
       originMarker.setMap(null);
       destinationMarker.setMap(null);
+      directPath.setMap(null);
       directionsRenderer.setMap(null);
     };
   }, [map, isMapReady, originLocation, destinationLocation]);

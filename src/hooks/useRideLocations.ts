@@ -8,7 +8,7 @@ export const useRideLocations = (ride: Ride | null) => {
     destination: { lat: number; lng: number };
   } | null>(null);
 
-  // Create a memoized function to get Constantine locations
+  // Memoized function to get Constantine locations
   const getConstantineLocations = useCallback(() => {
     return {
       "Ain Abid": { lat: 36.232, lng: 6.942 },
@@ -25,16 +25,18 @@ export const useRideLocations = (ride: Ride | null) => {
     };
   }, []);
 
-  // Set default locations immediately so they're available when needed
+  // Set locations immediately on mount, even before ride data is loaded
   useEffect(() => {
-    // Définir des coordonnées par défaut de Constantine immédiatement
+    // Default coordinates for Constantine city center
     const defaultLocations = {
       origin: { lat: 36.365, lng: 6.614 },
       destination: { lat: 36.365, lng: 6.624 }
     };
+    console.log("Setting default Constantine locations immediately");
     setRideLocations(defaultLocations);
   }, []);
 
+  // Update with real ride locations once available
   useEffect(() => {
     if (ride) {
       // Get the predefined Constantine locations
@@ -47,7 +49,7 @@ export const useRideLocations = (ride: Ride | null) => {
         lng: origin.lng + 0.05
       };
       
-      console.log("Setting ride locations:", { origin, destination });
+      console.log("Setting ride-specific locations:", { origin, destination });
       setRideLocations({ origin, destination });
     }
   }, [ride, getConstantineLocations]);

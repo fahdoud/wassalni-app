@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Loader2, Map as MapIcon } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface MapLoadingStateProps {
   className?: string;
@@ -10,46 +11,56 @@ interface MapLoadingStateProps {
 const MapLoadingState: React.FC<MapLoadingStateProps> = ({ className, isInitializing = false }) => {
   const [loadingTime, setLoadingTime] = useState(0);
   
+  // Make the loading progress faster
   useEffect(() => {
+    // Start at 30% to make it feel faster
+    setLoadingTime(30);
+    
     const interval = setInterval(() => {
       setLoadingTime(prev => {
-        // Don't exceed 100%
-        return prev < 100 ? prev + 5 : 100;
+        if (prev < 70) return prev + 10; // Load quickly to 70%
+        if (prev < 90) return prev + 3;  // Slow down a bit
+        return prev;                     // Stay at 90% until actual load
       });
-    }, 300);
+    }, 150); // Faster interval
     
-    return () => clearInterval(interval);
+    // Force complete after reasonable timeout
+    const timeout = setTimeout(() => {
+      setLoadingTime(100);
+    }, 2000);
+    
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, []);
   
   if (isInitializing) {
     return (
-      <div className={`${className} bg-gray-900 flex items-center justify-center dark:bg-gray-800 border border-gray-700 dark:border-gray-700 p-4 rounded-lg`}>
-        <div className="text-center">
+      <div className={`${className} bg-gray-900/90 backdrop-blur-sm flex items-center justify-center dark:bg-gray-800/90 rounded-lg overflow-hidden absolute inset-0 z-10`}>
+        <div className="text-center p-6 bg-gray-950/80 backdrop-blur-md rounded-lg shadow-xl border border-gray-700 max-w-xs w-full">
           <MapIcon className="h-12 w-12 mx-auto text-wassalni-green mb-2 animate-pulse" />
-          <p className="text-gray-200 dark:text-gray-300 font-medium text-sm">Chargement de la carte...</p>
-          <p className="text-gray-400 dark:text-gray-400 text-xs mt-2">Les données seront disponibles rapidement</p>
-          <div className="mt-3 w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
-            <div 
-              className="bg-wassalni-green h-full transition-all duration-300 rounded-full" 
-              style={{ width: `${loadingTime}%` }}
-            />
-          </div>
+          <p className="text-gray-200 dark:text-gray-200 font-medium">Chargement de la carte...</p>
+          <p className="text-gray-400 dark:text-gray-400 text-xs mt-1">Presque prêt</p>
+          <Progress 
+            value={loadingTime} 
+            className="h-1.5 mt-3 bg-gray-800"
+          />
         </div>
       </div>
     );
   }
   
   return (
-    <div className={`${className} bg-gray-900 flex items-center justify-center dark:bg-gray-800 border border-gray-700 dark:border-gray-700 p-4 rounded-lg`}>
-      <div className="text-center">
+    <div className={`${className} bg-gray-900/90 backdrop-blur-sm flex items-center justify-center dark:bg-gray-800/90 rounded-lg overflow-hidden absolute inset-0 z-10`}>
+      <div className="text-center p-6 bg-gray-950/80 backdrop-blur-md rounded-lg shadow-xl border border-gray-700 max-w-xs w-full">
         <Loader2 className="h-12 w-12 animate-spin mx-auto text-wassalni-green" />
-        <p className="mt-3 text-gray-200 dark:text-gray-300 font-medium text-sm">Chargement de la carte...</p>
-        <div className="mt-3 w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
-          <div 
-            className="bg-wassalni-green h-full transition-all duration-300 rounded-full" 
-            style={{ width: `${loadingTime}%` }}
-          />
-        </div>
+        <p className="mt-2 text-gray-200 dark:text-gray-200 font-medium">Chargement de la carte...</p>
+        <p className="text-gray-400 dark:text-gray-400 text-xs mt-1">Les données seront disponibles rapidement</p>
+        <Progress 
+          value={loadingTime} 
+          className="h-1.5 mt-3 bg-gray-800"
+        />
       </div>
     </div>
   );
