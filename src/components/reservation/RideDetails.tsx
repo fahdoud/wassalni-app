@@ -40,11 +40,11 @@ const RideDetails = ({
     }
   };
 
-  // Subscribe to real-time updates for available seats
+  // Initialize seats from available sources
   useEffect(() => {
     if (!ride.id) return;
     
-    // Initialize seats from the ride or seatAvailability
+    // Initialize seats from the seatAvailability or ride.seats
     if (seatAvailability) {
       console.log("Using provided seat availability:", seatAvailability);
       setAvailableSeats(seatAvailability.remaining);
