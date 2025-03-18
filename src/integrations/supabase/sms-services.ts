@@ -52,17 +52,17 @@ export const sendSMSNotification = async (userId: string, phone: string, message
  */
 export const checkPhoneVerified = async (userId: string) => {
   try {
-    const { data, error } = await supabase
-      .from('phone_verification')
-      .select('verified')
-      .eq('id', userId)
-      .single();
+    // Update to use RPC instead of direct query
+    const { data, error } = await supabase.rpc('check_phone_verified', { 
+      user_id: userId 
+    });
       
     if (error) {
-      throw error;
+      console.error("Error checking phone verification status:", error);
+      return false;
     }
     
-    return data?.verified || false;
+    return data || false;
   } catch (error) {
     console.error("Error checking phone verification status:", error);
     return false;

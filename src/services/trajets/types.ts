@@ -29,6 +29,7 @@ export interface ReservationTrajet {
   destination?: string;
   prix?: number;
   date_reservation?: string;
+  passager_nom?: string;
   trajet?: {
     id: string;
     origine: string;
@@ -36,8 +37,8 @@ export interface ReservationTrajet {
     date_depart: string;
     prix: number;
     chauffeur_id: string;
-    profiles: {
-      full_name: string;
-    };
+    profiles?: {
+      full_name: string | null;
+    } | null;
   };
 }

@@ -81,3 +81,20 @@ export interface ProposedTrip {
     full_name: string | null;
   } | null;
 }
+
+// Verification interfaces
+export interface EmailVerification {
+  id: string;
+  email: string;
+  verified: boolean;
+  verification_token?: string;
+  token_expires_at?: string;
+}
+
+export interface PhoneVerification {
+  id: string;
+  phone: string;
+  verified: boolean;
+  verification_code?: string;
+  code_expires_at?: string;
+}
