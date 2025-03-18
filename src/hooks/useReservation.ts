@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { getRideById, subscribeToRideUpdates } from '@/services/rides/rideQueries';
 import { createReservation } from '@/services/rides/reservationService';
@@ -52,6 +51,12 @@ export const useReservation = (rideId: string) => {
         const ride = await getRideById(rideId);
         
         if (ride) {
+          // Ensure the driver is displayed as male
+          if (ride.driver) {
+            // Keep the driver name but ensure they are treated as male in the UI
+            ride.driverGender = 'male';
+          }
+          
           setRide(ride);
           setPrice(ride.price);
         }
@@ -82,6 +87,11 @@ export const useReservation = (rideId: string) => {
     }
     
     const { unsubscribe } = subscribeToRideUpdates(rideId, (updatedRide) => {
+      // Ensure the driver is displayed as male
+      if (updatedRide.driver) {
+        updatedRide.driverGender = 'male';
+      }
+      
       setRide(updatedRide);
     });
     

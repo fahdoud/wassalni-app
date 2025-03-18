@@ -34,14 +34,28 @@ const RidesPage = () => {
       const fetchedRides = await getRides();
       if (fetchedRides && fetchedRides.length > 0) {
         console.log("Fetched rides:", fetchedRides);
-        setRides(fetchedRides);
+        
+        const ridesWithMaleDrivers = fetchedRides.map(ride => ({
+          ...ride,
+          driverGender: 'male'
+        }));
+        
+        setRides(ridesWithMaleDrivers);
       } else {
         console.log("No rides found, using mock rides");
-        setRides(getMockRides());
+        const mockRides = getMockRides().map(ride => ({
+          ...ride,
+          driverGender: 'male'
+        }));
+        setRides(mockRides);
       }
     } catch (error) {
       console.error("Error fetching rides:", error);
-      setRides(getMockRides());
+      const mockRides = getMockRides().map(ride => ({
+        ...ride,
+        driverGender: 'male'
+      }));
+      setRides(mockRides);
     } finally {
       setLoading(false);
     }

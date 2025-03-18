@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ChatInterface from '@/components/chat/ChatInterface';
+import RideMap from '@/components/maps/RideMap';
 
 const ReservationPage = () => {
   const { rideId } = useParams();
@@ -22,6 +23,10 @@ const ReservationPage = () => {
   const [user, setUser] = useState<any>(null);
   const [userName, setUserName] = useState<string>("");
   const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
+  const [rideLocations, setRideLocations] = useState<{
+    origin: { lat: number; lng: number };
+    destination: { lat: number; lng: number };
+  } | null>(null);
   
   const { 
     ride, 
@@ -34,6 +39,35 @@ const ReservationPage = () => {
     reservationError,
     isAuthenticated
   } = useReservation(rideId || "");
+
+  // Set some random but realistic locations for Constantine
+  useEffect(() => {
+    if (ride) {
+      // These would normally come from your database
+      // Using some realistic locations in Constantine
+      const constantineLocations: Record<string, { lat: number; lng: number }> = {
+        "Ain Abid": { lat: 36.232, lng: 6.942 },
+        "Ali Mendjeli": { lat: 36.262, lng: 6.606 },
+        "Bekira": { lat: 36.321, lng: 6.599 },
+        "Boussouf": { lat: 36.369, lng: 6.608 },
+        "Didouche Mourad": { lat: 36.451, lng: 6.604 },
+        "El Khroub": { lat: 36.263, lng: 6.697 },
+        "Hamma Bouziane": { lat: 36.412, lng: 6.599 },
+        "Zighoud Youcef": { lat: 36.531, lng: 6.709 },
+        // Default to center of Constantine
+        "Constantine": { lat: 36.365, lng: 6.614 }
+      };
+      
+      // Try to find locations by name, fallback to defaults
+      const origin = constantineLocations[ride.from] || constantineLocations["Constantine"];
+      const destination = constantineLocations[ride.to] || { 
+        lat: origin.lat + (Math.random() * 0.1), 
+        lng: origin.lng + (Math.random() * 0.1) 
+      };
+      
+      setRideLocations({ origin, destination });
+    }
+  }, [ride]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -112,6 +146,11 @@ const ReservationPage = () => {
                   {t('chat.groupChat')}
                 </TabsTrigger>
               )}
+              {reservationSuccess && (
+                <TabsTrigger value="tracking" className="flex-1">
+                  {t('reservation.liveTracking')}
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {isLoading ? (
@@ -155,6 +194,45 @@ const ReservationPage = () => {
                         userName={userName}
                       />
                     )}
+                  </TabsContent>
+                )}
+                
+                {reservationSuccess && (
+                  <TabsContent value="tracking">
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-xl font-semibold mb-2">
+                          {t('reservation.liveTracking')}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 mb-4">
+                          {t('reservation.trackingDescription')}
+                        </p>
+                      </div>
+                      
+                      {rideLocations && (
+                        <RideMap 
+                          rideId={rideId || ''} 
+                          originLocation={rideLocations.origin}
+                          destinationLocation={rideLocations.destination}
+                        />
+                      )}
+                      
+                      <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700">
+                        <h4 className="font-medium mb-2">{t('reservation.driverInfo')}</h4>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-wassalni-green flex items-center justify-center text-white">
+                            {ride?.driver.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-medium">{ride?.driver}</p>
+                            <div className="flex items-center text-yellow-500 text-sm">
+                              {'★'.repeat(Math.floor(ride?.rating || 0))}
+                              <span className="text-gray-400 ml-1">{ride?.rating}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </TabsContent>
                 )}
               </>

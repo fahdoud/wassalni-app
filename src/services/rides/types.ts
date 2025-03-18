@@ -13,6 +13,12 @@ export interface Ride {
   rating: number;
   trip_id?: string;
   is_mock?: boolean;
+  driverGender?: 'male' | 'female';
+  // Location tracking properties
+  currentLocation?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
