@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,6 +72,7 @@ const ReservationPage = () => {
     setActiveTab(value);
   };
 
+  // Only show chat tab for authenticated users with a successful reservation on a real ride
   const showChatTab = reservationSuccess && user && ride && !(/^\d+$/.test(ride.id));
 
   if (isLoading || checkingAuth) {
@@ -133,6 +135,7 @@ const ReservationPage = () => {
                     seats={seats} 
                     onSubmit={makeReservation} 
                     error={reservationError}
+                    isAuthenticated={isAuthenticated}
                   />
                 </TabsContent>
                 

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Ride } from "@/services/rides/types";
 import Button from "@/components/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Link } from "react-router-dom";
 
 interface PaymentDetailsProps {
   ride?: Ride;
@@ -15,6 +16,7 @@ interface PaymentDetailsProps {
   onSubmit?: () => Promise<void>;
   loading?: boolean;
   error?: string | null;
+  isAuthenticated?: boolean;
 }
 
 const PaymentDetails = ({
@@ -27,7 +29,8 @@ const PaymentDetails = ({
   onConfirm,
   onSubmit,
   loading,
-  error
+  error,
+  isAuthenticated
 }: PaymentDetailsProps) => {
   const { t } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -93,6 +96,21 @@ const PaymentDetails = ({
         )}
       </div>
       
+      {!isAuthenticated && (
+        <div className="mb-6 p-4 bg-yellow-50 text-yellow-700 rounded-lg border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800">
+          <p className="mb-2 font-medium">{t('auth.loginRequired')}</p>
+          <p className="text-sm">{t('auth.loginToReserve')}</p>
+          <div className="mt-3 flex space-x-3">
+            <Link to="/passenger/signin" className="text-sm font-medium text-wassalni-blue hover:underline dark:text-wassalni-lightBlue">
+              {t('auth.login')}
+            </Link>
+            <Link to="/passenger/signup" className="text-sm font-medium text-wassalni-green hover:underline dark:text-wassalni-lightGreen">
+              {t('auth.register')}
+            </Link>
+          </div>
+        </div>
+      )}
+      
       <div className="mb-8">
         <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
           {t('reservation.paymentMethod')}
@@ -151,9 +169,11 @@ const PaymentDetails = ({
           className="flex-1"
           onClick={handleSubmit}
           isLoading={loading}
-          disabled={loading || (ride && currentSeats > ride.seats)}
+          disabled={loading || (ride && currentSeats > ride.seats) || !isAuthenticated}
         >
-          {t('reservation.confirmReservation')}
+          {isAuthenticated 
+            ? t('reservation.confirmReservation') 
+            : t('auth.loginToConfirm')}
         </Button>
       </div>
     </div>

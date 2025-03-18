@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { getRideById, subscribeToRideUpdates } from '@/services/rides/rideQueries';
 import { createReservation } from '@/services/rides/reservationService';
@@ -93,11 +94,12 @@ export const useReservation = (rideId: string) => {
   const makeReservation = async () => {
     setReservationError(null);
     
-    // Check if authenticated but allow guest users to continue
+    // Check if authenticated - only allow authenticated users to make reservations
     if (!isAuthenticated) {
-      console.log("User is not authenticated but continuing with reservation");
-      // Note: This is where you would normally check for authentication
-      // but we're allowing unauthenticated users to continue
+      console.log("User is not authenticated");
+      setReservationError("You must be logged in to make a reservation");
+      toast.error("You must be logged in to make a reservation");
+      return;
     }
     
     // Get the current user
@@ -116,8 +118,13 @@ export const useReservation = (rideId: string) => {
     }
     
     try {
-      // Create the reservation - we'll use the user ID if authenticated, otherwise use a guest ID
-      const userId = user ? user.id : 'guest-user';
+      // Create the reservation - only for authenticated users
+      const userId = user?.id;
+      
+      if (!userId) {
+        setReservationError("User not authenticated");
+        return;
+      }
       
       // Create the reservation
       const response = await createReservation(
