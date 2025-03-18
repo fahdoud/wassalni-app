@@ -28,11 +28,6 @@ interface ReservationTabsProps {
   } | null;
   userName: string;
   userId: string;
-  seatAvailability?: {
-    total: number;
-    remaining: number;
-    available: boolean;
-  } | null;
 }
 
 const ReservationTabs: React.FC<ReservationTabsProps> = ({
@@ -50,8 +45,7 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
   showChatTab,
   rideLocations,
   userName,
-  userId,
-  seatAvailability
+  userId
 }) => {
   const { t, language } = useLanguage();
 
@@ -106,7 +100,6 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
             seats={seats} 
             setSeats={setSeats} 
             goToPayment={() => handleTabChange('payment')} 
-            seatAvailability={seatAvailability}
           />
         )}
       </TabsContent>
@@ -119,8 +112,6 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
           onSubmit={makeReservation} 
           error={reservationError} 
           isAuthenticated={isAuthenticated} 
-          ride={ride}
-          seatAvailability={seatAvailability}
         />
       </TabsContent>
       

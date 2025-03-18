@@ -1,12 +1,11 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import MapErrorState from './MapErrorState';
 import MapLoadingState from './MapLoadingState';
 import MapLegend from './MapLegend';
 import { useMapDirections } from './hooks/useMapDirections';
 import { useDriverSimulation } from './hooks/useDriverSimulation';
-import { loadGoogleMapsScript, GOOGLE_MAPS_API_KEY } from './utils/googleMapsLoader';
-import { toast } from "sonner";
+import { loadGoogleMapsScript } from './utils/googleMapsLoader';
 
 interface RideMapProps {
   rideId: string;
@@ -25,7 +24,6 @@ const RideMap: React.FC<RideMapProps> = ({
 }) => {
   // Track retry attempts
   const [retryCount, setRetryCount] = useState(0);
-  const [retryLoading, setRetryLoading] = useState(false);
   
   // Initialize with provided driver location or calculate default position
   const initialDriverLocation = driverLocation || { 
@@ -36,27 +34,10 @@ const RideMap: React.FC<RideMapProps> = ({
   // Handle retrying the map load
   const handleRetry = useCallback(() => {
     console.log('Retrying map load attempt:', retryCount + 1);
-    setRetryLoading(true);
     setRetryCount(prev => prev + 1);
-    
-    // Check if API key exists and is not empty
-    if (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.trim() === '') {
-      toast.error('Google Maps API key is missing. Please check your configuration.');
-      setRetryLoading(false);
-      return;
-    }
-    
     loadGoogleMapsScript()
-      .then(() => {
-        console.log('Google Maps reloaded successfully');
-        toast.success('Map reloaded successfully');
-        setRetryLoading(false);
-      })
-      .catch(err => {
-        console.error('Map reload failed:', err);
-        toast.error('Map reload failed. Please check the console for more details.');
-        setRetryLoading(false);
-      });
+      .then(() => console.log('Google Maps reloaded successfully'))
+      .catch(err => console.error('Map reload failed:', err));
   }, [retryCount]);
   
   // Use our custom hooks for map directions and driver simulation
@@ -71,13 +52,7 @@ const RideMap: React.FC<RideMapProps> = ({
   
   // Handle error state with retry button
   if (error) {
-    return (
-      <MapErrorState 
-        error={error} 
-        className={className} 
-        onRetry={retryLoading ? undefined : handleRetry} 
-      />
-    );
+    return <MapErrorState error={error} className={className} onRetry={handleRetry} />;
   }
   
   // Render the map container immediately, even while loading

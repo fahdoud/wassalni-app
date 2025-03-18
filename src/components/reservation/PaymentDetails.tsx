@@ -18,11 +18,6 @@ interface PaymentDetailsProps {
   loading?: boolean;
   error?: string | null;
   isAuthenticated?: boolean;
-  seatAvailability?: {
-    total: number;
-    remaining: number;
-    available: boolean;
-  } | null;
 }
 
 const PaymentDetails = ({
@@ -37,8 +32,7 @@ const PaymentDetails = ({
   onSubmit,
   loading,
   error,
-  isAuthenticated,
-  seatAvailability
+  isAuthenticated
 }: PaymentDetailsProps) => {
   const { t } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -65,8 +59,8 @@ const PaymentDetails = ({
     }
   };
   
-  // Calculate available seats from seatAvailability, ride, or default
-  const availableSeats = seatAvailability?.remaining || (ride?.seats || 4);
+  // Calculate available seats from ride if available
+  const availableSeats = ride?.seats || 4; // Default to 4 if no ride provided
   
   // Calculate displayed price based on what's available
   const displayPrice = price || (ride ? ride.price : 0);
@@ -97,22 +91,7 @@ const PaymentDetails = ({
             +
           </button>
         </div>
-        
-        {seatAvailability && (
-          <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {seatAvailability.remaining > 0 ? (
-              <span>
-                {t('reservation.remainingSeats', { count: seatAvailability.remaining })}
-              </span>
-            ) : (
-              <span className="text-red-500 dark:text-red-400">
-                {t('rides.full')}
-              </span>
-            )}
-          </div>
-        )}
-        
-        {ride && availableSeats < currentSeats && (
+        {ride && ride.seats < currentSeats && (
           <p className="text-sm text-red-500 mt-1">
             {t('reservation.notEnoughSeats')}
           </p>
@@ -197,7 +176,7 @@ const PaymentDetails = ({
           className="flex-1"
           onClick={handleSubmit}
           isLoading={loading}
-          disabled={loading || (availableSeats < currentSeats) || !isAuthenticated}
+          disabled={loading || (ride && currentSeats > ride.seats) || !isAuthenticated}
         >
           {isAuthenticated 
             ? t('reservation.confirmReservation') 

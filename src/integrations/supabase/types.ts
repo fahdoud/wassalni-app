@@ -267,13 +267,8 @@ export type Database = {
       reservations: {
         Row: {
           created_at: string | null
-          destination: string | null
           id: string
-          origin: string | null
           passenger_id: string | null
-          passenger_name: string | null
-          price: number | null
-          reservation_date: string | null
           seats_reserved: number
           status: string | null
           trip_id: string | null
@@ -281,13 +276,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          destination?: string | null
           id?: string
-          origin?: string | null
           passenger_id?: string | null
-          passenger_name?: string | null
-          price?: number | null
-          reservation_date?: string | null
           seats_reserved: number
           status?: string | null
           trip_id?: string | null
@@ -295,13 +285,8 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          destination?: string | null
           id?: string
-          origin?: string | null
           passenger_id?: string | null
-          passenger_name?: string | null
-          price?: number | null
-          reservation_date?: string | null
           seats_reserved?: number
           status?: string | null
           trip_id?: string | null
@@ -343,44 +328,6 @@ export type Database = {
           sender_name?: string
         }
         Relationships: []
-      }
-      seat_availability: {
-        Row: {
-          created_at: string | null
-          id: string
-          remaining_seats: number
-          seats_available: boolean
-          total_seats: number
-          trip_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          remaining_seats?: number
-          seats_available?: boolean
-          total_seats?: number
-          trip_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          remaining_seats?: number
-          seats_available?: boolean
-          total_seats?: number
-          trip_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "seat_availability_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: true
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       trajets: {
         Row: {
@@ -474,13 +421,6 @@ export type Database = {
           seats_count: number
         }
         Returns: undefined
-      }
-      decrease_seat_availability: {
-        Args: {
-          p_trip_id: string
-          p_seats_count: number
-        }
-        Returns: boolean
       }
     }
     Enums: {
