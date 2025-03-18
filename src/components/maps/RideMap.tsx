@@ -345,11 +345,4 @@ const RideMap: React.FC<RideMapProps> = ({
   );
 };
 
-// Add this to make the global callback TypeScript compatible
-declare global {
-  interface Window {
-    initMap: () => void;
-  }
-}
-
 export default RideMap;

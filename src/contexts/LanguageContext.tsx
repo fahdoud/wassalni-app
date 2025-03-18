@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 
 interface LanguageContextType {
@@ -24,7 +23,7 @@ const translations = {
   en: {
     // Navigation
     'nav.features': 'Features',
-    'nav.howItWorks': 'How it Works',
+    'nav.howItWorks': 'How It Works',
     'nav.feedback': 'Feedback',
     'nav.signIn': 'Sign In',
     'nav.signUp': 'Sign Up',
@@ -207,6 +206,13 @@ const translations = {
     'reservation.successMessage': 'Your ride has been successfully booked. The driver has been notified.',
     'reservation.reservationId': 'Reservation ID',
     'reservation.cashPayment': 'Cash Payment',
+    'reservation.rideDetails': 'Ride Details',
+    'reservation.confirmation': 'Confirmation',
+    'reservation.liveTracking': 'Live Tracking',
+    'reservation.trackingDescription': 'Track your driver\'s location in real-time. You can see when they\'ll arrive at your pickup point.',
+    'reservation.driverInfo': 'Driver Information',
+    'reservation.pickup': 'Pickup Location',
+    'reservation.dropoff': 'Dropoff Location',
   },
   fr: {
     // Navigation
@@ -394,6 +400,13 @@ const translations = {
     'reservation.successMessage': 'Votre trajet a été réservé avec succès. Le conducteur a été notifié.',
     'reservation.reservationId': 'Numéro de Réservation',
     'reservation.cashPayment': 'Paiement en Espèces',
+    'reservation.rideDetails': 'Détails du Trajet',
+    'reservation.confirmation': 'Confirmation',
+    'reservation.liveTracking': 'Suivi en Direct',
+    'reservation.trackingDescription': 'Suivez la position de votre conducteur en temps réel. Vous pouvez voir quand il arrivera à votre point de ramassage.',
+    'reservation.driverInfo': 'Informations du Conducteur',
+    'reservation.pickup': 'Lieu de Ramassage',
+    'reservation.dropoff': 'Lieu de Dépôt',
   },
   ar: {
     // Navigation
@@ -581,61 +594,7 @@ const translations = {
     'reservation.successMessage': 'تم حجز رحلتك بنجاح. تم إخطار السائق.',
     'reservation.reservationId': 'رقم الحجز',
     'reservation.cashPayment': 'الدفع نقدًا',
-  }
-};
-
-const defaultLanguage: string = 'fr';
-
-export const LanguageProvider = ({ children }: LanguageProviderProps) => {
-  const [language, setLanguage] = useState<string>(() => {
-    // Try to get the language from localStorage or use default
-    const savedLanguage = localStorage.getItem('language');
-    return savedLanguage || defaultLanguage;
-  });
-
-  // Determine the text direction based on the selected language
-  const dir = language === 'ar' ? 'rtl' : 'ltr';
-
-  // Effect to save the language preference to localStorage
-  useEffect(() => {
-    localStorage.setItem('language', language);
-    
-    // Update the document direction
-    document.documentElement.dir = dir;
-    document.documentElement.lang = language;
-  }, [language, dir]);
-
-  // Translate function
-  const t = (key: string): string => {
-    const selectedLanguage = language as keyof typeof translations;
-    const translationObject = translations[selectedLanguage] || translations.en;
-    return translationObject[key as keyof typeof translationObject] || key;
-  };
-
-  const contextValue = useMemo(
-    () => ({
-      language,
-      setLanguage,
-      t,
-      dir,
-    }),
-    [language, dir]
-  );
-
-  return (
-    <LanguageContext.Provider value={contextValue}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
-
-// Custom hook to use the language context
-export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
-  return context;
-};
-
-export default LanguageContext;
+    'reservation.rideDetails': 'تفاصيل الرحلة',
+    'reservation.confirmation': 'التأكيد',
+    'reservation.liveTracking': 'التتبع المباشر',
+    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي. يمكنك معرف
