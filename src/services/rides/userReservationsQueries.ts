@@ -22,14 +22,7 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
         seats_reserved,
         status,
         created_at,
-        updated_at,
         trip_id,
-        passenger_id,
-        passenger_name,
-        origin,
-        destination,
-        price,
-        reservation_date,
         trip:trips(
           id,
           origin,
@@ -88,16 +81,11 @@ export const getUserReservations = async (): Promise<Reservation[]> => {
       return {
         id: res.id,
         trip_id: res.trip_id,
-        passenger_id: res.passenger_id,
+        passenger_id: user.id,
         seats_reserved: res.seats_reserved,
         status: res.status as ReservationStatus,
         created_at: res.created_at,
-        updated_at: res.updated_at,
-        passenger_name: res.passenger_name,
-        origin: res.origin,
-        destination: res.destination,
-        price: res.price,
-        reservation_date: res.reservation_date,
+        updated_at: res.created_at,
         trip
       };
     });

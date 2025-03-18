@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getTrajets } from "@/services/trajets/trajetsService";
 import { Trajet } from "@/services/trajets/types";
+import { Loader2 } from "lucide-react";
 import TrajetList from "@/components/trajets/TrajetList";
-import { toast } from "sonner";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
@@ -19,11 +19,6 @@ const TrajetsPage = () => {
   const [trajets, setTrajets] = useState<Trajet[]>([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  
-  // Form state
-  const [fromLocation, setFromLocation] = useState("");
-  const [toLocation, setToLocation] = useState("");
-  const [travelDate, setTravelDate] = useState("");
 
   const fetchTrajets = async (forceRefresh = false) => {
     setLoading(true);
@@ -41,7 +36,6 @@ const TrajetsPage = () => {
       }
     } catch (error) {
       console.error("Erreur lors de la récupération des trajets:", error);
-      toast.error(t('rides.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -57,22 +51,14 @@ const TrajetsPage = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     
     const handleFocus = () => {
-      console.log("Window focused - refreshing trajets");
       fetchTrajets(true);
     };
     
     window.addEventListener('focus', handleFocus);
     
-    // Set up an interval to refresh trajets every 30 seconds
-    const refreshInterval = setInterval(() => {
-      console.log("Periodic refresh of trajets");
-      fetchTrajets();
-    }, 30000);
-    
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('focus', handleFocus);
-      clearInterval(refreshInterval);
     };
   }, []);
 
@@ -84,41 +70,11 @@ const TrajetsPage = () => {
         console.log("Retour de la page de réservation, forçage de l'actualisation des trajets");
         fetchTrajets(true);
         sessionStorage.removeItem('fromReservation');
-        toast.success(t('rides.seatsUpdated'));
       } else {
         fetchTrajets();
       }
     }
   }, [location]);
-
-  // Handle search form submission
-  const handleSearch = () => {
-    let filteredResults = "";
-    
-    if (fromLocation) {
-      filteredResults += fromLocation.toLowerCase();
-    }
-    
-    if (toLocation) {
-      filteredResults += " " + toLocation.toLowerCase();
-    }
-    
-    setFilter(filteredResults.trim());
-    
-    // Show toast notification for search
-    if (fromLocation || toLocation || travelDate) {
-      toast.info(t('form.searchApplied'));
-    }
-  };
-
-  // Reset search filters
-  const resetSearch = () => {
-    setFromLocation("");
-    setToLocation("");
-    setTravelDate("");
-    setFilter("");
-    toast.info(t('form.filtersReset'));
-  };
 
   const filteredTrajets = filter 
     ? trajets.filter(trajet => 
@@ -147,8 +103,6 @@ const TrajetsPage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{t('form.from')}</label>
                 <select 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  value={fromLocation}
-                  onChange={(e) => setFromLocation(e.target.value)}
                 >
                   <option value="">{t('form.selectLocation')}</option>
                   {constantineAreas.map(area => (
@@ -160,8 +114,6 @@ const TrajetsPage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{t('form.to')}</label>
                 <select 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  value={toLocation}
-                  onChange={(e) => setToLocation(e.target.value)}
                 >
                   <option value="">{t('form.selectLocation')}</option>
                   {constantineAreas.map(area => (
@@ -174,14 +126,11 @@ const TrajetsPage = () => {
                 <input 
                   type="date" 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  value={travelDate}
-                  onChange={(e) => setTravelDate(e.target.value)}
                 />
               </div>
             </div>
-            <div className="mt-4 flex justify-center gap-2">
-              <Button className="px-8" onClick={handleSearch}>{t('form.search')}</Button>
-              <Button variant="outlined" onClick={resetSearch}>{t('form.reset')}</Button>
+            <div className="mt-4 flex justify-center">
+              <Button className="px-8">{t('form.search')}</Button>
             </div>
           </div>
 

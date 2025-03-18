@@ -19,7 +19,7 @@ const ReservationPage = () => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("ride-details");
   
-  const { user, userName, userEmail, checkingAuth } = useAuthUser();
+  const { user, userName, checkingAuth } = useAuthUser();
   
   // Start preloading Google Maps immediately on component mount, before anything else
   useEffect(() => {
@@ -86,7 +86,6 @@ const ReservationPage = () => {
             showChatTab={showChatTab}
             rideLocations={rideLocations}
             userName={userName}
-            userEmail={userEmail}
             userId={user?.id || ''}
             seatAvailability={seatAvailability}
           />

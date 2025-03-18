@@ -1,11 +1,14 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Ride } from "./types";
-import { toast } from "sonner";
+import { Ride } from './types';
+import { getMockRides } from './mockRides';
 
-// Get all rides with their driver information
+// Get all available rides
 export const getRides = async (): Promise<Ride[]> => {
   try {
+    console.log("Fetching rides with cache busting");
+    
+    // First try to get trips directly
     const { data: trips, error } = await supabase
       .from('trips')
       .select(`
@@ -15,88 +18,70 @@ export const getRides = async (): Promise<Ride[]> => {
         departure_time,
         price,
         available_seats,
-        status,
         driver_id,
-        profiles(full_name)
+        profiles:drivers(full_name)
       `)
-      .eq('status', 'active')
-      .order('departure_time', { ascending: true });
-      
+      .eq('status', 'active');
+    
     if (error) {
       console.error("Error fetching rides:", error);
       throw new Error(error.message);
     }
+
+    // If we successfully got trips, transform them to Ride objects
+    if (trips && trips.length > 0) {
+      console.log("Trips fetched successfully:", trips);
+      
+      // Transform the data to match our Ride interface
+      const rides: Ride[] = trips.map(trip => {
+        // Get driver name from profiles join or use fallback
+        const driverName = trip.profiles && 
+          typeof trip.profiles === 'object' && 
+          'full_name' in trip.profiles ? 
+          String(trip.profiles.full_name || "Unknown Driver") : 
+          "Unknown Driver";
+
+        return {
+          id: trip.id,
+          driver: driverName,
+          from: trip.origin,
+          to: trip.destination,
+          date: new Date(trip.departure_time).toISOString().split('T')[0],
+          time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          price: trip.price,
+          seats: trip.available_seats,
+          rating: 4.7, // Default rating - in a real app would come from reviews
+          trip_id: trip.id
+        };
+      });
+
+      console.log("Transformed rides data:", rides);
+      return rides;
+    }
     
-    return trips.map(trip => {
-      // Safe extraction of driver name with type checking
-      let driverName = 'Unknown Driver';
-      
-      // Access profiles data safely with optional chaining and nullish coalescing
-      if (trip.profiles && typeof trip.profiles === 'object' && 'full_name' in trip.profiles) {
-        const profileName = trip.profiles.full_name;
-        if (profileName) {
-          driverName = profileName as string;
-        }
-      }
-      
-      // Format date and time
-      const date = new Date(trip.departure_time);
-      const formattedDate = date.toLocaleDateString();
-      const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
-      return {
-        id: trip.id,
-        driver: driverName,
-        origin: trip.origin,
-        destination: trip.destination,
-        departureDate: formattedDate,
-        departureTime: formattedTime,
-        price: trip.price,
-        seats: trip.available_seats,
-        rating: 4.5, // Default rating
-        trip_id: trip.id,
-        timestamp: new Date(trip.departure_time).getTime(),
-        // Backward compatibility fields
-        from: trip.origin,
-        to: trip.destination,
-        date: formattedDate,
-        time: formattedTime
-      };
-    });
+    // If no actual database trips, return mock rides
+    return getMockRides();
   } catch (error) {
     console.error("Failed to get rides:", error);
-    toast.error("Failed to load rides");
-    return [];
+    return getMockRides();
   }
 };
 
-// Get a ride by ID
-export const getRideById = async (rideId: string): Promise<Ride> => {
+// Get a specific ride by ID
+export const getRideById = async (rideId: string): Promise<Ride | null> => {
+  // Check if the ID is from a mock ride (simple numeric ID)
+  if (/^\d+$/.test(rideId)) {
+    console.log("Using mock ride with ID:", rideId);
+    const mockRides = getMockRides();
+    const mockRide = mockRides.find(ride => ride.id === rideId);
+    return mockRide || null;
+  }
+  
+  // Otherwise try to fetch from Supabase (UUID format)
   try {
-    // For mock rides with numeric IDs
-    if (/^\d+$/.test(rideId)) {
-      console.log("Getting mock ride:", rideId);
-      return {
-        id: rideId,
-        driver: "Demo Driver",
-        origin: "Demo Origin",
-        destination: "Demo Destination",
-        departureDate: "2023-06-15",
-        departureTime: "10:00 AM",
-        price: 2500,
-        seats: 3,
-        rating: 4.7,
-        is_mock: true,
-        // Backward compatibility fields
-        from: "Demo Origin",
-        to: "Demo Destination",
-        date: "2023-06-15",
-        time: "10:00 AM"
-      };
-    }
+    console.log("Fetching real ride with ID:", rideId);
     
-    // For real rides with UUID IDs
-    console.log("Fetching real ride:", rideId);
+    // Fetch the trip data with driver join
     const { data: trip, error } = await supabase
       .from('trips')
       .select(`
@@ -106,81 +91,60 @@ export const getRideById = async (rideId: string): Promise<Ride> => {
         departure_time,
         price,
         available_seats,
-        status,
         driver_id,
-        profiles(full_name)
+        profiles:drivers(full_name)
       `)
       .eq('id', rideId)
       .single();
-      
+    
     if (error) {
       console.error("Error fetching ride:", error);
-      throw new Error(error.message);
+      return null;
     }
-    
-    // Safe extraction of driver name with type checking
-    let driverName = 'Unknown Driver';
-    
-    // Access profiles data safely with optional chaining and nullish coalescing
-    if (trip.profiles && typeof trip.profiles === 'object' && 'full_name' in trip.profiles) {
-      const profileName = trip.profiles.full_name;
-      if (profileName) {
-        driverName = profileName as string;
-      }
-    }
-    
-    // Format date and time
-    const date = new Date(trip.departure_time);
-    const formattedDate = date.toLocaleDateString();
-    const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    // Map the database trip to our Ride interface
-    return {
+
+    console.log("Trip data fetched:", trip);
+
+    // Get driver name from profiles join or use fallback
+    const driverName = trip.profiles && 
+      typeof trip.profiles === 'object' && 
+      'full_name' in trip.profiles ? 
+      String(trip.profiles.full_name || "Unknown Driver") : 
+      "Unknown Driver";
+
+    // Transform the trip data to our Ride interface
+    const ride: Ride = {
       id: trip.id,
       driver: driverName,
-      origin: trip.origin,
-      destination: trip.destination,
-      departureDate: formattedDate,
-      departureTime: formattedTime,
-      price: trip.price,
-      seats: trip.available_seats,
-      rating: 4.5, // Default rating
-      trip_id: trip.id,
-      timestamp: date.getTime(),
-      // Backward compatibility fields
       from: trip.origin,
       to: trip.destination,
-      date: formattedDate,
-      time: formattedTime
+      date: new Date(trip.departure_time).toISOString().split('T')[0],
+      time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      price: trip.price,
+      seats: trip.available_seats,
+      rating: 4.7, // Default rating - would come from reviews
+      trip_id: trip.id
     };
+
+    console.log("Transformed ride data:", ride);
+    return ride;
   } catch (error) {
     console.error("Failed to get ride:", error);
-    toast.error("Failed to load ride details");
-    
-    // Return a default ride with error indication
-    return {
-      id: rideId || "error",
-      driver: "Error",
-      origin: "Could not load ride",
-      destination: "Please try again",
-      departureDate: "",
-      departureTime: "",
-      price: 0,
-      seats: 0,
-      rating: 0,
-      // Backward compatibility fields
-      from: "Could not load ride",
-      to: "Please try again",
-      date: "",
-      time: ""
-    };
+    return null;
   }
 };
 
-// Listen for updates to a specific ride
+// Subscribe to changes for a specific ride
 export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) => void) => {
+  if (/^\d+$/.test(rideId)) {
+    // Mock rides don't support real-time updates
+    console.log("Mock rides don't support real-time updates");
+    return { unsubscribe: () => {} };
+  }
+
+  console.log("Setting up real-time subscription for ride:", rideId);
+  
   const channel = supabase
-    .channel(`ride-updates-${rideId}`)
+    .channel(`ride-${rideId}`)
     .on(
       'postgres_changes',
       {
@@ -190,74 +154,20 @@ export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) =>
         filter: `id=eq.${rideId}`
       },
       async (payload) => {
-        if (payload.new) {
-          console.log("Ride update received:", payload.new);
-          
-          // Get the full ride details including joined data
-          const { data: trip, error } = await supabase
-            .from('trips')
-            .select(`
-              id,
-              origin,
-              destination,
-              departure_time,
-              price,
-              available_seats,
-              status,
-              driver_id,
-              profiles(full_name)
-            `)
-            .eq('id', rideId)
-            .single();
-            
-          if (error) {
-            console.error("Error fetching updated ride:", error);
-            return;
-          }
-          
-          // Safe extraction of driver name with type checking
-          let driverName = 'Unknown Driver';
-          
-          // Access profiles data safely with optional chaining and nullish coalescing
-          if (trip.profiles && typeof trip.profiles === 'object' && 'full_name' in trip.profiles) {
-            const profileName = trip.profiles.full_name;
-            if (profileName) {
-              driverName = profileName as string;
-            }
-          }
-          
-          // Format date and time
-          const date = new Date(trip.departure_time);
-          const formattedDate = date.toLocaleDateString();
-          const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          
-          // Call the callback with the updated ride
-          callback({
-            id: trip.id,
-            driver: driverName,
-            origin: trip.origin,
-            destination: trip.destination,
-            departureDate: formattedDate,
-            departureTime: formattedTime,
-            price: trip.price,
-            seats: trip.available_seats,
-            rating: 4.5, // Default rating
-            trip_id: trip.id,
-            timestamp: date.getTime(),
-            // Backward compatibility fields
-            from: trip.origin,
-            to: trip.destination,
-            date: formattedDate,
-            time: formattedTime
-          });
+        console.log("Received real-time update for ride:", payload);
+        
+        // Fetch the updated ride data
+        const updatedRide = await getRideById(rideId);
+        if (updatedRide) {
+          callback(updatedRide);
         }
       }
     )
     .subscribe();
-    
+
   return {
     unsubscribe: () => {
-      console.log("Unsubscribing from ride updates:", rideId);
+      console.log("Unsubscribing from ride updates");
       supabase.removeChannel(channel);
     }
   };

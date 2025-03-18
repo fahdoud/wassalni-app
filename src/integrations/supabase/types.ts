@@ -23,7 +23,6 @@ export type Database = {
           registration_number: string | null
           updated_at: string
           user_id: string
-          vehicle_photo_url: string | null
           verification_status: string | null
         }
         Insert: {
@@ -39,7 +38,6 @@ export type Database = {
           registration_number?: string | null
           updated_at?: string
           user_id: string
-          vehicle_photo_url?: string | null
           verification_status?: string | null
         }
         Update: {
@@ -55,8 +53,37 @@ export type Database = {
           registration_number?: string | null
           updated_at?: string
           user_id?: string
-          vehicle_photo_url?: string | null
           verification_status?: string | null
+        }
+        Relationships: []
+      }
+      email_verification: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          token_expires_at: string | null
+          updated_at: string | null
+          verification_token: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+          verification_token?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          token_expires_at?: string | null
+          updated_at?: string | null
+          verification_token?: string | null
+          verified?: boolean | null
         }
         Relationships: []
       }
@@ -174,6 +201,36 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      phone_verification: {
+        Row: {
+          code_expires_at: string | null
+          created_at: string | null
+          id: string
+          phone: string
+          updated_at: string | null
+          verification_code: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          code_expires_at?: string | null
+          created_at?: string | null
+          id: string
+          phone: string
+          updated_at?: string | null
+          verification_code?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          code_expires_at?: string | null
+          created_at?: string | null
+          id?: string
+          phone?: string
+          updated_at?: string | null
+          verification_code?: string | null
+          verified?: boolean | null
         }
         Relationships: []
       }
@@ -402,30 +459,6 @@ export type Database = {
           origin?: string
           price?: number
           status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      vehicle_photos: {
-        Row: {
-          created_at: string | null
-          driver_id: string
-          id: string
-          photo_url: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          driver_id: string
-          id?: string
-          photo_url: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          driver_id?: string
-          id?: string
-          photo_url?: string
           updated_at?: string | null
         }
         Relationships: []

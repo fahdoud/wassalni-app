@@ -27,7 +27,6 @@ interface ReservationTabsProps {
     destination: { lat: number; lng: number };
   } | null;
   userName: string;
-  userEmail: string;
   userId: string;
   seatAvailability?: {
     total: number;
@@ -51,7 +50,6 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
   showChatTab,
   rideLocations,
   userName,
-  userEmail,
   userId,
   seatAvailability
 }) => {

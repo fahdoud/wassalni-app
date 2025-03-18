@@ -1,4 +1,3 @@
-
 import { Ride } from "@/services/rides/types";
 import { MapPin, Calendar, Clock, User } from "lucide-react";
 import Button from "@/components/Button";
@@ -40,22 +39,15 @@ const RideDetails = ({
     }
   };
 
-  // Initialize seats from available sources
+  // Subscribe to real-time updates for available seats
   useEffect(() => {
     if (!ride.id) return;
     
-    // Initialize seats from the seatAvailability or ride.seats
     if (seatAvailability) {
-      console.log("Using provided seat availability:", seatAvailability);
+      // If seatAvailability is provided, use it
       setAvailableSeats(seatAvailability.remaining);
     } else {
-      console.log("Using ride seats:", ride.seats);
-      setAvailableSeats(ride.seats);
-    }
-    
-    // Set up real-time subscription only for non-mock rides
-    if (!/^\d+$/.test(ride.id)) {
-      console.log("Setting up real-time subscription for seat updates");
+      // Otherwise use the legacy subscription
       const subscription = subscribeToRideUpdates(ride.id, (updatedRide) => {
         console.log("Real-time seat update:", updatedRide.seats);
         setAvailableSeats(updatedRide.seats);
@@ -65,7 +57,7 @@ const RideDetails = ({
         subscription.unsubscribe();
       };
     }
-  }, [ride.id, seatAvailability, ride.seats]);
+  }, [ride.id, seatAvailability]);
 
   // Subscribe to real-time updates for seat availability
   useEffect(() => {
@@ -75,7 +67,6 @@ const RideDetails = ({
     }
     
     const tripId = ride.trip_id;
-    console.log("Setting up real-time subscription for seat availability:", tripId);
     
     const channel = supabase
       .channel(`seat-channel-${tripId}`)
@@ -90,7 +81,6 @@ const RideDetails = ({
         (payload) => {
           console.log("Received seat availability update:", payload);
           if (payload.new && 'remaining_seats' in payload.new) {
-            console.log(`Updating available seats from ${availableSeats} to ${payload.new.remaining_seats}`);
             setAvailableSeats(payload.new.remaining_seats);
           }
         }
@@ -100,7 +90,13 @@ const RideDetails = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [ride.id, ride.trip_id, availableSeats]);
+  }, [ride.id, ride.trip_id]);
+
+  // Update available seats whenever ride.seats changes
+  useEffect(() => {
+    console.log("Ride seats updated:", ride.seats);
+    setAvailableSeats(ride.seats);
+  }, [ride.seats]);
 
   return (
     <div className="glass-card p-8 rounded-xl mb-6">

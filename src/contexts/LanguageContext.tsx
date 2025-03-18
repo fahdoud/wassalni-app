@@ -214,11 +214,6 @@ const translations = {
     'reservation.driverInfo': 'Driver Information',
     'reservation.pickup': 'Pickup Location',
     'reservation.dropoff': 'Dropoff Location',
-    'reservation.remainingSeatsCount': 'Remaining seats: {count}',
-    'reservation.availableSeats': 'Available Seats',
-    'reservation.totalSeats': 'Total Seats',
-    'reservation.cash': 'Cash',
-    'reservation.notEnoughSeats': 'Not enough seats available',
   },
   fr: {
     // Navigation
@@ -413,11 +408,6 @@ const translations = {
     'reservation.driverInfo': 'Informations du Conducteur',
     'reservation.pickup': 'Lieu de Ramassage',
     'reservation.dropoff': 'Lieu de Dépôt',
-    'reservation.remainingSeatsCount': 'Places restantes: {count}',
-    'reservation.availableSeats': 'Places Disponibles',
-    'reservation.totalSeats': 'Nombre Total de Places',
-    'reservation.cash': 'Espèces',
-    'reservation.notEnoughSeats': 'Pas assez de places disponibles',
   },
   ar: {
     // Navigation
@@ -612,11 +602,6 @@ const translations = {
     'reservation.driverInfo': 'معلومات السائق',
     'reservation.pickup': 'نقطة الالتقاء',
     'reservation.dropoff': 'نقطة الوصول',
-    'reservation.remainingSeatsCount': 'المقاعد المتبقية: {count}',
-    'reservation.availableSeats': 'المقاعد المتاحة',
-    'reservation.totalSeats': 'إجمالي المقاعد',
-    'reservation.cash': 'نقدا',
-    'reservation.notEnoughSeats': 'لا توجد مقاعد كافية متاحة',
   }
 };
 

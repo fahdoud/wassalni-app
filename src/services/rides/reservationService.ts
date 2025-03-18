@@ -15,18 +15,6 @@ export const createReservation = async (
     if (/^\d+$/.test(tripId)) {
       console.log("Creating a mock reservation with ID:", tripId);
       
-      // Get user details first
-      const { data: userProfile } = await supabase
-        .from('profiles')
-        .select('full_name, phone')
-        .eq('id', passengerId)
-        .single();
-      
-      // Get email from auth
-      const { data: userData } = await supabase.auth.getUser();
-      const userEmail = userData?.user?.email || null;
-      const fullName = userProfile?.full_name || userData?.user?.email || "Unknown User";
-      
       // Create a reservation entry for mock trips
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
@@ -34,12 +22,7 @@ export const createReservation = async (
           trip_id: null, // No real trip ID for mock trips
           passenger_id: passengerId,
           seats_reserved: seatsReserved,
-          status: 'mock' as ReservationStatus,
-          passenger_name: fullName,
-          origin: "El Khroub",
-          destination: "Ali Mendjeli",
-          price: 500 * seatsReserved, // Real price
-          reservation_date: new Date().toISOString()
+          status: 'mock' as ReservationStatus
         })
         .select()
         .single();
@@ -51,11 +34,10 @@ export const createReservation = async (
       
       console.log("Mock reservation created successfully:", reservation);
       
-      // For mock rides, return a lower seat count that will be used to update the UI
-      return { 
-        success: true,
-        updatedSeats: 0 // Force UI to update with fewer seats 
-      };
+      // For mock rides, we manually decrement the seats in the mock data
+      // The UI will update based on the response, but next time the page loads
+      // it will show the original seat count since mock data is static
+      return { success: true };
     }
     
     // For real rides with UUID trip IDs
@@ -73,36 +55,14 @@ export const createReservation = async (
       throw new Error(tripError.message);
     }
     
-    // Also check seat_availability for the most accurate seat count
-    const { data: seatAvail, error: seatError } = await supabase
-      .from('seat_availability')
-      .select('remaining_seats')
-      .eq('trip_id', tripId)
-      .single();
-      
-    // Use the more accurate seat count from seat_availability if available
-    const availableSeats = seatAvail ? seatAvail.remaining_seats : currentTrip.available_seats;
-    
-    if (availableSeats < seatsReserved) {
+    if (currentTrip.available_seats < seatsReserved) {
       console.error("Not enough seats available");
       toast.error("Not enough seats available");
       return { success: false };
     }
     
-    // Get user profile information
-    const { data: userProfile } = await supabase
-      .from('profiles')
-      .select('full_name, phone')
-      .eq('id', passengerId)
-      .single();
-    
-    // Get email from auth
-    const { data: userData } = await supabase.auth.getUser();
-    const userEmail = userData?.user?.email || null;
-    
-    // Get full name with fallbacks
-    const fullName = userProfile?.full_name || userEmail || "Unknown User";
-    const phone = userProfile?.phone || "";
+    // Get user display info for storing with reservation
+    const userInfo = await getUserDisplayInfo(passengerId);
     
     // 1. Create the reservation with additional fields
     const { data: reservation, error: reservationError } = await supabase
@@ -112,7 +72,7 @@ export const createReservation = async (
         passenger_id: passengerId,
         seats_reserved: seatsReserved,
         status: 'confirmed' as ReservationStatus,
-        passenger_name: fullName,
+        passenger_name: userInfo.name,
         origin: currentTrip.origin,
         destination: currentTrip.destination,
         price: currentTrip.price * seatsReserved,
@@ -128,7 +88,7 @@ export const createReservation = async (
 
     console.log("Created reservation record:", reservation);
 
-    // 2. Update seat availability using the function
+    // 2. Update seat availability using the new function
     const { data: seatUpdateSuccess, error: seatUpdateError } = await supabase
       .rpc('decrease_seat_availability', {
         p_trip_id: tripId,
@@ -142,8 +102,6 @@ export const createReservation = async (
       throw new Error(seatUpdateError?.message || "Failed to update seats");
     }
     
-    console.log("Successfully decreased seat availability");
-    
     // 3. Also update the available seats in the trips table for backward compatibility
     const { data: success, error: updateError } = await supabase
       .rpc('decrease_available_seats', {
@@ -155,8 +113,6 @@ export const createReservation = async (
       console.error("Error updating available seats:", updateError);
       // No need to rollback since the primary update succeeded
       console.warn("Failed to update trips.available_seats, but seat_availability was updated successfully");
-    } else {
-      console.log("Successfully decreased available seats in trips table");
     }
 
     // 4. Send a welcome message to the ride chat
@@ -166,7 +122,7 @@ export const createReservation = async (
         ride_id: tripId,
         sender_id: 'system', // Using 'system' as ID for system messages
         sender_name: 'System',
-        content: `${fullName} has joined the ride.`
+        content: `${userInfo.name} has joined the ride.`
       });
     } catch (chatError) {
       console.error("Error sending welcome message to chat:", chatError);

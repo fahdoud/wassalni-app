@@ -72,11 +72,6 @@ const PaymentDetails = ({
   const displayPrice = price || (ride ? ride.price : 0);
   const totalPrice = displayPrice * currentSeats;
 
-  // Function to format the remaining seats message
-  const getRemainingSeatsMessage = (count: number) => {
-    return t('reservation.remainingSeatsCount').replace('{count}', count.toString());
-  };
-
   return (
     <div className="glass-card p-8 rounded-xl mb-6">
       <h2 className="text-xl font-semibold mb-6">{t('reservation.payment')}</h2>
@@ -107,8 +102,7 @@ const PaymentDetails = ({
           <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             {seatAvailability.remaining > 0 ? (
               <span>
-                {/* Fix: Using a function to handle the string interpolation instead of passing two arguments */}
-                {getRemainingSeatsMessage(seatAvailability.remaining)}
+                {t('reservation.remainingSeats', { count: seatAvailability.remaining })}
               </span>
             ) : (
               <span className="text-red-500 dark:text-red-400">
