@@ -11,7 +11,6 @@ interface PaymentDetailsProps {
   seats?: number;
   passengerCount?: number;
   setPassengerCount?: (count: number) => void;
-  setSeats?: (seats: number) => void;
   onBack?: () => void;
   onConfirm?: () => void;
   onSubmit?: () => Promise<void>;
@@ -26,7 +25,6 @@ const PaymentDetails = ({
   seats,
   passengerCount,
   setPassengerCount,
-  setSeats,
   onBack,
   onConfirm,
   onSubmit,
@@ -39,16 +37,7 @@ const PaymentDetails = ({
   
   // Use either seats or passengerCount for backward compatibility
   const currentSeats = seats || passengerCount || 1;
-  
-  // Handle both setPassengerCount and setSeats for backward compatibility
-  const handleSetSeats = (count: number) => {
-    if (setPassengerCount) {
-      setPassengerCount(count);
-    }
-    if (setSeats) {
-      setSeats(count);
-    }
-  };
+  const setSeats = setPassengerCount;
   
   // Handle submit function (either onSubmit or onConfirm)
   const handleSubmit = async () => {
@@ -59,9 +48,13 @@ const PaymentDetails = ({
     }
   };
   
-  // Calculate available seats from ride if available
-  const availableSeats = ride?.seats || 4; // Default to 4 if no ride provided
-  
+  // Make sure passenger count doesn't exceed available seats if ride is provided
+  useEffect(() => {
+    if (ride && setSeats && currentSeats > ride.seats) {
+      setSeats(Math.max(1, ride.seats));
+    }
+  }, [ride?.seats, currentSeats, setSeats, ride]);
+
   // Calculate displayed price based on what's available
   const displayPrice = price || (ride ? ride.price : 0);
   const totalPrice = displayPrice * currentSeats;
@@ -77,16 +70,16 @@ const PaymentDetails = ({
         <div className="flex items-center">
           <button
             className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
-            onClick={() => handleSetSeats(Math.max(1, currentSeats - 1))}
-            disabled={currentSeats <= 1}
+            onClick={() => setSeats && setSeats(Math.max(1, currentSeats - 1))}
+            disabled={currentSeats <= 1 || !setSeats}
           >
             -
           </button>
           <span className="mx-4 font-medium w-8 text-center">{currentSeats}</span>
           <button
             className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
-            onClick={() => handleSetSeats(Math.min(availableSeats, currentSeats + 1))}
-            disabled={currentSeats >= availableSeats}
+            onClick={() => setSeats && ride && setSeats(Math.min(ride.seats, currentSeats + 1))}
+            disabled={(ride && currentSeats >= ride.seats) || !setSeats}
           >
             +
           </button>
