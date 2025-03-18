@@ -1,3 +1,4 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -37,7 +38,7 @@ const RidesPage = () => {
         
         const ridesWithMaleDrivers = fetchedRides.map(ride => ({
           ...ride,
-          driverGender: 'male'
+          driverGender: 'male' as 'male'
         }));
         
         setRides(ridesWithMaleDrivers);
@@ -45,7 +46,7 @@ const RidesPage = () => {
         console.log("No rides found, using mock rides");
         const mockRides = getMockRides().map(ride => ({
           ...ride,
-          driverGender: 'male'
+          driverGender: 'male' as 'male'
         }));
         setRides(mockRides);
       }
@@ -53,7 +54,7 @@ const RidesPage = () => {
       console.error("Error fetching rides:", error);
       const mockRides = getMockRides().map(ride => ({
         ...ride,
-        driverGender: 'male'
+        driverGender: 'male' as 'male'
       }));
       setRides(mockRides);
     } finally {
