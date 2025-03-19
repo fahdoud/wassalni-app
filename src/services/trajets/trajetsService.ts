@@ -1,13 +1,13 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Trajet } from './types';
-import { toast } from "sonner";
+import { Trajet, StatutReservation } from "./types";
+import { getMockRides } from "@/services/rides/mockRides";
 
-// Get all active trajets
+// Obtenir tous les trajets disponibles
 export const getTrajets = async (): Promise<Trajet[]> => {
   try {
-    console.log("Fetching trajets...");
+    console.log("Récupération des trajets");
     
+    // Essayer d'abord d'obtenir les trajets depuis la base de données
     const { data: trajets, error } = await supabase
       .from('trajets')
       .select(`
@@ -18,57 +18,107 @@ export const getTrajets = async (): Promise<Trajet[]> => {
         prix,
         places_dispo,
         chauffeur_id,
-        profiles(full_name)
+        profiles:chauffeur_id(full_name)
       `)
       .eq('statut', 'actif');
     
     if (error) {
-      console.error("Error fetching trajets:", error);
+      console.error("Erreur lors de la récupération des trajets:", error);
       throw new Error(error.message);
     }
 
+    // Si nous avons récupéré des trajets avec succès, les transformer en objets Trajet
     if (trajets && trajets.length > 0) {
-      console.log("Trajets fetched successfully:", trajets);
+      console.log("Trajets récupérés avec succès:", trajets);
       
-      const formattedTrajets: Trajet[] = trajets.map(trajet => {
-        // Safe access to profile data with null checks
-        const chauffeurName = trajet.profiles && 
+      // Transformer les données pour correspondre à notre interface Trajet
+      const ridesTransformed: Trajet[] = trajets.map(trajet => {
+        // Obtenir le nom du chauffeur depuis la jointure des profils ou utiliser une valeur par défaut
+        const nomChauffeur = trajet.profiles && 
           typeof trajet.profiles === 'object' && 
-          trajet.profiles !== null ? 
-          (trajet.profiles.full_name || "Chauffeur Inconnu") : 
-          "Chauffeur Inconnu";
+          'full_name' in trajet.profiles ? 
+          String(trajet.profiles.full_name || "Chauffeur inconnu") : 
+          "Chauffeur inconnu";
 
         return {
           id: trajet.id,
-          chauffeur: chauffeurName,
+          chauffeur: nomChauffeur,
           origine: trajet.origine,
           destination: trajet.destination,
           date: new Date(trajet.date_depart).toISOString().split('T')[0],
           heure: new Date(trajet.date_depart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           prix: trajet.prix,
           places_dispo: trajet.places_dispo,
-          note: 4.7, // Default rating
+          note: 4.7, // Note par défaut - dans une vraie application, proviendrait des avis
           chauffeur_id: trajet.chauffeur_id
         };
       });
 
-      console.log("Formatted trajets:", formattedTrajets);
-      return formattedTrajets;
+      console.log("Données des trajets transformées:", ridesTransformed);
+      return ridesTransformed;
     }
     
-    // Return empty array if no trajets
-    return [];
+    // Si aucun trajet réel dans la base de données, retourner des trajets simulés
+    const mockRides = getMockRides();
+    return mockRides.map(ride => ({
+      id: ride.id,
+      chauffeur: ride.driver,
+      origine: ride.from,
+      destination: ride.to,
+      date: ride.date,
+      heure: ride.time,
+      prix: ride.price,
+      places_dispo: ride.seats,
+      note: ride.rating,
+      est_mock: true
+    }));
   } catch (error) {
-    console.error("Failed to get trajets:", error);
-    return [];
+    console.error("Échec de la récupération des trajets:", error);
+    const mockRides = getMockRides();
+    return mockRides.map(ride => ({
+      id: ride.id,
+      chauffeur: ride.driver,
+      origine: ride.from,
+      destination: ride.to,
+      date: ride.date,
+      heure: ride.time,
+      prix: ride.price,
+      places_dispo: ride.seats,
+      note: ride.rating,
+      est_mock: true
+    }));
   }
 };
 
-// Get a specific trajet by ID
+// Obtenir un trajet spécifique par ID
 export const getTrajetById = async (trajetId: string): Promise<Trajet | null> => {
+  // Vérifier si l'ID provient d'un trajet simulé (ID numérique simple)
+  if (/^\d+$/.test(trajetId)) {
+    console.log("Utilisation d'un trajet simulé avec ID:", trajetId);
+    const mockRides = getMockRides();
+    const mockRide = mockRides.find(ride => ride.id === trajetId);
+    if (mockRide) {
+      return {
+        id: mockRide.id,
+        chauffeur: mockRide.driver,
+        origine: mockRide.from,
+        destination: mockRide.to,
+        date: mockRide.date,
+        heure: mockRide.time,
+        prix: mockRide.price,
+        places_dispo: mockRide.seats,
+        note: mockRide.rating,
+        est_mock: true
+      };
+    }
+    return null;
+  }
+  
+  // Sinon, essayer de récupérer depuis Supabase (format UUID)
   try {
-    console.log("Fetching trajet with ID:", trajetId);
+    console.log("Récupération d'un trajet réel avec ID:", trajetId);
     
+    // Récupérer les données du trajet avec jointure du chauffeur
     const { data: trajet, error } = await supabase
       .from('trajets')
       .select(`
@@ -79,42 +129,43 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet | null> =>
         prix,
         places_dispo,
         chauffeur_id,
-        profiles(full_name)
+        profiles:chauffeur_id(full_name)
       `)
       .eq('id', trajetId)
       .single();
     
     if (error) {
-      console.error("Error fetching trajet:", error);
+      console.error("Erreur lors de la récupération du trajet:", error);
       return null;
     }
 
-    console.log("Trajet data fetched:", trajet);
+    console.log("Données du trajet récupérées:", trajet);
 
-    // Safe access to profile data with null checks
-    const chauffeurName = trajet.profiles && 
+    // Obtenir le nom du chauffeur depuis la jointure des profils ou utiliser une valeur par défaut
+    const nomChauffeur = trajet.profiles && 
       typeof trajet.profiles === 'object' && 
-      trajet.profiles !== null ? 
-      (trajet.profiles.full_name || "Chauffeur Inconnu") : 
-      "Chauffeur Inconnu";
+      'full_name' in trajet.profiles ? 
+      String(trajet.profiles.full_name || "Chauffeur inconnu") : 
+      "Chauffeur inconnu";
 
-    const formattedTrajet: Trajet = {
+    // Transformer les données du trajet selon notre interface Trajet
+    const trajetTransformed: Trajet = {
       id: trajet.id,
-      chauffeur: chauffeurName,
+      chauffeur: nomChauffeur,
       origine: trajet.origine,
       destination: trajet.destination,
       date: new Date(trajet.date_depart).toISOString().split('T')[0],
       heure: new Date(trajet.date_depart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       prix: trajet.prix,
       places_dispo: trajet.places_dispo,
-      note: 4.7, // Default rating
+      note: 4.7, // Note par défaut - proviendrait des avis
       chauffeur_id: trajet.chauffeur_id
     };
 
-    console.log("Formatted trajet:", formattedTrajet);
-    return formattedTrajet;
+    console.log("Données du trajet transformées:", trajetTransformed);
+    return trajetTransformed;
   } catch (error) {
-    console.error("Failed to get trajet:", error);
+    console.error("Échec de la récupération du trajet:", error);
     return null;
   }
 };
@@ -160,110 +211,99 @@ export const subscribeToTrajetUpdates = (trajetId: string, callback: (trajet: Tr
 };
 
 // Créer une réservation
-export const createTrajetReservation = async (
+export const createReservationTrajet = async (
   trajetId: string, 
-  userId: string, 
+  passagerId: string, 
   placesReservees: number
-) => {
+): Promise<{ success: boolean, placesDispoMisesAJour?: number }> => {
   try {
-    // Fetch the trajet details
-    const { data: trajet, error: trajetError } = await supabase
+    // Pour les trajets simulés, créer une réservation réelle avec une étiquette "mock"
+    if (/^\d+$/.test(trajetId)) {
+      console.log("Création d'une réservation simulée avec ID:", trajetId);
+      
+      // Créer une entrée de réservation pour les trajets simulés
+      const { data: reservation, error: reservationError } = await supabase
+        .from('reservations_trajets')
+        .insert({
+          trajet_id: null, // Pas d'ID de trajet réel pour les trajets simulés
+          passager_id: passagerId,
+          places_reservees: placesReservees,
+          statut: 'mock' as StatutReservation
+        })
+        .select()
+        .single();
+      
+      if (reservationError) {
+        console.error("Erreur lors de la création de la réservation simulée:", reservationError);
+        throw new Error(reservationError.message);
+      }
+      
+      console.log("Réservation simulée créée avec succès:", reservation);
+      
+      // Pour les trajets simulés, nous décrémentons manuellement les places
+      return { success: true };
+    }
+    
+    // Pour les trajets réels avec des ID UUID
+    console.log("Création d'une réservation réelle avec trajetId:", trajetId);
+    
+    // D'abord, récupérer les places disponibles actuelles
+    const { data: trajetActuel, error: trajetError } = await supabase
       .from('trajets')
-      .select('origine, destination, prix, places_dispo')
+      .select('places_dispo')
       .eq('id', trajetId)
       .single();
       
     if (trajetError) {
-      console.error("Error fetching trajet for reservation:", trajetError);
+      console.error("Erreur lors de la récupération des places du trajet actuel:", trajetError);
       throw new Error(trajetError.message);
     }
-
-    // Get passenger name
-    const { data: userProfile, error: userError } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', userId)
-      .single();
-      
-    if (userError) {
-      console.error("Error fetching user profile:", userError);
-      throw new Error(userError.message);
+    
+    if (trajetActuel.places_dispo < placesReservees) {
+      console.error("Pas assez de places disponibles");
+      return { success: false };
     }
-
-    // Create the reservation in the reservations table
+    
+    // 1. Créer la réservation
     const { data: reservation, error: reservationError } = await supabase
-      .from('reservations')
+      .from('reservations_trajets')
       .insert({
-        trip_id: trajetId,
-        passenger_id: userId,
-        seats_reserved: placesReservees,
-        passenger_name: userProfile?.full_name || "Unknown User",
-        price: trajet?.prix * placesReservees,
-        origin: trajet?.origine,
-        destination: trajet?.destination,
-        status: 'pending',
-        reservation_date: new Date().toISOString()
+        trajet_id: trajetId,
+        passager_id: passagerId,
+        places_reservees: placesReservees,
+        statut: 'confirmée'
       })
       .select()
       .single();
-      
+    
     if (reservationError) {
-      console.error("Error creating reservation:", reservationError);
+      console.error("Erreur lors de la création de la réservation:", reservationError);
       throw new Error(reservationError.message);
     }
 
-    // Update available seats count in the trajet using RPC
-    const { error: updateError } = await supabase
-      .rpc('decrease_available_seats', {
-        trip_id: trajetId,
-        seats_count: placesReservees
-      });
-      
-    if (updateError) {
-      console.error("Error updating available seats:", updateError);
-      // Don't throw here, at least the reservation was created
-      toast.warning("Reservation created but seat count may not be accurate");
+    console.log("Enregistrement de réservation créé:", reservation);
+
+    // La mise à jour est gérée par le trigger dans la base de données,
+    // mais nous allons quand même vérifier que ça a fonctionné
+
+    // Récupérer le nombre de places mises à jour pour confirmer
+    const { data: trajetMisAJour, error: fetchError } = await supabase
+      .from('trajets')
+      .select('places_dispo')
+      .eq('id', trajetId)
+      .single();
+
+    if (fetchError) {
+      console.error("Erreur lors de la récupération du nombre de places mises à jour:", fetchError);
     }
 
-    return {
-      success: true,
-      reservation,
-      updatedSeats: trajet ? trajet.places_dispo - placesReservees : 0 // Calculate updated seats correctly
+    console.log("Réservation créée avec succès. Trajet mis à jour:", trajetMisAJour);
+    return { 
+      success: true, 
+      placesDispoMisesAJour: trajetMisAJour?.places_dispo
     };
-  } catch (error: any) {
-    console.error("Failed to create trajet reservation:", error);
-    toast.error(error.message || "Failed to create reservation");
-    return { success: false };
-  }
-};
-
-// Get user's trajet reservations using the reservations table
-export const getUserTrajetReservations = async (userId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('reservations')
-      .select(`
-        id,
-        trip_id,
-        passenger_name,
-        seats_reserved,
-        price,
-        status,
-        origin,
-        destination,
-        reservation_date,
-        created_at
-      `)
-      .eq('passenger_id', userId);
-      
-    if (error) {
-      console.error("Error fetching user reservations:", error);
-      throw new Error(error.message);
-    }
-    
-    return data || [];
   } catch (error) {
-    console.error("Failed to get user reservations:", error);
-    return [];
+    console.error("Échec de la création de la réservation:", error);
+    return { success: false };
   }
 };

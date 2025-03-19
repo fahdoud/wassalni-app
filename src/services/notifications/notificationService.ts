@@ -1,6 +1,5 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { sendSMSNotification } from "@/integrations/supabase/client";
+import { supabase, sendSMSNotification } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 // Notification types

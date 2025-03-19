@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Ride } from './types';
 import { getMockRides } from './mockRides';
@@ -33,11 +34,11 @@ export const getRides = async (): Promise<Ride[]> => {
       
       // Transform the data to match our Ride interface
       const rides: Ride[] = trips.map(trip => {
-        // Get driver name from profiles join or use fallback - with proper null checks
+        // Get driver name from profiles join or use fallback
         const driverName = trip.profiles && 
           typeof trip.profiles === 'object' && 
-          trip.profiles !== null ? 
-          (trip.profiles.full_name || "Unknown Driver") : 
+          'full_name' in trip.profiles ? 
+          String(trip.profiles.full_name || "Unknown Driver") : 
           "Unknown Driver";
 
         return {
@@ -103,11 +104,11 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
 
     console.log("Trip data fetched:", trip);
 
-    // Get driver name using null-safe access
+    // Get driver name from profiles join or use fallback
     const driverName = trip.profiles && 
       typeof trip.profiles === 'object' && 
-      trip.profiles !== null ? 
-      (trip.profiles.full_name || "Unknown Driver") : 
+      'full_name' in trip.profiles ? 
+      String(trip.profiles.full_name || "Unknown Driver") : 
       "Unknown Driver";
 
     // Transform the trip data to our Ride interface
