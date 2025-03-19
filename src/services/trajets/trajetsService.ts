@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Trajet } from './types';
 import { toast } from "sonner";
@@ -121,7 +122,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet | null> =>
 // S'abonner aux changements pour un trajet spécifique
 export const subscribeToTrajetUpdates = (trajetId: string, callback: (trajet: Trajet) => void) => {
   if (/^\d+$/.test(trajetId)) {
-    // Les trajets simulés ne prennent pas en charge les mises �� jour en temps réel
+    // Les trajets simulés ne prennent pas en charge les mises à jour en temps réel
     console.log("Les trajets simulés ne prennent pas en charge les mises à jour en temps réel");
     return { unsubscribe: () => {} };
   }
@@ -168,7 +169,7 @@ export const createTrajetReservation = async (
     // Fetch the trajet details
     const { data: trajet, error: trajetError } = await supabase
       .from('trajets')
-      .select('origine, destination, prix')
+      .select('origine, destination, prix, places_dispo')
       .eq('id', trajetId)
       .single();
       

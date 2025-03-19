@@ -39,6 +39,14 @@ const ConfirmationDetails = ({ ride, seats, passengerCount }: ConfirmationDetail
           <span className="font-medium">{ride.driver}</span>
         </div>
         <div className="flex justify-between mb-4">
+          <span className="text-gray-600 dark:text-gray-300">{t('reservation.from')}</span>
+          <span className="font-medium">{ride.from}</span>
+        </div>
+        <div className="flex justify-between mb-4">
+          <span className="text-gray-600 dark:text-gray-300">{t('reservation.to')}</span>
+          <span className="font-medium">{ride.to}</span>
+        </div>
+        <div className="flex justify-between mb-4">
           <span className="text-gray-600 dark:text-gray-300">{t('reservation.date')}</span>
           <span className="font-medium">
             {new Date(ride.date).toLocaleDateString('fr-FR', {

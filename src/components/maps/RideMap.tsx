@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, Map as MapIcon, AlertTriangle } from 'lucide-react';
 
@@ -11,7 +10,7 @@ interface RideMapProps {
 }
 
 // Google Maps API key
-const GOOGLE_MAPS_API_KEY = "AIzaSyAShg04o1uyNHkCNwWLwrEuV7jxZ8xiIU8";
+const GOOGLE_MAPS_API_KEY = "AIzaSyCvCVLujxpvbeM9DHqN3TqDGyVn4Egst8A";
 
 const RideMap: React.FC<RideMapProps> = ({ 
   rideId,
