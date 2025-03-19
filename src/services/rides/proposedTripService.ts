@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Create a proposed trip
+// Create a proposed trip - using the trips table instead of proposed_trips
 export const createProposedTrip = async (
   driverId: string,
   origin: string,
@@ -14,7 +14,7 @@ export const createProposedTrip = async (
 ) => {
   try {
     const { data, error } = await supabase
-      .from('proposed_trips')
+      .from('trips')
       .insert({
         driver_id: driverId,
         origin,
@@ -41,11 +41,11 @@ export const createProposedTrip = async (
   }
 };
 
-// Get all proposed trips
+// Get all proposed trips - using the trips table
 export const getProposedTrips = async () => {
   try {
     const { data, error } = await supabase
-      .from('proposed_trips')
+      .from('trips')
       .select(`
         id,
         origin,
@@ -74,11 +74,11 @@ export const getProposedTrips = async () => {
   }
 };
 
-// Update a proposed trip status
+// Update a proposed trip status - using the trips table
 export const updateProposedTripStatus = async (tripId: string, status: 'pending' | 'approved' | 'rejected') => {
   try {
     const { data, error } = await supabase
-      .from('proposed_trips')
+      .from('trips')
       .update({ status })
       .eq('id', tripId)
       .select()

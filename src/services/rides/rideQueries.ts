@@ -34,9 +34,10 @@ export const getRides = async (): Promise<Ride[]> => {
       
       // Transform the data to match our Ride interface
       const rides: Ride[] = trips.map(trip => {
-        // Get driver name from profiles join or use fallback
+        // Get driver name from profiles join or use fallback - with proper null checks
         const driverName = trip.profiles && 
           typeof trip.profiles === 'object' && 
+          trip.profiles !== null &&
           'full_name' in trip.profiles ? 
           String(trip.profiles.full_name || "Unknown Driver") : 
           "Unknown Driver";
@@ -104,9 +105,10 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
 
     console.log("Trip data fetched:", trip);
 
-    // Get driver name from profiles join or use fallback
+    // Get driver name from profiles join or use fallback - with proper null checks
     const driverName = trip.profiles && 
       typeof trip.profiles === 'object' && 
+      trip.profiles !== null &&
       'full_name' in trip.profiles ? 
       String(trip.profiles.full_name || "Unknown Driver") : 
       "Unknown Driver";
