@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Trajet } from './types';
 import { toast } from "sonner";
@@ -34,9 +33,8 @@ export const getTrajets = async (): Promise<Trajet[]> => {
         // Safe access to profile data with null checks
         const chauffeurName = trajet.profiles && 
           typeof trajet.profiles === 'object' && 
-          trajet.profiles !== null &&
-          'full_name' in trajet.profiles ? 
-          String(trajet.profiles.full_name || "Chauffeur Inconnu") : 
+          trajet.profiles !== null ? 
+          (trajet.profiles.full_name || "Chauffeur Inconnu") : 
           "Chauffeur Inconnu";
 
         return {
@@ -49,7 +47,7 @@ export const getTrajets = async (): Promise<Trajet[]> => {
           prix: trajet.prix,
           places_dispo: trajet.places_dispo,
           note: 4.7, // Default rating
-          trajet_id: trajet.id
+          chauffeur_id: trajet.chauffeur_id
         };
       });
 
@@ -95,9 +93,8 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet | null> =>
     // Safe access to profile data with null checks
     const chauffeurName = trajet.profiles && 
       typeof trajet.profiles === 'object' && 
-      trajet.profiles !== null &&
-      'full_name' in trajet.profiles ? 
-      String(trajet.profiles.full_name || "Chauffeur Inconnu") : 
+      trajet.profiles !== null ? 
+      (trajet.profiles.full_name || "Chauffeur Inconnu") : 
       "Chauffeur Inconnu";
 
     const formattedTrajet: Trajet = {
@@ -110,7 +107,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet | null> =>
       prix: trajet.prix,
       places_dispo: trajet.places_dispo,
       note: 4.7, // Default rating
-      trajet_id: trajet.id
+      chauffeur_id: trajet.chauffeur_id
     };
 
     console.log("Formatted trajet:", formattedTrajet);
@@ -124,7 +121,7 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet | null> =>
 // S'abonner aux changements pour un trajet spécifique
 export const subscribeToTrajetUpdates = (trajetId: string, callback: (trajet: Trajet) => void) => {
   if (/^\d+$/.test(trajetId)) {
-    // Les trajets simulés ne prennent pas en charge les mises à jour en temps réel
+    // Les trajets simulés ne prennent pas en charge les mises �� jour en temps réel
     console.log("Les trajets simulés ne prennent pas en charge les mises à jour en temps réel");
     return { unsubscribe: () => {} };
   }
@@ -230,7 +227,7 @@ export const createTrajetReservation = async (
     return {
       success: true,
       reservation,
-      updatedSeats: trajet ? trajet.prix - placesReservees : 0 // Calculate updated seats
+      updatedSeats: trajet ? trajet.places_dispo - placesReservees : 0 // Calculate updated seats correctly
     };
   } catch (error: any) {
     console.error("Failed to create trajet reservation:", error);
