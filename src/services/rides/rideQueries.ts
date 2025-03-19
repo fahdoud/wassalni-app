@@ -105,7 +105,7 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
 
     console.log("Trip data fetched:", trip);
 
-    // Get driver name from profiles join or use fallback - with proper null checks
+    // Get driver name using null-safe access
     const driverName = trip.profiles && 
       typeof trip.profiles === 'object' && 
       trip.profiles !== null &&

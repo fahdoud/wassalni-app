@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Trajet } from './types';
 import { toast } from "sonner";
@@ -41,13 +42,13 @@ export const getTrajets = async (): Promise<Trajet[]> => {
         return {
           id: trajet.id,
           chauffeur: chauffeurName,
-          de: trajet.origine,
-          vers: trajet.destination,
+          origine: trajet.origine,
+          destination: trajet.destination,
           date: new Date(trajet.date_depart).toISOString().split('T')[0],
           heure: new Date(trajet.date_depart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           prix: trajet.prix,
-          placesDispo: trajet.places_dispo,
-          evaluation: 4.7, // Default rating
+          places_dispo: trajet.places_dispo,
+          note: 4.7, // Default rating
           trajet_id: trajet.id
         };
       });
@@ -102,13 +103,13 @@ export const getTrajetById = async (trajetId: string): Promise<Trajet | null> =>
     const formattedTrajet: Trajet = {
       id: trajet.id,
       chauffeur: chauffeurName,
-      de: trajet.origine,
-      vers: trajet.destination,
+      origine: trajet.origine,
+      destination: trajet.destination,
       date: new Date(trajet.date_depart).toISOString().split('T')[0],
       heure: new Date(trajet.date_depart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       prix: trajet.prix,
-      placesDispo: trajet.places_dispo,
-      evaluation: 4.7, // Default rating
+      places_dispo: trajet.places_dispo,
+      note: 4.7, // Default rating
       trajet_id: trajet.id
     };
 
@@ -213,11 +214,12 @@ export const createTrajetReservation = async (
       throw new Error(reservationError.message);
     }
 
-    // Update available seats count in the trajet
+    // Update available seats count in the trajet using RPC
     const { error: updateError } = await supabase
-      .from('trajets')
-      .update({ places_dispo: supabase.rpc('decrement_places_dispo', { seats: placesReservees }) })
-      .eq('id', trajetId);
+      .rpc('decrease_available_seats', {
+        trip_id: trajetId,
+        seats_count: placesReservees
+      });
       
     if (updateError) {
       console.error("Error updating available seats:", updateError);
@@ -228,7 +230,7 @@ export const createTrajetReservation = async (
     return {
       success: true,
       reservation,
-      updatedSeats: trajet.places_dispo - placesReservees
+      updatedSeats: trajet ? trajet.prix - placesReservees : 0 // Calculate updated seats
     };
   } catch (error: any) {
     console.error("Failed to create trajet reservation:", error);
@@ -237,7 +239,7 @@ export const createTrajetReservation = async (
   }
 };
 
-// Get user's trajet reservations using the correct table
+// Get user's trajet reservations using the reservations table
 export const getUserTrajetReservations = async (userId: string) => {
   try {
     const { data, error } = await supabase
