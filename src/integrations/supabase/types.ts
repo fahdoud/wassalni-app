@@ -23,6 +23,7 @@ export type Database = {
           registration_number: string | null
           updated_at: string
           user_id: string
+          vehicle_photo_url: string | null
           verification_status: string | null
         }
         Insert: {
@@ -38,6 +39,7 @@ export type Database = {
           registration_number?: string | null
           updated_at?: string
           user_id: string
+          vehicle_photo_url?: string | null
           verification_status?: string | null
         }
         Update: {
@@ -53,37 +55,8 @@ export type Database = {
           registration_number?: string | null
           updated_at?: string
           user_id?: string
+          vehicle_photo_url?: string | null
           verification_status?: string | null
-        }
-        Relationships: []
-      }
-      email_verification: {
-        Row: {
-          created_at: string | null
-          email: string
-          id: string
-          token_expires_at: string | null
-          updated_at: string | null
-          verification_token: string | null
-          verified: boolean | null
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          id: string
-          token_expires_at?: string | null
-          updated_at?: string | null
-          verification_token?: string | null
-          verified?: boolean | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          id?: string
-          token_expires_at?: string | null
-          updated_at?: string | null
-          verification_token?: string | null
-          verified?: boolean | null
         }
         Relationships: []
       }
@@ -204,36 +177,6 @@ export type Database = {
         }
         Relationships: []
       }
-      phone_verification: {
-        Row: {
-          code_expires_at: string | null
-          created_at: string | null
-          id: string
-          phone: string
-          updated_at: string | null
-          verification_code: string | null
-          verified: boolean | null
-        }
-        Insert: {
-          code_expires_at?: string | null
-          created_at?: string | null
-          id: string
-          phone: string
-          updated_at?: string | null
-          verification_code?: string | null
-          verified?: boolean | null
-        }
-        Update: {
-          code_expires_at?: string | null
-          created_at?: string | null
-          id?: string
-          phone?: string
-          updated_at?: string | null
-          verification_code?: string | null
-          verified?: boolean | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -267,8 +210,13 @@ export type Database = {
       reservations: {
         Row: {
           created_at: string | null
+          destination: string | null
           id: string
+          origin: string | null
           passenger_id: string | null
+          passenger_name: string | null
+          price: number | null
+          reservation_date: string | null
           seats_reserved: number
           status: string | null
           trip_id: string | null
@@ -276,8 +224,13 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          destination?: string | null
           id?: string
+          origin?: string | null
           passenger_id?: string | null
+          passenger_name?: string | null
+          price?: number | null
+          reservation_date?: string | null
           seats_reserved: number
           status?: string | null
           trip_id?: string | null
@@ -285,8 +238,13 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          destination?: string | null
           id?: string
+          origin?: string | null
           passenger_id?: string | null
+          passenger_name?: string | null
+          price?: number | null
+          reservation_date?: string | null
           seats_reserved?: number
           status?: string | null
           trip_id?: string | null
@@ -298,44 +256,6 @@ export type Database = {
             columns: ["passenger_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      reservations_trajets: {
-        Row: {
-          created_at: string | null
-          id: string
-          passager_id: string
-          places_reservees: number
-          statut: string | null
-          trajet_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          passager_id: string
-          places_reservees?: number
-          statut?: string | null
-          trajet_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          passager_id?: string
-          places_reservees?: number
-          statut?: string | null
-          trajet_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reservations_trajets_trajet_id_fkey"
-            columns: ["trajet_id"]
-            isOneToOne: false
-            referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
         ]
@@ -366,6 +286,44 @@ export type Database = {
           sender_name?: string
         }
         Relationships: []
+      }
+      seat_availability: {
+        Row: {
+          created_at: string | null
+          id: string
+          remaining_seats: number
+          seats_available: boolean
+          total_seats: number
+          trip_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          remaining_seats?: number
+          seats_available?: boolean
+          total_seats?: number
+          trip_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          remaining_seats?: number
+          seats_available?: boolean
+          total_seats?: number
+          trip_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seat_availability_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trajets: {
         Row: {
@@ -448,6 +406,30 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_photos: {
+        Row: {
+          created_at: string | null
+          driver_id: string
+          id: string
+          photo_url: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          driver_id: string
+          id?: string
+          photo_url: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          driver_id?: string
+          id?: string
+          photo_url?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -459,6 +441,13 @@ export type Database = {
           seats_count: number
         }
         Returns: undefined
+      }
+      decrease_seat_availability: {
+        Args: {
+          p_trip_id: string
+          p_seats_count: number
+        }
+        Returns: boolean
       }
     }
     Enums: {
