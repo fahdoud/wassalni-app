@@ -34,12 +34,14 @@ const Index = () => {
       });
     });
     
-    // Add animation classes on page load
+    // Modified animation logic to ensure persistence
     const elements = document.querySelectorAll('.stagger-animation > *');
     elements.forEach((el, index) => {
       const element = el as HTMLElement;
+      // Set opacity to 1 with a delay and make it permanent
       setTimeout(() => {
         element.style.opacity = '1';
+        element.style.transition = 'opacity 0.5s ease-in-out';
       }, 100 * (index + 1));
     });
     

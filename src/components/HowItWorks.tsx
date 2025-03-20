@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Button from "./Button";
@@ -43,7 +42,7 @@ const HowItWorks = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("animate-slide-up");
-            observer.unobserve(entry.target);
+            // Don't unobserve to keep the animation persistent
           }
         });
       },
@@ -73,8 +72,8 @@ const HowItWorks = () => {
         {steps.map((step, index) => (
           <div
             key={index}
-            className="step-item flex flex-col md:flex-row items-start gap-6 mb-12 opacity-0"
-            style={{ transitionDelay: `${index * 0.1}s` }}
+            className="step-item flex flex-col md:flex-row items-start gap-6 mb-12"
+            style={{ opacity: 1, transitionDelay: `${index * 0.1}s` }}
           >
             <div className="flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-full bg-gradient-primary text-white font-bold text-xl">
               {step.number}
