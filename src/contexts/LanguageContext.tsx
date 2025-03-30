@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 
 interface LanguageContextType {
@@ -598,61 +597,4 @@ const translations = {
     'reservation.rideDetails': 'تفاصيل الرحلة',
     'reservation.confirmation': 'التأكيد',
     'reservation.liveTracking': 'التتبع المباشر',
-    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي. يمكنك معرفة وقت وصوله إلى نقطة الالتقاء.',
-    'reservation.driverInfo': 'معلومات السائق',
-    'reservation.pickup': 'نقطة الالتقاء',
-    'reservation.dropoff': 'نقطة الوصول',
-  }
-};
-
-export const LanguageProvider = ({ children }: LanguageProviderProps) => {
-  const [language, setLanguage] = useState<string>("fr");
-  
-  // Load language from localStorage on initial render
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem("language");
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-    }
-  }, []);
-  
-  // Save language to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem("language", language);
-    // Update document direction based on language
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = language;
-  }, [language]);
-  
-  // Translation function
-  const t = (key: string): string => {
-    const lang = language as keyof typeof translations;
-    const translation = translations[lang] as Record<string, string>;
-    return translation[key] || key;
-  };
-  
-  // Get text direction based on language
-  const dir = language === "ar" ? "rtl" : "ltr";
-  
-  // Memoized context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => ({
-    language,
-    setLanguage,
-    t,
-    dir
-  }), [language]);
-  
-  return (
-    <LanguageContext.Provider value={contextValue}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
-
-export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
-  return context;
-};
+    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي. يمكنك معرفة وقت وصول
