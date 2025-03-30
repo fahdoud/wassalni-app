@@ -4,6 +4,7 @@ import { Ride } from "@/services/rides/types";
 import Button from "@/components/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
+import { UserCheck, Lock } from "lucide-react";
 
 interface PaymentDetailsProps {
   ride?: Ride;
@@ -104,14 +105,25 @@ const PaymentDetails = ({
       </div>
       
       {!isAuthenticated && (
-        <div className="mb-6 p-4 bg-yellow-50 text-yellow-700 rounded-lg border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800">
-          <p className="mb-2 font-medium">{t('auth.loginRequired')}</p>
-          <p className="text-sm">{t('auth.loginToReserve')}</p>
-          <div className="mt-3 flex space-x-3">
-            <Link to="/passenger/signin" className="text-sm font-medium text-wassalni-blue hover:underline dark:text-wassalni-lightBlue">
+        <div className="mb-6 p-5 bg-yellow-50 text-yellow-800 rounded-lg border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="rounded-full bg-yellow-100 p-2 dark:bg-yellow-800">
+              <Lock size={18} className="text-yellow-600 dark:text-yellow-300" />
+            </div>
+            <h3 className="font-medium text-lg">{t('auth.loginRequired')}</h3>
+          </div>
+          <p className="mb-4">{t('auth.loginToReserve')}</p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link 
+              to="/passenger-signin" 
+              className="text-center py-2 px-4 bg-wassalni-blue text-white font-medium rounded-lg hover:bg-wassalni-blue/90 transition-colors dark:bg-wassalni-lightBlue dark:hover:bg-wassalni-lightBlue/90"
+            >
               {t('auth.login')}
             </Link>
-            <Link to="/passenger/signup" className="text-sm font-medium text-wassalni-green hover:underline dark:text-wassalni-lightGreen">
+            <Link 
+              to="/passenger-signup" 
+              className="text-center py-2 px-4 bg-wassalni-green text-white font-medium rounded-lg hover:bg-wassalni-green/90 transition-colors dark:bg-wassalni-lightGreen dark:hover:bg-wassalni-lightGreen/90"
+            >
               {t('auth.register')}
             </Link>
           </div>

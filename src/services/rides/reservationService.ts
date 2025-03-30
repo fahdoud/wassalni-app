@@ -142,18 +142,45 @@ export const createReservation = async (
 
     console.log("Created reservation record:", reservation);
 
-    // 2. Update the available seats in the trip using the new function
-    const { data: success, error: updateError } = await supabase
-      .rpc('decrease_available_seats', {
-        trip_id: tripId,
-        seats_count: seatsReserved
-      });
-
-    if (updateError || !success) {
-      console.error("Error updating available seats:", updateError);
-      // If there's an error updating seats, try to delete the reservation
-      await supabase.from('reservations').delete().eq('id', reservation.id);
-      throw new Error(updateError?.message || "Failed to update seats");
+    try {
+      // 2. Update the available seats in the trip using the new function
+      const { data: success, error: updateError } = await supabase
+        .rpc('decrease_available_seats', {
+          trip_id: tripId,
+          seats_count: seatsReserved
+        });
+  
+      if (updateError) {
+        console.error("Error updating available seats:", updateError);
+        // If there's an error updating seats, try to delete the reservation
+        await supabase.from('reservations').delete().eq('id', reservation.id);
+        throw new Error(updateError.message);
+      }
+      
+      if (!success) {
+        console.error("Failed to update seats but no error provided");
+        await supabase.from('reservations').delete().eq('id', reservation.id);
+        throw new Error("Failed to update seats");
+      }
+    } catch (rpcError) {
+      console.error("Error calling RPC function:", rpcError);
+      // Attempt direct update if RPC fails
+      try {
+        const { error: directUpdateError } = await supabase
+          .from('trips')
+          .update({ available_seats: currentTrip.available_seats - seatsReserved })
+          .eq('id', tripId);
+        
+        if (directUpdateError) {
+          console.error("Direct update failed:", directUpdateError);
+          await supabase.from('reservations').delete().eq('id', reservation.id);
+          throw new Error("Failed to update seats");
+        }
+      } catch (directError) {
+        console.error("Direct update attempt failed:", directError);
+        await supabase.from('reservations').delete().eq('id', reservation.id);
+        throw new Error("Failed to update seats");
+      }
     }
 
     // 3. Send a welcome message to the ride chat
