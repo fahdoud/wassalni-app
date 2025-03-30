@@ -17,6 +17,8 @@ const ConfirmationDetails = ({ ride, seats, passengerCount }: ConfirmationDetail
   
   // Use either seats or passengerCount for backward compatibility
   const currentSeats = seats || passengerCount || 1;
+  // Calculate the total price based on the ride price and number of seats
+  const totalPrice = ride.price * currentSeats;
 
   return (
     <div className="glass-card p-8 rounded-xl mb-6 text-center">
@@ -53,12 +55,20 @@ const ConfirmationDetails = ({ ride, seats, passengerCount }: ConfirmationDetail
           <span className="font-medium">{ride.time}</span>
         </div>
         <div className="flex justify-between mb-4">
+          <span className="text-gray-600 dark:text-gray-300">{t('form.from')}</span>
+          <span className="font-medium">{ride.from}</span>
+        </div>
+        <div className="flex justify-between mb-4">
+          <span className="text-gray-600 dark:text-gray-300">{t('form.to')}</span>
+          <span className="font-medium">{ride.to}</span>
+        </div>
+        <div className="flex justify-between mb-4">
           <span className="text-gray-600 dark:text-gray-300">{t('reservation.passengers')}</span>
           <span className="font-medium">{currentSeats}</span>
         </div>
         <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
           <span className="text-gray-600 dark:text-gray-300">{t('reservation.total')}</span>
-          <span className="font-medium text-wassalni-green dark:text-wassalni-lightGreen">{ride.price * currentSeats} DZD</span>
+          <span className="font-medium text-wassalni-green dark:text-wassalni-lightGreen">{totalPrice} DZD</span>
         </div>
       </div>
       

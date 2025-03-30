@@ -31,23 +31,31 @@ export const createReservation = async (
       const { data: { user } } = await supabase.auth.getUser();
       const userEmail = user?.email || '';
       
-      // Create a reservation entry for mock trips with detailed information
+      // Get the mock ride details
+      const mockRides = (await import('./mockRides')).default;
+      const mockRide = mockRides.find(ride => ride.id === tripId);
+      
+      if (!mockRide) {
+        throw new Error('Mock ride not found');
+      }
+      
+      // Create a reservation entry for mock trips with real information from the mock data
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
         .insert({
-          trip_id: null, // No real trip ID for mock trips
+          trip_id: tripId,
           passenger_id: passengerId,
           passenger_name: userProfile?.full_name || 'User',
           passenger_first_name: firstName,
           passenger_last_name: lastName,
           passenger_email: userEmail,
           seats_reserved: seatsReserved,
-          status: 'mock' as ReservationStatus,
-          price: 0, // This will be updated with the actual price
-          origin: 'Not specified', // This will be updated with actual origin
-          destination: 'Not specified', // This will be updated with actual destination
-          departure_point: 'Not specified', // This will be updated with detailed departure point
-          destination_point: 'Not specified' // This will be updated with detailed destination point
+          status: 'confirmed' as ReservationStatus,
+          price: mockRide.price * seatsReserved, // Calculate the actual price
+          origin: mockRide.from, // Use actual origin from mock data
+          destination: mockRide.to, // Use actual destination from mock data
+          departure_point: mockRide.from, // Use actual departure point
+          destination_point: mockRide.to // Use actual destination point
         })
         .select()
         .single();
