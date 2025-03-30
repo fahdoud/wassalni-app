@@ -15,14 +15,39 @@ export const createReservation = async (
     if (/^\d+$/.test(tripId)) {
       console.log("Creating a mock reservation with ID:", tripId);
       
-      // Create a reservation entry for mock trips
+      // Get user profile information
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('full_name, phone')
+        .eq('id', passengerId)
+        .single();
+      
+      // Parse full name into first and last name
+      const fullNameParts = (userProfile?.full_name || 'User').split(' ');
+      const firstName = fullNameParts[0] || '';
+      const lastName = fullNameParts.slice(1).join(' ') || '';
+      
+      // Get user email from auth
+      const { data: { user } } = await supabase.auth.getUser();
+      const userEmail = user?.email || '';
+      
+      // Create a reservation entry for mock trips with detailed information
       const { data: reservation, error: reservationError } = await supabase
         .from('reservations')
         .insert({
           trip_id: null, // No real trip ID for mock trips
           passenger_id: passengerId,
+          passenger_name: userProfile?.full_name || 'User',
+          passenger_first_name: firstName,
+          passenger_last_name: lastName,
+          passenger_email: userEmail,
           seats_reserved: seatsReserved,
-          status: 'mock' as ReservationStatus
+          status: 'mock' as ReservationStatus,
+          price: 0, // This will be updated with the actual price
+          origin: 'Not specified', // This will be updated with actual origin
+          destination: 'Not specified', // This will be updated with actual destination
+          departure_point: 'Not specified', // This will be updated with detailed departure point
+          destination_point: 'Not specified' // This will be updated with detailed destination point
         })
         .select()
         .single();
@@ -43,10 +68,10 @@ export const createReservation = async (
     // For real rides with UUID trip IDs
     console.log("Creating a real reservation with tripId:", tripId);
     
-    // First fetch current available seats
+    // First fetch current available seats and trip details
     const { data: currentTrip, error: tripError } = await supabase
       .from('trips')
-      .select('available_seats')
+      .select('available_seats, origin, destination, price')
       .eq('id', tripId)
       .single();
       
@@ -61,14 +86,42 @@ export const createReservation = async (
       return { success: false };
     }
     
-    // 1. Create the reservation
+    // Get user profile information
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', passengerId)
+      .single();
+    
+    // Parse full name into first and last name
+    const fullNameParts = (userProfile?.full_name || 'User').split(' ');
+    const firstName = fullNameParts[0] || '';
+    const lastName = fullNameParts.slice(1).join(' ') || '';
+    
+    // Get user email from auth
+    const { data: { user } } = await supabase.auth.getUser();
+    const userEmail = user?.email || '';
+    
+    // Calculate total price
+    const totalPrice = currentTrip.price * seatsReserved;
+    
+    // 1. Create the reservation with all detailed information
     const { data: reservation, error: reservationError } = await supabase
       .from('reservations')
       .insert({
         trip_id: tripId,
         passenger_id: passengerId,
+        passenger_name: userProfile?.full_name || 'User',
+        passenger_first_name: firstName,
+        passenger_last_name: lastName,
+        passenger_email: userEmail,
         seats_reserved: seatsReserved,
-        status: 'confirmed' as ReservationStatus
+        status: 'confirmed' as ReservationStatus,
+        price: totalPrice,
+        origin: currentTrip.origin,
+        destination: currentTrip.destination,
+        departure_point: currentTrip.origin, // This could be more specific in the future
+        destination_point: currentTrip.destination // This could be more specific in the future
       })
       .select()
       .single();
@@ -144,7 +197,15 @@ export const getUserReservations = async (userId: string) => {
         seats_reserved,
         status,
         created_at,
-        trip_id
+        trip_id,
+        passenger_first_name,
+        passenger_last_name,
+        passenger_email,
+        departure_point,
+        destination_point,
+        price,
+        origin,
+        destination
       `)
       .eq('passenger_id', userId)
       .order('created_at', { ascending: false });

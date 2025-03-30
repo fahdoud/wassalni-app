@@ -136,7 +136,7 @@ export const useReservation = (rideId: string) => {
         return;
       }
       
-      // Create the reservation
+      // Create the reservation with complete passenger information
       const response = await createReservation(
         ride.id, 
         userId, 

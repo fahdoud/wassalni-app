@@ -210,10 +210,15 @@ export type Database = {
       reservations: {
         Row: {
           created_at: string | null
+          departure_point: string | null
           destination: string | null
+          destination_point: string | null
           id: string
           origin: string | null
+          passenger_email: string | null
+          passenger_first_name: string | null
           passenger_id: string | null
+          passenger_last_name: string | null
           passenger_name: string | null
           price: number | null
           reservation_date: string | null
@@ -224,10 +229,15 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          departure_point?: string | null
           destination?: string | null
+          destination_point?: string | null
           id?: string
           origin?: string | null
+          passenger_email?: string | null
+          passenger_first_name?: string | null
           passenger_id?: string | null
+          passenger_last_name?: string | null
           passenger_name?: string | null
           price?: number | null
           reservation_date?: string | null
@@ -238,10 +248,15 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          departure_point?: string | null
           destination?: string | null
+          destination_point?: string | null
           id?: string
           origin?: string | null
+          passenger_email?: string | null
+          passenger_first_name?: string | null
           passenger_id?: string | null
+          passenger_last_name?: string | null
           passenger_name?: string | null
           price?: number | null
           reservation_date?: string | null
