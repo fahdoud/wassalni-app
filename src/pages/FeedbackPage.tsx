@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { MessageSquare, Star, Send, ThumbsUp, AlertTriangle, Flag, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,6 +11,7 @@ import { submitFeedback } from "@/services/rides/index";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { useIsMobileSimple } from "@/hooks/use-mobile";
 
 const FEEDBACK_EXAMPLES = {
   general: [
@@ -54,6 +56,7 @@ const FEEDBACK_EXAMPLES = {
 
 const FeedbackPage = () => {
   const { t } = useLanguage();
+  const isMobile = useIsMobileSimple();
   const [feedbackType, setFeedbackType] = useState<
     "general" | "suggestion" | "complaint" | "reclamation" | "issue" | "problems" | "other" | "rating"
   >("general");
@@ -233,45 +236,45 @@ const FeedbackPage = () => {
       <div className="container mx-auto px-4 py-12 flex-grow">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <h1 className="mb-3">{t('feedback.title')}</h1>
+            <h1 className="text-3xl font-bold mb-3">{t('feedback.title')}</h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
               {t('feedback.subtitle')}
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-10">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 md:p-8 mb-10">
             <Tabs defaultValue="general" onValueChange={(value) => setFeedbackType(value as any)}>
-              <TabsList className="grid grid-cols-2 md:grid-cols-8 gap-2 mb-8">
-                <TabsTrigger value="general" className="flex flex-col items-center gap-1 py-3 px-1">
-                  <MessageSquare size={18} />
+              <TabsList className={`grid ${isMobile ? 'grid-cols-2 gap-1 mb-4' : 'md:grid-cols-8 gap-2 mb-8'} overflow-x-auto max-w-full`}>
+                <TabsTrigger value="general" className="flex flex-col items-center gap-1 py-2 px-1">
+                  <MessageSquare size={16} />
                   <span className="text-xs">General</span>
                 </TabsTrigger>
-                <TabsTrigger value="suggestion" className="flex flex-col items-center gap-1 py-3 px-1">
-                  <ThumbsUp size={18} />
+                <TabsTrigger value="suggestion" className="flex flex-col items-center gap-1 py-2 px-1">
+                  <ThumbsUp size={16} />
                   <span className="text-xs">Suggestions</span>
                 </TabsTrigger>
-                <TabsTrigger value="complaint" className="flex flex-col items-center gap-1 py-3 px-1">
-                  <AlertTriangle size={18} />
+                <TabsTrigger value="complaint" className="flex flex-col items-center gap-1 py-2 px-1">
+                  <AlertTriangle size={16} />
                   <span className="text-xs">Complaints</span>
                 </TabsTrigger>
-                <TabsTrigger value="reclamation" className="flex flex-col items-center gap-1 py-3 px-1">
-                  <Flag size={18} />
+                <TabsTrigger value="reclamation" className="flex flex-col items-center gap-1 py-2 px-1">
+                  <Flag size={16} />
                   <span className="text-xs">Réclamation</span>
                 </TabsTrigger>
-                <TabsTrigger value="issue" className="flex flex-col items-center gap-1 py-3 px-1">
-                  <HelpCircle size={18} />
+                <TabsTrigger value="issue" className="flex flex-col items-center gap-1 py-2 px-1">
+                  <HelpCircle size={16} />
                   <span className="text-xs">Issues</span>
                 </TabsTrigger>
-                <TabsTrigger value="problems" className="flex flex-col items-center gap-1 py-3 px-1">
-                  <AlertTriangle size={18} />
+                <TabsTrigger value="problems" className="flex flex-col items-center gap-1 py-2 px-1">
+                  <AlertTriangle size={16} />
                   <span className="text-xs">Problèmes</span>
                 </TabsTrigger>
-                <TabsTrigger value="other" className="flex flex-col items-center gap-1 py-3 px-1">
-                  <MessageSquare size={18} />
+                <TabsTrigger value="other" className="flex flex-col items-center gap-1 py-2 px-1">
+                  <MessageSquare size={16} />
                   <span className="text-xs">Other</span>
                 </TabsTrigger>
-                <TabsTrigger value="rating" className="flex flex-col items-center gap-1 py-3 px-1">
-                  <Star size={18} />
+                <TabsTrigger value="rating" className="flex flex-col items-center gap-1 py-2 px-1">
+                  <Star size={16} />
                   <span className="text-xs">Rate Driver</span>
                 </TabsTrigger>
               </TabsList>
@@ -388,14 +391,14 @@ const FeedbackPage = () => {
                   <div className="mt-4">
                     <h4 className="text-sm font-medium mb-2">Example suggestions:</h4>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {exampleSuggestions.map((suggestion, index) => (
+                      {exampleSuggestions.slice(0, isMobile ? 2 : 3).map((suggestion, index) => (
                         <button
                           key={index}
                           type="button"
                           onClick={() => useSuggestion(suggestion)}
                           className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full px-3 py-1 transition-colors"
                         >
-                          {suggestion.length > 40 ? suggestion.substring(0, 37) + '...' : suggestion}
+                          {suggestion.length > (isMobile ? 30 : 40) ? suggestion.substring(0, isMobile ? 27 : 37) + '...' : suggestion}
                         </button>
                       ))}
                     </div>
@@ -410,16 +413,16 @@ const FeedbackPage = () => {
                     id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    rows={6}
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
+                    placeholder="Write your feedback here..."
+                    className="w-full dark:bg-gray-900"
                     required
                   />
                 </div>
 
-                <div className="flex justify-center">
+                <div className="flex justify-center pt-4">
                   <Button
                     type="submit"
-                    className="px-8 py-3 flex items-center gap-2"
+                    className="px-8 py-3 flex items-center gap-2 bg-gradient-to-r from-blue-400 to-green-400 text-white rounded-full"
                     size="lg"
                     disabled={loading}
                   >
@@ -432,10 +435,10 @@ const FeedbackPage = () => {
           </div>
 
           <div className="glass-card p-6 rounded-xl">
-            <h3 className="mb-4">{t('feedback.otherWaysTitle')}</h3>
+            <h3 className="text-xl font-semibold mb-4">{t('feedback.otherWaysTitle')}</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
-                <h4 className="mb-2">{t('feedback.emailUs')}</h4>
+                <h4 className="text-lg font-medium mb-2">{t('feedback.emailUs')}</h4>
                 <p className="text-gray-600 dark:text-gray-400 mb-3">
                   {t('feedback.emailDescription')}
                 </p>
@@ -447,7 +450,7 @@ const FeedbackPage = () => {
                 </a>
               </div>
               <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
-                <h4 className="mb-2">{t('feedback.socialMedia')}</h4>
+                <h4 className="text-lg font-medium mb-2">{t('feedback.socialMedia')}</h4>
                 <p className="text-gray-600 dark:text-gray-400 mb-3">
                   {t('feedback.socialDescription')}
                 </p>
