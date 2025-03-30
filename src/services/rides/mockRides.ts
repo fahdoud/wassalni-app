@@ -66,3 +66,6 @@ export const getMockRides = (): Ride[] => {
     },
   ];
 };
+
+// Export the module directly for easier importing
+export default getMockRides;

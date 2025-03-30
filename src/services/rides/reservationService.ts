@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ReservationStatus } from "./types";
 import { getUserDisplayInfo } from "./chatService";
+import { getMockRides } from "./mockRides";
 
 // Create a reservation
 export const createReservation = async (
@@ -32,7 +33,7 @@ export const createReservation = async (
       const userEmail = user?.email || '';
       
       // Get the mock ride details
-      const mockRides = (await import('./mockRides')).default;
+      const mockRides = getMockRides();
       const mockRide = mockRides.find(ride => ride.id === tripId);
       
       if (!mockRide) {
