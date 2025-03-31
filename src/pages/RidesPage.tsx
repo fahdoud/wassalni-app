@@ -15,13 +15,66 @@ import { supabase } from "@/integrations/supabase/client";
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
 const RidesPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [filter, setFilter] = useState("");
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
   const [liveSeats, setLiveSeats] = useState<Record<string, number>>({});
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Define text strings directly to avoid using translation keys
+  const ridesTitle = language === 'en' ? 'Available Rides' : 
+                    language === 'fr' ? 'Trajets Disponibles' : 
+                    'الرحلات المتاحة';
+                    
+  const ridesSubtitle = language === 'en' ? 'Find and book rides in Constantine and surrounding areas' : 
+                       language === 'fr' ? 'Trouvez et réservez des trajets à Constantine et dans les environs' : 
+                       'ابحث واحجز رحلات في قسنطينة والمناطق المحيطة بها';
+                       
+  const fromText = language === 'en' ? 'From' : 
+                 language === 'fr' ? 'De' : 
+                 'من';
+                 
+  const toText = language === 'en' ? 'To' : 
+               language === 'fr' ? 'À' : 
+               'إلى';
+               
+  const dateText = language === 'en' ? 'Date' : 
+                 language === 'fr' ? 'Date' : 
+                 'تاريخ';
+                 
+  const searchText = language === 'en' ? 'Search' : 
+                   language === 'fr' ? 'Rechercher' : 
+                   'بحث';
+                   
+  const selectLocationText = language === 'en' ? 'Select location' : 
+                           language === 'fr' ? 'Sélectionner un lieu' : 
+                           'اختر موقعا';
+                           
+  const seatText = language === 'en' ? 'seat' : 
+                 language === 'fr' ? 'place' : 
+                 'مقعد';
+                 
+  const seatsText = language === 'en' ? 'seats' : 
+                  language === 'fr' ? 'places' : 
+                  'مقاعد';
+                  
+  const fullText = language === 'en' ? 'Full' : 
+                 language === 'fr' ? 'Complet' : 
+                 'ممتلئ';
+                 
+  const reserveText = language === 'en' ? 'Reserve' : 
+                    language === 'fr' ? 'Réserver' : 
+                    'حجز';
+                    
+  const loadingText = language === 'en' ? 'Loading rides...' : 
+                    language === 'fr' ? 'Chargement des trajets...' : 
+                    '... تحميل الرحلات';
+                    
+  const noRidesText = language === 'en' ? 'No rides found' : 
+                    language === 'fr' ? 'Aucun trajet trouvé' : 
+                    'لم يتم العثور على رحلات';
 
   const fetchRides = async (forceRefresh = false) => {
     setLoading(true);
@@ -155,39 +208,39 @@ const RidesPage = () => {
         <section className="section">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h1 className="mb-4">
-              <GradientText>Constantine</GradientText> {t('rides.title')}
+              <GradientText>Constantine</GradientText> {ridesTitle}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              {t('rides.subtitle')}
+              {ridesSubtitle}
             </p>
           </div>
 
           <div className="mb-10 bg-gray-50 p-6 rounded-xl dark:bg-gray-800/50">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{t('form.from')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{fromText}</label>
                 <select 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
-                  <option value="">{t('form.selectLocation')}</option>
+                  <option value="">{selectLocationText}</option>
                   {constantineAreas.map(area => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{t('form.to')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{toText}</label>
                 <select 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
-                  <option value="">{t('form.selectLocation')}</option>
+                  <option value="">{selectLocationText}</option>
                   {constantineAreas.map(area => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{t('form.date')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{dateText}</label>
                 <input 
                   type="date" 
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -195,20 +248,20 @@ const RidesPage = () => {
               </div>
             </div>
             <div className="mt-4 flex justify-center">
-              <Button className="px-8">{t('form.search')}</Button>
+              <Button className="px-8">{searchText}</Button>
             </div>
           </div>
 
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-wassalni-green" />
-              <span className="ml-2 text-gray-600 dark:text-gray-300">Loading rides...</span>
+              <span className="ml-2 text-gray-600 dark:text-gray-300">{loadingText}</span>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6">
               {filteredRides.length === 0 ? (
                 <div className="text-center py-10">
-                  <p className="text-gray-500 dark:text-gray-400">{t('rides.noRidesFound')}</p>
+                  <p className="text-gray-500 dark:text-gray-400">{noRidesText}</p>
                 </div>
               ) : (
                 filteredRides.map((ride) => {
@@ -261,8 +314,8 @@ const RidesPage = () => {
                               : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
                           }`}>
                             {currentSeats > 0 
-                              ? `${currentSeats} ${currentSeats === 1 ? t('rides.seat') : t('rides.seats')}` 
-                              : t('rides.full')}
+                              ? `${currentSeats} ${currentSeats === 1 ? seatText : seatsText}` 
+                              : fullText}
                           </div>
                         </div>
                       </div>
@@ -275,11 +328,11 @@ const RidesPage = () => {
                             size="sm" 
                             onClick={() => handleReserveClick(ride.id)}
                           >
-                            {t('rides.reserve')}
+                            {reserveText}
                           </Button>
                         ) : (
                           <Button size="sm" variant="outlined" disabled>
-                            {t('rides.full')}
+                            {fullText}
                           </Button>
                         )}
                       </div>

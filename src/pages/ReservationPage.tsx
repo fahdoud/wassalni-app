@@ -16,7 +16,7 @@ import { preloadGoogleMaps } from '@/components/maps/utils/googleMapsLoader';
 const ReservationPage = () => {
   const { rideId } = useParams();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("ride-details");
   
   const { user, userName, checkingAuth } = useAuthUser();

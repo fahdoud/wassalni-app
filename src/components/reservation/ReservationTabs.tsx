@@ -55,6 +55,27 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
     setActiveTab(value);
   };
 
+  // Define proper tab labels based on language
+  const rideDetailsLabel = language === 'en' ? 'Ride Details' : 
+                          language === 'fr' ? 'Détails du Trajet' : 
+                          'تفاصيل الرحلة';
+  
+  const paymentLabel = language === 'en' ? 'Payment' : 
+                      language === 'fr' ? 'Paiement' : 
+                      'الدفع';
+  
+  const confirmationLabel = language === 'en' ? 'Confirmation' : 
+                           language === 'fr' ? 'Confirmation' : 
+                           'التأكيد';
+  
+  const groupChatLabel = language === 'en' ? 'Group Chat' : 
+                        language === 'fr' ? 'Discussion de Groupe' : 
+                        'محادثة المجموعة';
+  
+  const trackingLabel = language === 'en' ? 'Live Tracking' : 
+                       language === 'fr' ? 'Suivi en Direct' : 
+                       'التتبع المباشر';
+
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       <TabsList className="w-full mb-6 bg-gray-900 p-0 h-auto rounded-none dark:bg-gray-900 flex">
@@ -62,27 +83,27 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
           value="ride-details" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
         >
-          {language === 'en' ? 'Ride Details' : language === 'fr' ? 'Détails du Trajet' : 'تفاصيل الرحلة'}
+          {rideDetailsLabel}
         </TabsTrigger>
         <TabsTrigger 
           value="payment" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
         >
-          {language === 'en' ? 'Payment' : language === 'fr' ? 'Paiement' : 'الدفع'}
+          {paymentLabel}
         </TabsTrigger>
         <TabsTrigger 
           value="confirmation" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate" 
           disabled={!reservationSuccess}
         >
-          {language === 'en' ? 'Confirmation' : language === 'fr' ? 'Confirmation' : 'التأكيد'}
+          {confirmationLabel}
         </TabsTrigger>
         {showChatTab && (
           <TabsTrigger 
             value="chat" 
             className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
           >
-            {language === 'en' ? 'Group Chat' : language === 'fr' ? 'Discussion de Groupe' : 'محادثة المجموعة'}
+            {groupChatLabel}
           </TabsTrigger>
         )}
         {reservationSuccess && (
@@ -90,7 +111,7 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
             value="tracking" 
             className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
           >
-            {language === 'en' ? 'Live Tracking' : language === 'fr' ? 'Suivi' : 'تتبع'}
+            {trackingLabel}
           </TabsTrigger>
         )}
       </TabsList>
