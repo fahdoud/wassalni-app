@@ -2,7 +2,7 @@
 // This file polyfills crypto.randomUUID for older browsers and platforms
 // that don't support it natively
 
-interface ExtendedCrypto extends Crypto {
+interface ExtendedCrypto extends Omit<Crypto, 'randomUUID'> {
   randomUUID?: () => string;
 }
 

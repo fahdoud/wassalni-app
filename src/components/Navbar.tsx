@@ -15,7 +15,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { t } = useLanguage();
+  const { language } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,6 +57,27 @@ const Navbar = () => {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+  // Define text strings directly based on the current language
+  const featuresText = language === 'en' ? 'Features' : 
+                      language === 'fr' ? 'Fonctionnalités' : 
+                      'المميزات';
+                      
+  const howItWorksText = language === 'en' ? 'How It Works' : 
+                        language === 'fr' ? 'Comment Ça Marche' : 
+                        'كيف يعمل';
+                        
+  const feedbackText = language === 'en' ? 'Feedback' : 
+                      language === 'fr' ? 'Commentaires' : 
+                      'تعليقات';
+                      
+  const signInText = language === 'en' ? 'Sign In' : 
+                    language === 'fr' ? 'Se Connecter' : 
+                    'تسجيل الدخول';
+                    
+  const signUpText = language === 'en' ? 'Sign Up' : 
+                    language === 'fr' ? 'S\'inscrire' : 
+                    'إنشاء حساب';
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -81,7 +102,7 @@ const Navbar = () => {
                 href="#features"
                 className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
               >
-                {t('nav.features')}
+                {featuresText}
               </a>
             </li>
             <li>
@@ -89,7 +110,7 @@ const Navbar = () => {
                 href="#how-it-works"
                 className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
               >
-                {t('nav.howItWorks')}
+                {howItWorksText}
               </a>
             </li>
             <li>
@@ -97,7 +118,7 @@ const Navbar = () => {
                 to="/feedback"
                 className="text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
               >
-                {t('nav.feedback')}
+                {feedbackText}
               </Link>
             </li>
           </ul>
@@ -110,11 +131,11 @@ const Navbar = () => {
               <>
                 <Link to="/passenger-signin">
                   <Button variant="outlined" size="sm">
-                    {t('nav.signIn')}
+                    {signInText}
                   </Button>
                 </Link>
                 <Link to="/passenger-signup">
-                  <Button size="sm">{t('nav.signUp')}</Button>
+                  <Button size="sm">{signUpText}</Button>
                 </Link>
               </>
             )}
@@ -146,7 +167,7 @@ const Navbar = () => {
                   className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
                   onClick={toggleMenu}
                 >
-                  {t('nav.features')}
+                  {featuresText}
                 </a>
               </li>
               <li>
@@ -155,7 +176,7 @@ const Navbar = () => {
                   className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
                   onClick={toggleMenu}
                 >
-                  {t('nav.howItWorks')}
+                  {howItWorksText}
                 </a>
               </li>
               <li>
@@ -164,18 +185,18 @@ const Navbar = () => {
                   className="block py-2 text-gray-700 hover:text-wassalni-green transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
                   onClick={toggleMenu}
                 >
-                  {t('nav.feedback')}
+                  {feedbackText}
                 </Link>
               </li>
               {!isLoggedIn && (
                 <li className="flex flex-col gap-2 pt-2">
                   <Link to="/passenger-signin" onClick={toggleMenu}>
                     <Button variant="outlined" className="w-full">
-                      {t('nav.signIn')}
+                      {signInText}
                     </Button>
                   </Link>
                   <Link to="/passenger-signup" onClick={toggleMenu}>
-                    <Button className="w-full">{t('nav.signUp')}</Button>
+                    <Button className="w-full">{signUpText}</Button>
                   </Link>
                 </li>
               )}
