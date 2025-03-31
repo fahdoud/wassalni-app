@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { getRideById, subscribeToRideUpdates } from '@/services/rides/rideQueries';
 import { createReservation } from '@/services/rides/reservationService';
@@ -13,6 +14,7 @@ export const useReservation = (rideId: string) => {
   const [reservationSuccess, setReservationSuccess] = useState<boolean>(false);
   const [reservationError, setReservationError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isReserving, setIsReserving] = useState<boolean>(false);
   
   // Check authentication status on load
   useEffect(() => {
@@ -102,13 +104,17 @@ export const useReservation = (rideId: string) => {
   
   // Make a reservation
   const makeReservation = async () => {
+    if (isReserving) return; // Prevent multiple submissions
+    
     setReservationError(null);
+    setIsReserving(true);
     
     // Check if authenticated - only allow authenticated users to make reservations
     if (!isAuthenticated) {
       console.log("User is not authenticated");
       setReservationError("You must be logged in to make a reservation");
       toast.error("You must be logged in to make a reservation");
+      setIsReserving(false);
       return;
     }
     
@@ -118,12 +124,14 @@ export const useReservation = (rideId: string) => {
     // Check if ride exists
     if (!ride) {
       setReservationError("Ride not found");
+      setIsReserving(false);
       return;
     }
     
     // Check if enough seats are available
     if (ride.seats < seats) {
       setReservationError("Not enough seats available");
+      setIsReserving(false);
       return;
     }
     
@@ -133,6 +141,7 @@ export const useReservation = (rideId: string) => {
       
       if (!userId) {
         setReservationError("User not authenticated");
+        setIsReserving(false);
         return;
       }
       
@@ -161,6 +170,8 @@ export const useReservation = (rideId: string) => {
     } catch (error) {
       console.error("Error making reservation:", error);
       setReservationError("An error occurred. Please try again.");
+    } finally {
+      setIsReserving(false);
     }
   };
   
@@ -173,6 +184,7 @@ export const useReservation = (rideId: string) => {
     makeReservation,
     reservationSuccess,
     reservationError,
-    isAuthenticated
+    isAuthenticated,
+    isReserving
   };
 };

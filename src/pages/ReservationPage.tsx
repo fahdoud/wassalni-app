@@ -36,7 +36,8 @@ const ReservationPage = () => {
     makeReservation,
     reservationSuccess,
     reservationError,
-    isAuthenticated
+    isAuthenticated,
+    isReserving
   } = useReservation(rideId || "");
 
   const rideLocations = useRideLocations(ride);
@@ -45,7 +46,7 @@ const ReservationPage = () => {
   useEffect(() => {
     if (reservationSuccess) {
       console.log("Reservation successful, switching to tracking tab");
-      toast.success(t('reservation.successNotification'));
+      toast.success(t('successNotification'));
       setActiveTab("tracking");
     }
   }, [reservationSuccess, t]);
@@ -86,6 +87,7 @@ const ReservationPage = () => {
             rideLocations={rideLocations}
             userName={userName}
             userId={user?.id || ''}
+            isReserving={isReserving}
           />
         </div>
 

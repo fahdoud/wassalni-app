@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Ride } from "@/services/rides/types";
 import Button from "@/components/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -36,7 +36,7 @@ const PaymentDetails = ({
   error,
   isAuthenticated
 }: PaymentDetailsProps) => {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [reservationInProgress, setReservationInProgress] = useState(false);
   
@@ -56,7 +56,7 @@ const PaymentDetails = ({
   // Handle submit function with error handling
   const handleSubmit = async () => {
     if (!isAuthenticated) {
-      toast.error("Please login to make a reservation");
+      toast.error(t('login'));
       return;
     }
     
@@ -72,7 +72,7 @@ const PaymentDetails = ({
       }
     } catch (error) {
       console.error("Reservation error:", error);
-      toast.error("Failed to make reservation. Please try again.");
+      toast.error(t('error'));
     } finally {
       setReservationInProgress(false);
     }
@@ -87,21 +87,21 @@ const PaymentDetails = ({
 
   // Translation text mapping based on language
   const texts = {
-    payment: language === 'fr' ? 'Détails du Paiement' : (language === 'ar' ? 'تفاصيل الدفع' : 'Payment Details'),
-    passengers: language === 'fr' ? 'Passagers' : (language === 'ar' ? 'الركاب' : 'Passengers'),
-    notEnoughSeats: language === 'fr' ? 'Pas assez de places disponibles' : (language === 'ar' ? 'لا توجد مقاعد كافية' : 'Not enough available seats'),
-    loginRequired: language === 'fr' ? 'Connexion Requise' : (language === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required'),
-    loginToReserve: language === 'fr' ? 'Connectez-vous pour réserver votre trajet' : (language === 'ar' ? 'سجل الدخول لحجز رحلتك' : 'Login to book your ride'),
-    login: language === 'fr' ? 'Se Connecter' : (language === 'ar' ? 'تسجيل الدخول' : 'Login'),
-    register: language === 'fr' ? 'S\'inscrire' : (language === 'ar' ? 'إنشاء حساب' : 'Register'),
-    paymentMethod: language === 'fr' ? 'Mode de Paiement' : (language === 'ar' ? 'طريقة الدفع' : 'Payment Method'),
-    cash: language === 'fr' ? 'Espèces' : (language === 'ar' ? 'نقدا' : 'Cash'),
-    payDriver: language === 'fr' ? 'Payer directement au conducteur' : (language === 'ar' ? 'ادفع للسائق مباشرة' : 'Pay the driver directly'),
-    baseFare: language === 'fr' ? 'Tarif de base' : (language === 'ar' ? 'السعر الأساسي' : 'Base fare'),
-    total: language === 'fr' ? 'Total' : (language === 'ar' ? 'المجموع' : 'Total'),
-    back: language === 'fr' ? 'Retour' : (language === 'ar' ? 'رجوع' : 'Back'),
-    confirmReservation: language === 'fr' ? 'Confirmer la Réservation' : (language === 'ar' ? 'تأكيد الحجز' : 'Confirm Reservation'),
-    loginToConfirm: language === 'fr' ? 'Connectez-vous pour confirmer' : (language === 'ar' ? 'سجل الدخول للتأكيد' : 'Login to confirm')
+    payment: t('payment'),
+    passengers: t('passengers'),
+    notEnoughSeats: t('notEnoughSeats'),
+    loginRequired: t('login'),
+    loginToReserve: t('loginToBook'),
+    login: t('login'),
+    register: t('register'),
+    paymentMethod: t('paymentMethod'),
+    cash: t('cash'),
+    payDriver: t('payDriver'),
+    baseFare: t('baseFare'),
+    total: t('total'),
+    back: t('back'),
+    confirmReservation: t('confirmReservation'),
+    loginToConfirm: t('loginToConfirm')
   };
 
   return (

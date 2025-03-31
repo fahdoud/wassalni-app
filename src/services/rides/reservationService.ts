@@ -12,7 +12,7 @@ export const createReservation = async (
   seatsReserved: number
 ): Promise<{ success: boolean, updatedSeats?: number }> => {
   try {
-    // For mock rides, create a real reservation with a "mock" tag
+    // For mock rides, create a mock reservation record
     if (/^\d+$/.test(tripId)) {
       console.log("Creating a mock reservation with ID:", tripId);
       
@@ -40,35 +40,42 @@ export const createReservation = async (
         throw new Error('Mock ride not found');
       }
       
-      // Create a reservation entry for mock trips with real information from the mock data
-      const { data: reservation, error: reservationError } = await supabase
-        .from('reservations')
-        .insert({
-          trip_id: tripId,
-          passenger_id: passengerId,
-          passenger_name: userProfile?.full_name || 'User',
-          passenger_first_name: firstName,
-          passenger_last_name: lastName,
-          passenger_email: userEmail,
-          seats_reserved: seatsReserved,
-          status: 'confirmed' as ReservationStatus,
-          price: mockRide.price * seatsReserved, // Calculate the actual price
-          origin: mockRide.from, // Use actual origin from mock data
-          destination: mockRide.to, // Use actual destination from mock data
-          departure_point: mockRide.from, // Use actual departure point
-          destination_point: mockRide.to // Use actual destination point
-        })
-        .select()
-        .single();
-      
-      if (reservationError) {
-        console.error("Error creating mock reservation:", reservationError);
-        throw new Error(reservationError.message);
+      try {
+        // Create a reservation entry for mock trips with a generated UUID
+        const mockTripId = crypto.randomUUID(); // Generate a UUID for the reservation
+        
+        const { data: reservation, error: reservationError } = await supabase
+          .from('reservations')
+          .insert({
+            trip_id: mockTripId, // Use generated UUID instead of numeric ID
+            passenger_id: passengerId,
+            passenger_name: userProfile?.full_name || 'User',
+            passenger_first_name: firstName,
+            passenger_last_name: lastName,
+            passenger_email: userEmail,
+            seats_reserved: seatsReserved,
+            status: 'confirmed' as ReservationStatus,
+            price: mockRide.price * seatsReserved,
+            origin: mockRide.from,
+            destination: mockRide.to,
+            departure_point: mockRide.from,
+            destination_point: mockRide.to
+          })
+          .select()
+          .single();
+        
+        if (reservationError) {
+          console.error("Error creating mock reservation:", reservationError);
+          throw new Error(reservationError.message);
+        }
+        
+        console.log("Mock reservation created successfully:", reservation);
+        
+        return { success: true };
+      } catch (error) {
+        console.error("Error creating mock reservation:", error);
+        throw error;
       }
-      
-      console.log("Mock reservation created successfully:", reservation);
-      
-      return { success: true };
     }
     
     // For real rides with UUID trip IDs

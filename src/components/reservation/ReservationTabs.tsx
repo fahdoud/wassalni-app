@@ -28,6 +28,7 @@ interface ReservationTabsProps {
   } | null;
   userName: string;
   userId: string;
+  isReserving?: boolean;
 }
 
 const ReservationTabs: React.FC<ReservationTabsProps> = ({
@@ -45,7 +46,8 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
   showChatTab,
   rideLocations,
   userName,
-  userId
+  userId,
+  isReserving = false
 }) => {
   const { t, language } = useLanguage();
 
@@ -60,27 +62,27 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
           value="ride-details" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
         >
-          {t('reservation.rideDetails')}
+          {t('rideDetails')}
         </TabsTrigger>
         <TabsTrigger 
           value="payment" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
         >
-          {t('reservation.payment')}
+          {t('payment')}
         </TabsTrigger>
         <TabsTrigger 
           value="confirmation" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate" 
           disabled={!reservationSuccess}
         >
-          {t('reservation.confirmation')}
+          {t('confirmation')}
         </TabsTrigger>
         {showChatTab && (
           <TabsTrigger 
             value="chat" 
             className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
           >
-            {t('chat.groupChat')}
+            {t('chat')}
           </TabsTrigger>
         )}
         {reservationSuccess && (
@@ -88,7 +90,7 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
             value="tracking" 
             className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
           >
-            {language === 'fr' ? 'Suivi' : t('reservation.liveTracking')}
+            {language === 'fr' ? 'Suivi' : t('tracking')}
           </TabsTrigger>
         )}
       </TabsList>
@@ -106,10 +108,13 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
       
       <TabsContent value="payment">
         <PaymentDetails 
+          ride={ride}
           price={price} 
           seats={seats} 
-          setPassengerCount={setSeats} 
+          setSeats={setSeats}
+          onBack={() => handleTabChange('ride-details')}
           onSubmit={makeReservation} 
+          loading={isReserving}
           error={reservationError} 
           isAuthenticated={isAuthenticated} 
         />
