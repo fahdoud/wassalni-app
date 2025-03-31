@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 
 interface LanguageContextType {
@@ -509,7 +510,7 @@ const translations = {
     'feedback.successTitle': 'شكرا لك!',
     'feedback.successDescription': 'تم إرسال ملاحظاتك بنجاح. نقدر مساهمتك!',
 
-    // Auth section
+    // Authentication
     'auth.welcomeBack': 'مرحبًا بعودتك',
     'auth.welcomeBackDriver': 'مرحبًا بعودتك أيها السائق',
     'auth.passengerSignInDesc': 'سجل الدخول إلى حسابك كراكب لحجز رحلات في قسنطينة',
@@ -570,7 +571,7 @@ const translations = {
     'profile.passengerProfile': 'ملف الراكب الشخصي',
     'profile.driverProfile': 'ملف السائق الشخصي',
     
-    // Reservation section
+    // Reservation
     'reservation.title': 'حجز رحلة',
     'reservation.subtitle': 'أكمل بيانات الحجز وأكد رحلتك',
     'reservation.details': 'تفاصيل الرحلة',
@@ -597,4 +598,41 @@ const translations = {
     'reservation.rideDetails': 'تفاصيل الرحلة',
     'reservation.confirmation': 'التأكيد',
     'reservation.liveTracking': 'التتبع المباشر',
-    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي. يمكنك معرفة
+    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي. يمكنك معرفة متى سيصل إلى نقطة الالتقاء الخاصة بك.',
+    'reservation.driverInfo': 'معلومات السائق',
+    'reservation.pickup': 'موقع الالتقاء',
+    'reservation.dropoff': 'موقع النزول',
+  }
+};
+
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  const [language, setLanguage] = useState<string>(() => {
+    const storedLang = localStorage.getItem('wassalni_language');
+    return storedLang || 'fr';
+  });
+
+  const dir = useMemo(() => (language === 'ar' ? 'rtl' : 'ltr'), [language]);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = dir;
+    localStorage.setItem('wassalni_language', language);
+  }, [language, dir]);
+
+  const t = (key: string): string => {
+    if (!translations[language as keyof typeof translations]) {
+      return key;
+    }
+    
+    return (translations[language as keyof typeof translations] as Record<string, string>)[key] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t, dir }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => useContext(LanguageContext);
+export default LanguageContext;
