@@ -49,7 +49,7 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
   userId,
   isReserving = false
 }) => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -62,27 +62,27 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
           value="ride-details" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
         >
-          {t('rideDetails')}
+          {language === 'en' ? 'Ride Details' : language === 'fr' ? 'Détails du Trajet' : 'تفاصيل الرحلة'}
         </TabsTrigger>
         <TabsTrigger 
           value="payment" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
         >
-          {t('payment')}
+          {language === 'en' ? 'Payment' : language === 'fr' ? 'Paiement' : 'الدفع'}
         </TabsTrigger>
         <TabsTrigger 
           value="confirmation" 
           className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate" 
           disabled={!reservationSuccess}
         >
-          {t('confirmation')}
+          {language === 'en' ? 'Confirmation' : language === 'fr' ? 'Confirmation' : 'التأكيد'}
         </TabsTrigger>
         {showChatTab && (
           <TabsTrigger 
             value="chat" 
             className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
           >
-            {t('chat')}
+            {language === 'en' ? 'Group Chat' : language === 'fr' ? 'Discussion de Groupe' : 'محادثة المجموعة'}
           </TabsTrigger>
         )}
         {reservationSuccess && (
@@ -90,7 +90,7 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
             value="tracking" 
             className="flex-1 px-3 py-2.5 text-xs sm:text-sm font-medium text-gray-300 data-[state=active]:text-white data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:shadow-none rounded-none truncate"
           >
-            {language === 'fr' ? 'Suivi' : t('tracking')}
+            {language === 'en' ? 'Live Tracking' : language === 'fr' ? 'Suivi' : 'تتبع'}
           </TabsTrigger>
         )}
       </TabsList>

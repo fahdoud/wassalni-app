@@ -16,7 +16,7 @@ import { preloadGoogleMaps } from '@/components/maps/utils/googleMapsLoader';
 const ReservationPage = () => {
   const { rideId } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("ride-details");
   
   const { user, userName, checkingAuth } = useAuthUser();
@@ -46,10 +46,13 @@ const ReservationPage = () => {
   useEffect(() => {
     if (reservationSuccess) {
       console.log("Reservation successful, switching to tracking tab");
-      toast.success(t('successNotification'));
+      const successMessage = language === 'en' ? 'Reservation successful!' : 
+                            language === 'fr' ? 'Réservation réussie!' : 
+                            'تم الحجز بنجاح!';
+      toast.success(successMessage);
       setActiveTab("tracking");
     }
-  }, [reservationSuccess, t]);
+  }, [reservationSuccess, language]);
 
   // Only show chat tab for authenticated users with a successful reservation on a real ride
   const showChatTab = reservationSuccess && user && ride && !/^\d+$/.test(ride.id);
@@ -62,11 +65,13 @@ const ReservationPage = () => {
     );
   }
 
+  const backText = language === 'en' ? 'Back' : language === 'fr' ? 'Retour' : 'رجوع';
+
   return (
     <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
       <Button variant="ghost" className="mb-4 flex items-center gap-1" onClick={() => navigate(-1)}>
         <ChevronLeft size={16} />
-        {t('back')}
+        {backText}
       </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

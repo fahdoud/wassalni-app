@@ -15,7 +15,7 @@ interface RideDetailsProps {
 }
 
 const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDetailsProps) => {
-  const { t } = useLanguage();
+  const { language } = useLanguage();
   const [availableSeats, setAvailableSeats] = useState(ride.seats);
   
   // Handle both onContinue and goToPayment for backward compatibility
@@ -26,6 +26,26 @@ const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDet
       onContinue();
     }
   };
+
+  // Text translations
+  const rideDetailsText = language === 'en' ? 'Trip Details' : 
+                       language === 'fr' ? 'Détails du Trajet' : 
+                       'تفاصيل الرحلة';
+  const estimatedArrivalText = language === 'en' ? 'Estimated arrival' : 
+                            language === 'fr' ? 'Arrivée estimée' : 
+                            'وقت الوصول المتوقع';
+  const seatText = language === 'en' ? 'seat' : 
+                language === 'fr' ? 'place' : 
+                'مقعد';
+  const seatsText = language === 'en' ? 'seats' : 
+                 language === 'fr' ? 'places' : 
+                 'مقاعد';
+  const fullText = language === 'en' ? 'Full' : 
+                language === 'fr' ? 'Complet' : 
+                'ممتلئ';
+  const paymentText = language === 'en' ? 'Payment' : 
+                   language === 'fr' ? 'Paiement' : 
+                   'الدفع';
 
   // Subscribe to real-time updates for available seats
   useEffect(() => {
@@ -43,7 +63,7 @@ const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDet
 
   return (
     <div className="glass-card p-8 rounded-xl mb-6">
-      <h2 className="text-xl font-semibold mb-6">{t('reservation.details')}</h2>
+      <h2 className="text-xl font-semibold mb-6">{rideDetailsText}</h2>
       
       <div className="mb-6">
         <div className="flex items-center mb-4">
@@ -72,7 +92,7 @@ const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDet
             <div className="absolute top-0 left-0 w-4 h-4 rounded-full bg-wassalni-blue -translate-x-1/2"></div>
             <div>
               <p className="font-medium">{ride.to}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{t('reservation.estimatedArrival')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{estimatedArrivalText}</p>
             </div>
           </div>
         </div>
@@ -101,8 +121,8 @@ const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDet
           <User size={16} className={availableSeats > 0 ? "text-wassalni-green dark:text-wassalni-lightGreen" : "text-red-500 dark:text-red-400"} />
           <span>
             {availableSeats > 0 
-              ? `${availableSeats} ${availableSeats === 1 ? t('rides.seat') : t('rides.seats')}`
-              : t('rides.full')}
+              ? `${availableSeats} ${availableSeats === 1 ? seatText : seatsText}`
+              : fullText}
           </span>
         </div>
       </div>
@@ -113,7 +133,7 @@ const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDet
           onClick={handleContinue}
           disabled={availableSeats <= 0}
         >
-          {availableSeats > 0 ? t('reservation.payment') : t('rides.full')}
+          {availableSeats > 0 ? paymentText : fullText}
         </Button>
       </div>
     </div>

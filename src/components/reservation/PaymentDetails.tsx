@@ -36,7 +36,7 @@ const PaymentDetails = ({
   error,
   isAuthenticated
 }: PaymentDetailsProps) => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [reservationInProgress, setReservationInProgress] = useState(false);
   
@@ -55,8 +55,13 @@ const PaymentDetails = ({
   
   // Handle submit function with error handling
   const handleSubmit = async () => {
+    const loginText = language === 'en' ? 'Login' : language === 'fr' ? 'Se Connecter' : 'تسجيل الدخول';
+    const errorText = language === 'en' ? 'An error occurred. Please try again.' : 
+                      language === 'fr' ? 'Une erreur s\'est produite. Veuillez réessayer.' : 
+                      'حدث خطأ. يرجى المحاولة مرة أخرى.';
+                      
     if (!isAuthenticated) {
-      toast.error(t('login'));
+      toast.error(loginText);
       return;
     }
     
@@ -72,7 +77,7 @@ const PaymentDetails = ({
       }
     } catch (error) {
       console.error("Reservation error:", error);
-      toast.error(t('error'));
+      toast.error(errorText);
     } finally {
       setReservationInProgress(false);
     }
@@ -85,32 +90,40 @@ const PaymentDetails = ({
   const displayPrice = price || (ride ? ride.price : 0);
   const totalPrice = displayPrice * currentSeats;
 
-  // Translation text mapping based on language
-  const texts = {
-    payment: t('payment'),
-    passengers: t('passengers'),
-    notEnoughSeats: t('notEnoughSeats'),
-    loginRequired: t('login'),
-    loginToReserve: t('loginToBook'),
-    login: t('login'),
-    register: t('register'),
-    paymentMethod: t('paymentMethod'),
-    cash: t('cash'),
-    payDriver: t('payDriver'),
-    baseFare: t('baseFare'),
-    total: t('total'),
-    back: t('back'),
-    confirmReservation: t('confirmReservation'),
-    loginToConfirm: t('loginToConfirm')
-  };
+  // Text translations based on language
+  const paymentText = language === 'en' ? 'Payment Details' : language === 'fr' ? 'Détails du Paiement' : 'تفاصيل الدفع';
+  const passengersText = language === 'en' ? 'Passengers' : language === 'fr' ? 'Passagers' : 'الركاب';
+  const notEnoughSeatsText = language === 'en' ? 'Not enough available seats' : 
+                             language === 'fr' ? 'Pas assez de places disponibles' : 
+                             'لا توجد مقاعد كافية';
+  const loginRequiredText = language === 'en' ? 'Login Required' : language === 'fr' ? 'Connexion Requise' : 'تسجيل الدخول مطلوب';
+  const loginToReserveText = language === 'en' ? 'Login to book your ride' : 
+                             language === 'fr' ? 'Connectez-vous pour réserver votre trajet' : 
+                             'سجل الدخول لحجز رحلتك';
+  const loginText = language === 'en' ? 'Login' : language === 'fr' ? 'Se Connecter' : 'تسجيل الدخول';
+  const registerText = language === 'en' ? 'Register' : language === 'fr' ? 'S\'inscrire' : 'التسجيل';
+  const paymentMethodText = language === 'en' ? 'Payment Method' : language === 'fr' ? 'Mode de Paiement' : 'طريقة الدفع';
+  const cashText = language === 'en' ? 'Cash' : language === 'fr' ? 'Espèces' : 'نقدا';
+  const payDriverText = language === 'en' ? 'Pay the driver directly' : 
+                        language === 'fr' ? 'Payer directement au conducteur' : 
+                        'ادفع للسائق مباشرة';
+  const baseFareText = language === 'en' ? 'Base fare' : language === 'fr' ? 'Tarif de base' : 'السعر الأساسي';
+  const totalText = language === 'en' ? 'Total' : language === 'fr' ? 'Total' : 'المجموع';
+  const backText = language === 'en' ? 'Back' : language === 'fr' ? 'Retour' : 'رجوع';
+  const confirmReservationText = language === 'en' ? 'Confirm Reservation' : 
+                                 language === 'fr' ? 'Confirmer la Réservation' : 
+                                 'تأكيد الحجز';
+  const loginToConfirmText = language === 'en' ? 'Login to confirm' : 
+                             language === 'fr' ? 'Connectez-vous pour confirmer' : 
+                             'سجل الدخول للتأكيد';
 
   return (
     <div className="glass-card p-8 rounded-xl mb-6">
-      <h2 className="text-xl font-semibold mb-6">{texts.payment}</h2>
+      <h2 className="text-xl font-semibold mb-6">{paymentText}</h2>
       
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-          {texts.passengers}
+          {passengersText}
         </label>
         <div className="flex items-center">
           <button
@@ -131,7 +144,7 @@ const PaymentDetails = ({
         </div>
         {ride && ride.seats < currentSeats && (
           <p className="text-sm text-red-500 mt-1">
-            {texts.notEnoughSeats}
+            {notEnoughSeatsText}
           </p>
         )}
         {error && (
@@ -147,21 +160,21 @@ const PaymentDetails = ({
             <div className="rounded-full bg-yellow-100 p-2 dark:bg-yellow-800">
               <Lock size={18} className="text-yellow-600 dark:text-yellow-300" />
             </div>
-            <h3 className="font-medium text-lg">{texts.loginRequired}</h3>
+            <h3 className="font-medium text-lg">{loginRequiredText}</h3>
           </div>
-          <p className="mb-4">{texts.loginToReserve}</p>
+          <p className="mb-4">{loginToReserveText}</p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link 
               to="/passenger-signin" 
               className="text-center py-2 px-4 bg-wassalni-blue text-white font-medium rounded-lg hover:bg-wassalni-blue/90 transition-colors dark:bg-wassalni-lightBlue dark:hover:bg-wassalni-lightBlue/90"
             >
-              {texts.login}
+              {loginText}
             </Link>
             <Link 
               to="/passenger-signup" 
               className="text-center py-2 px-4 bg-wassalni-green text-white font-medium rounded-lg hover:bg-wassalni-green/90 transition-colors dark:bg-wassalni-lightGreen dark:hover:bg-wassalni-lightGreen/90"
             >
-              {texts.register}
+              {registerText}
             </Link>
           </div>
         </div>
@@ -169,7 +182,7 @@ const PaymentDetails = ({
       
       <div className="mb-8">
         <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-          {texts.paymentMethod}
+          {paymentMethodText}
         </label>
         <div className="space-y-3">
           <div 
@@ -190,8 +203,8 @@ const PaymentDetails = ({
               )}
             </div>
             <div className="flex-grow">
-              <p className="font-medium">{texts.cash}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{texts.payDriver}</p>
+              <p className="font-medium">{cashText}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{payDriverText}</p>
             </div>
           </div>
         </div>
@@ -199,15 +212,15 @@ const PaymentDetails = ({
       
       <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
         <div className="flex justify-between mb-2">
-          <span className="text-gray-600 dark:text-gray-300">{texts.baseFare}</span>
+          <span className="text-gray-600 dark:text-gray-300">{baseFareText}</span>
           <span>{displayPrice} DZD</span>
         </div>
         <div className="flex justify-between mb-2">
-          <span className="text-gray-600 dark:text-gray-300">{texts.passengers} × {currentSeats}</span>
+          <span className="text-gray-600 dark:text-gray-300">{passengersText} × {currentSeats}</span>
           <span>{totalPrice} DZD</span>
         </div>
         <div className="flex justify-between font-semibold text-lg mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <span>{texts.total}</span>
+          <span>{totalText}</span>
           <span className="text-wassalni-green dark:text-wassalni-lightGreen">{totalPrice} DZD</span>
         </div>
       </div>
@@ -219,7 +232,7 @@ const PaymentDetails = ({
           onClick={onBack}
           disabled={!onBack}
         >
-          {texts.back}
+          {backText}
         </Button>
         <Button 
           className="flex-1"
@@ -228,8 +241,8 @@ const PaymentDetails = ({
           disabled={loading || reservationInProgress || (ride && currentSeats > ride.seats) || !isAuthenticated}
         >
           {isAuthenticated 
-            ? texts.confirmReservation 
-            : texts.loginToConfirm}
+            ? confirmReservationText 
+            : loginToConfirmText}
         </Button>
       </div>
     </div>
