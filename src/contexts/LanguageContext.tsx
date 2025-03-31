@@ -151,7 +151,7 @@ const translations = {
     'auth.agreeTerms': 'I agree to the',
     'auth.alreadyAccount': 'Already have an account?',
     'auth.wantToBeDriver': 'Want to be a driver?',
-    'auth.wantToBePassenger': 'Want to be a passenger?',
+    'auth.want to be a passenger?': 'Want to be a passenger?',
     'auth.signUp': 'Sign Up',
     'auth.signUpAsDriver': 'Sign up as a driver',
     'auth.signUpAsPassenger': 'Sign up as a passenger',
@@ -597,4 +597,4 @@ const translations = {
     'reservation.rideDetails': 'تفاصيل الرحلة',
     'reservation.confirmation': 'التأكيد',
     'reservation.liveTracking': 'التتبع المباشر',
-    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي. يمكنك معرفة وقت وصول
+    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي
