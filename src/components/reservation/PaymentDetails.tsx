@@ -5,6 +5,7 @@ import Button from "@/components/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { UserCheck, Lock } from "lucide-react";
+import { toast } from "sonner";
 
 interface PaymentDetailsProps {
   ride?: Ride;
@@ -35,8 +36,9 @@ const PaymentDetails = ({
   error,
   isAuthenticated
 }: PaymentDetailsProps) => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [reservationInProgress, setReservationInProgress] = useState(false);
   
   // Use either seats or passengerCount for backward compatibility
   const currentSeats = seats || passengerCount || 1;
@@ -51,12 +53,28 @@ const PaymentDetails = ({
     }
   };
   
-  // Handle submit function (either onSubmit or onConfirm)
+  // Handle submit function with error handling
   const handleSubmit = async () => {
-    if (onSubmit) {
-      await onSubmit();
-    } else if (onConfirm) {
-      onConfirm();
+    if (!isAuthenticated) {
+      toast.error("Please login to make a reservation");
+      return;
+    }
+    
+    if (reservationInProgress) return;
+    
+    try {
+      setReservationInProgress(true);
+      
+      if (onSubmit) {
+        await onSubmit();
+      } else if (onConfirm) {
+        onConfirm();
+      }
+    } catch (error) {
+      console.error("Reservation error:", error);
+      toast.error("Failed to make reservation. Please try again.");
+    } finally {
+      setReservationInProgress(false);
     }
   };
   
@@ -74,8 +92,8 @@ const PaymentDetails = ({
     notEnoughSeats: language === 'fr' ? 'Pas assez de places disponibles' : (language === 'ar' ? 'لا توجد مقاعد كافية' : 'Not enough available seats'),
     loginRequired: language === 'fr' ? 'Connexion Requise' : (language === 'ar' ? 'تسجيل الدخول مطلوب' : 'Login Required'),
     loginToReserve: language === 'fr' ? 'Connectez-vous pour réserver votre trajet' : (language === 'ar' ? 'سجل الدخول لحجز رحلتك' : 'Login to book your ride'),
-    login: language === 'fr' ? 'Se Connecter' : (language === 'ar' ? 'تسجيل الدخول' : 'Log In'),
-    register: language === 'fr' ? 'S\'inscrire' : (language === 'ar' ? 'اشتراك' : 'Register'),
+    login: language === 'fr' ? 'Se Connecter' : (language === 'ar' ? 'تسجيل الدخول' : 'Login'),
+    register: language === 'fr' ? 'S\'inscrire' : (language === 'ar' ? 'إنشاء حساب' : 'Register'),
     paymentMethod: language === 'fr' ? 'Mode de Paiement' : (language === 'ar' ? 'طريقة الدفع' : 'Payment Method'),
     cash: language === 'fr' ? 'Espèces' : (language === 'ar' ? 'نقدا' : 'Cash'),
     payDriver: language === 'fr' ? 'Payer directement au conducteur' : (language === 'ar' ? 'ادفع للسائق مباشرة' : 'Pay the driver directly'),
@@ -206,8 +224,8 @@ const PaymentDetails = ({
         <Button 
           className="flex-1"
           onClick={handleSubmit}
-          isLoading={loading}
-          disabled={loading || (ride && currentSeats > ride.seats) || !isAuthenticated}
+          isLoading={loading || reservationInProgress}
+          disabled={loading || reservationInProgress || (ride && currentSeats > ride.seats) || !isAuthenticated}
         >
           {isAuthenticated 
             ? texts.confirmReservation 

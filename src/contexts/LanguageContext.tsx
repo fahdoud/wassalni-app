@@ -121,7 +121,7 @@ const translations = {
     'feedback.successTitle': 'Thank You!',
     'feedback.successDescription': 'Your feedback has been submitted successfully. We appreciate your input!',
 
-    // Authentication (already exists in the translations)
+    // Auth section
     'auth.welcomeBack': 'Welcome Back',
     'auth.welcomeBackDriver': 'Welcome Back Driver',
     'auth.passengerSignInDesc': 'Sign in to your passenger account to book rides in Constantine',
@@ -151,7 +151,7 @@ const translations = {
     'auth.agreeTerms': 'I agree to the',
     'auth.alreadyAccount': 'Already have an account?',
     'auth.wantToBeDriver': 'Want to be a driver?',
-    'auth.want to be a passenger?': 'Want to be a passenger?',
+    'auth.wantToBePassenger': 'Want to be a passenger?',
     'auth.signUp': 'Sign Up',
     'auth.signUpAsDriver': 'Sign up as a driver',
     'auth.signUpAsPassenger': 'Sign up as a passenger',
@@ -182,7 +182,7 @@ const translations = {
     'profile.passengerProfile': 'Passenger Profile',
     'profile.driverProfile': 'Driver Profile',
     
-    // Reservation
+    // Reservation section
     'reservation.title': 'Ride Reservation',
     'reservation.subtitle': 'Complete your booking details and confirm your ride',
     'reservation.details': 'Trip Details',
@@ -315,7 +315,7 @@ const translations = {
     'feedback.successTitle': 'Merci!',
     'feedback.successDescription': 'Vos commentaires ont été soumis avec succès. Nous apprécions votre contribution!',
 
-    // Authentication
+    // Auth section
     'auth.welcomeBack': 'Bon Retour',
     'auth.welcomeBackDriver': 'Bon Retour Chauffeur',
     'auth.passengerSignInDesc': 'Connectez-vous à votre compte passager pour réserver des trajets à Constantine',
@@ -376,7 +376,7 @@ const translations = {
     'profile.passengerProfile': 'Profil Passager',
     'profile.driverProfile': 'Profil Conducteur',
     
-    // Reservation
+    // Reservation section
     'reservation.title': 'Réservation de Trajet',
     'reservation.subtitle': 'Complétez vos informations et confirmez votre réservation',
     'reservation.details': 'Détails du Trajet',
@@ -509,7 +509,7 @@ const translations = {
     'feedback.successTitle': 'شكرا لك!',
     'feedback.successDescription': 'تم إرسال ملاحظاتك بنجاح. نقدر مساهمتك!',
 
-    // Authentication
+    // Auth section
     'auth.welcomeBack': 'مرحبًا بعودتك',
     'auth.welcomeBackDriver': 'مرحبًا بعودتك أيها السائق',
     'auth.passengerSignInDesc': 'سجل الدخول إلى حسابك كراكب لحجز رحلات في قسنطينة',
@@ -570,7 +570,7 @@ const translations = {
     'profile.passengerProfile': 'ملف الراكب الشخصي',
     'profile.driverProfile': 'ملف السائق الشخصي',
     
-    // Reservation
+    // Reservation section
     'reservation.title': 'حجز رحلة',
     'reservation.subtitle': 'أكمل بيانات الحجز وأكد رحلتك',
     'reservation.details': 'تفاصيل الرحلة',
@@ -597,4 +597,4 @@ const translations = {
     'reservation.rideDetails': 'تفاصيل الرحلة',
     'reservation.confirmation': 'التأكيد',
     'reservation.liveTracking': 'التتبع المباشر',
-    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي
+    'reservation.trackingDescription': 'تتبع موقع السائق الخاص بك في الوقت الحقيقي. يمكنك معرفة

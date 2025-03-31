@@ -68,9 +68,6 @@ export const createReservation = async (
       
       console.log("Mock reservation created successfully:", reservation);
       
-      // For mock rides, we manually decrement the seats in the mock data
-      // The UI will update based on the response, but next time the page loads
-      // it will show the original seat count since mock data is static
       return { success: true };
     }
     
@@ -114,73 +111,131 @@ export const createReservation = async (
     // Calculate total price
     const totalPrice = currentTrip.price * seatsReserved;
     
-    // 1. Create the reservation with all detailed information
-    const { data: reservation, error: reservationError } = await supabase
-      .from('reservations')
-      .insert({
-        trip_id: tripId,
-        passenger_id: passengerId,
-        passenger_name: userProfile?.full_name || 'User',
-        passenger_first_name: firstName,
-        passenger_last_name: lastName,
-        passenger_email: userEmail,
-        seats_reserved: seatsReserved,
-        status: 'confirmed' as ReservationStatus,
-        price: totalPrice,
-        origin: currentTrip.origin,
-        destination: currentTrip.destination,
-        departure_point: currentTrip.origin, // This could be more specific in the future
-        destination_point: currentTrip.destination // This could be more specific in the future
-      })
-      .select()
-      .single();
+    // Use a transaction to ensure both operations are successful
+    let updatedSeatsCount = 0;
     
-    if (reservationError) {
-      console.error("Error creating reservation:", reservationError);
-      throw new Error(reservationError.message);
-    }
-
-    console.log("Created reservation record:", reservation);
-
     try {
-      // 2. Update the available seats in the trip using the new function
-      const { data: success, error: updateError } = await supabase
-        .rpc('decrease_available_seats', {
-          trip_id: tripId,
-          seats_count: seatsReserved
-        });
-  
-      if (updateError) {
-        console.error("Error updating available seats:", updateError);
-        // If there's an error updating seats, try to delete the reservation
-        await supabase.from('reservations').delete().eq('id', reservation.id);
-        throw new Error(updateError.message);
+      // Try using a transaction first
+      const { error: transactionError } = await supabase.rpc('create_reservation_transaction', {
+        p_trip_id: tripId,
+        p_passenger_id: passengerId,
+        p_passenger_name: userProfile?.full_name || 'User',
+        p_passenger_first_name: firstName,
+        p_passenger_last_name: lastName,
+        p_passenger_email: userEmail,
+        p_seats_reserved: seatsReserved,
+        p_status: 'confirmed',
+        p_price: totalPrice,
+        p_origin: currentTrip.origin,
+        p_destination: currentTrip.destination
+      });
+      
+      if (transactionError) {
+        // If transaction RPC fails, fall back to separate operations
+        console.warn("Transaction failed, using fallback method:", transactionError.message);
+        throw transactionError;
       }
       
-      if (!success) {
-        console.error("Failed to update seats but no error provided");
-        await supabase.from('reservations').delete().eq('id', reservation.id);
-        throw new Error("Failed to update seats");
-      }
-    } catch (rpcError) {
-      console.error("Error calling RPC function:", rpcError);
-      // Attempt direct update if RPC fails
-      try {
-        const { error: directUpdateError } = await supabase
-          .from('trips')
-          .update({ available_seats: currentTrip.available_seats - seatsReserved })
-          .eq('id', tripId);
+      // Get updated seat count after transaction
+      const { data: updatedTrip } = await supabase
+        .from('trips')
+        .select('available_seats')
+        .eq('id', tripId)
+        .single();
         
-        if (directUpdateError) {
-          console.error("Direct update failed:", directUpdateError);
+      updatedSeatsCount = updatedTrip?.available_seats || 0;
+      
+    } catch (transactionError) {
+      console.warn("Using fallback method for reservation");
+      
+      // 1. Create the reservation with all detailed information
+      const { data: reservation, error: reservationError } = await supabase
+        .from('reservations')
+        .insert({
+          trip_id: tripId,
+          passenger_id: passengerId,
+          passenger_name: userProfile?.full_name || 'User',
+          passenger_first_name: firstName,
+          passenger_last_name: lastName,
+          passenger_email: userEmail,
+          seats_reserved: seatsReserved,
+          status: 'confirmed' as ReservationStatus,
+          price: totalPrice,
+          origin: currentTrip.origin,
+          destination: currentTrip.destination,
+          departure_point: currentTrip.origin,
+          destination_point: currentTrip.destination
+        })
+        .select()
+        .single();
+      
+      if (reservationError) {
+        console.error("Error creating reservation:", reservationError);
+        throw new Error(reservationError.message);
+      }
+
+      console.log("Created reservation record:", reservation);
+
+      try {
+        // 2. Update the available seats using RPC function
+        const { data: success, error: updateError } = await supabase
+          .rpc('decrease_available_seats', {
+            trip_id: tripId,
+            seats_count: seatsReserved
+          });
+    
+        if (updateError) {
+          console.error("Error updating available seats:", updateError);
+          // If there's an error updating seats, try to delete the reservation
+          await supabase.from('reservations').delete().eq('id', reservation.id);
+          
+          // Try direct update as a last resort
+          const { error: directUpdateError } = await supabase
+            .from('trips')
+            .update({ available_seats: currentTrip.available_seats - seatsReserved })
+            .eq('id', tripId);
+          
+          if (directUpdateError) {
+            console.error("Direct update failed:", directUpdateError);
+            await supabase.from('reservations').delete().eq('id', reservation.id);
+            throw new Error("Failed to update seats");
+          }
+        }
+        
+        if (!success) {
+          console.error("Failed to update seats but no error provided");
           await supabase.from('reservations').delete().eq('id', reservation.id);
           throw new Error("Failed to update seats");
         }
-      } catch (directError) {
-        console.error("Direct update attempt failed:", directError);
-        await supabase.from('reservations').delete().eq('id', reservation.id);
-        throw new Error("Failed to update seats");
+      } catch (rpcError) {
+        console.error("Error calling RPC function:", rpcError);
+        // Attempt direct update if RPC fails
+        try {
+          const { error: directUpdateError } = await supabase
+            .from('trips')
+            .update({ available_seats: currentTrip.available_seats - seatsReserved })
+            .eq('id', tripId);
+          
+          if (directUpdateError) {
+            console.error("Direct update failed:", directUpdateError);
+            await supabase.from('reservations').delete().eq('id', reservation.id);
+            throw new Error("Failed to update seats");
+          }
+        } catch (directError) {
+          console.error("Direct update attempt failed:", directError);
+          await supabase.from('reservations').delete().eq('id', reservation.id);
+          throw new Error("Failed to update seats");
+        }
       }
+
+      // 4. Fetch the updated seat count to confirm
+      const { data: updatedTrip } = await supabase
+        .from('trips')
+        .select('available_seats')
+        .eq('id', tripId)
+        .single();
+      
+      updatedSeatsCount = updatedTrip?.available_seats || 0;
     }
 
     // 3. Send a welcome message to the ride chat
@@ -200,21 +255,10 @@ export const createReservation = async (
       // Don't throw error here, the reservation was still successful
     }
 
-    // 4. Fetch the updated seat count to confirm
-    const { data: updatedTrip, error: fetchError } = await supabase
-      .from('trips')
-      .select('available_seats')
-      .eq('id', tripId)
-      .single();
-
-    if (fetchError) {
-      console.error("Error fetching updated seat count:", fetchError);
-    }
-
-    console.log("Reservation created successfully. Updated trip:", updatedTrip);
+    console.log("Reservation created successfully. Updated seats:", updatedSeatsCount);
     return { 
       success: true, 
-      updatedSeats: updatedTrip?.available_seats
+      updatedSeats: updatedSeatsCount
     };
   } catch (error) {
     console.error("Failed to create reservation:", error);
