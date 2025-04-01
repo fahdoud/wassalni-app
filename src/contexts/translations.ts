@@ -101,6 +101,50 @@ export const translations = {
     // Location
     'location': {
       'constantine': 'Constantine, Algeria'
+    },
+    
+    // Feedback page
+    'feedback': {
+      'title': 'Share Your Feedback',
+      'subtitle': 'We value your opinion and are constantly working to improve our service',
+      'name': 'Your Name',
+      'email': 'Your Email',
+      'yourFeedback': 'Your Feedback',
+      'writeFeedbackPlaceholder': 'Write your feedback here...',
+      'submit': 'Submit Feedback',
+      'submitting': 'Submitting...',
+      'successTitle': 'Thank you for your feedback!',
+      'successMessage': 'We appreciate your input and will use it to improve our services.',
+      'errorTitle': 'Submission Failed',
+      'errorMessage': 'There was an error submitting your feedback. Please try again.',
+      'rateExperience': 'Rate your experience',
+      'selectDriver': 'Select Driver',
+      'selectDriverOption': 'Select a driver',
+      'selectTrip': 'Select Trip (Optional)',
+      'selectTripOption': 'Select a trip',
+      'exampleSuggestions': 'Example suggestions',
+      'otherWaysTitle': 'Other Ways to Reach Us',
+      'emailUs': 'Email Us',
+      'emailDescription': 'Send us a detailed message about your experience or suggestions.',
+      'socialMedia': 'Social Media',
+      'socialDescription': 'Connect with us on social media for updates and support.',
+      'to': 'to',
+      'types': {
+        'general': 'General',
+        'suggestions': 'Suggestions',
+        'complaints': 'Complaints',
+        'reclamation': 'Réclamation',
+        'issues': 'Issues',
+        'problems': 'Problems',
+        'other': 'Other',
+        'rateDriver': 'Rate Driver'
+      }
+    },
+
+    // Profile
+    'profile': {
+      'updateSuccess': 'Profile updated successfully',
+      'updateError': 'Error updating profile'
     }
   },
   fr: {
@@ -203,6 +247,50 @@ export const translations = {
     // Location
     'location': {
       'constantine': 'Constantine, Algérie'
+    },
+    
+    // Feedback page
+    'feedback': {
+      'title': 'Partagez Votre Avis',
+      'subtitle': 'Nous valorisons votre opinion et travaillons constamment à améliorer notre service',
+      'name': 'Votre Nom',
+      'email': 'Votre Email',
+      'yourFeedback': 'Votre Commentaire',
+      'writeFeedbackPlaceholder': 'Écrivez votre commentaire ici...',
+      'submit': 'Envoyer',
+      'submitting': 'Envoi en cours...',
+      'successTitle': 'Merci pour votre retour!',
+      'successMessage': 'Nous apprécions votre contribution et l\'utiliserons pour améliorer nos services.',
+      'errorTitle': 'Échec de l\'envoi',
+      'errorMessage': 'Une erreur est survenue lors de l\'envoi de votre commentaire. Veuillez réessayer.',
+      'rateExperience': 'Évaluez votre expérience',
+      'selectDriver': 'Sélectionner un Chauffeur',
+      'selectDriverOption': 'Sélectionnez un chauffeur',
+      'selectTrip': 'Sélectionner un Trajet (Optionnel)',
+      'selectTripOption': 'Sélectionnez un trajet',
+      'exampleSuggestions': 'Suggestions d\'exemples',
+      'otherWaysTitle': 'Autres Façons de Nous Contacter',
+      'emailUs': 'Envoyez-nous un Email',
+      'emailDescription': 'Envoyez-nous un message détaillé concernant votre expérience ou vos suggestions.',
+      'socialMedia': 'Réseaux Sociaux',
+      'socialDescription': 'Connectez-vous avec nous sur les réseaux sociaux pour les mises à jour et le support.',
+      'to': 'à',
+      'types': {
+        'general': 'Général',
+        'suggestions': 'Suggestions',
+        'complaints': 'Plaintes',
+        'reclamation': 'Réclamation',
+        'issues': 'Problèmes',
+        'problems': 'Problèmes',
+        'other': 'Autre',
+        'rateDriver': 'Évaluer Chauffeur'
+      }
+    },
+
+    // Profile
+    'profile': {
+      'updateSuccess': 'Profil mis à jour avec succès',
+      'updateError': 'Erreur lors de la mise à jour du profil'
     }
   },
   ar: {
@@ -305,6 +393,50 @@ export const translations = {
     // Location
     'location': {
       'constantine': 'قسنطينة، الجزائر'
+    },
+    
+    // Feedback page
+    'feedback': {
+      'title': 'شارك رأيك',
+      'subtitle': 'نحن نقدر رأيك ونعمل باستمرار على تحسين خدماتنا',
+      'name': 'اسمك',
+      'email': 'بريدك الإلكتروني',
+      'yourFeedback': 'تعليقك',
+      'writeFeedbackPlaceholder': 'اكتب تعليقك هنا...',
+      'submit': 'إرسال',
+      'submitting': 'جاري الإرسال...',
+      'successTitle': 'شكراً على تعليقك!',
+      'successMessage': 'نحن نقدر مساهمتك وسنستخدمها لتحسين خدماتنا.',
+      'errorTitle': 'فشل الإرسال',
+      'errorMessage': 'حدث خطأ أثناء إرسال تعليقك. يرجى المحاولة مرة أخرى.',
+      'rateExperience': 'قيم تجربتك',
+      'selectDriver': 'اختر السائق',
+      'selectDriverOption': 'اختر سائقًا',
+      'selectTrip': 'اختر الرحلة (اختياري)',
+      'selectTripOption': 'اختر رحلة',
+      'exampleSuggestions': 'أمثلة على الاقتراحات',
+      'otherWaysTitle': 'طرق أخرى للتواصل معنا',
+      'emailUs': 'راسلنا عبر البريد الإلكتروني',
+      'emailDescription': 'أرسل لنا رسالة مفصلة عن تجربتك أو اقتراحاتك.',
+      'socialMedia': 'وسائل التواصل الاجتماعي',
+      'socialDescription': 'تواصل معنا على وسائل التواصل الاجتماعي للحصول على التحديثات والدعم.',
+      'to': 'إلى',
+      'types': {
+        'general': 'عام',
+        'suggestions': 'اقتراحات',
+        'complaints': 'شكاوى',
+        'reclamation': 'مطالبات',
+        'issues': 'مشكلات',
+        'problems': 'مشاكل',
+        'other': 'أخرى',
+        'rateDriver': 'تقييم السائق'
+      }
+    },
+
+    // Profile
+    'profile': {
+      'updateSuccess': 'تم تحديث الملف الشخصي بنجاح',
+      'updateError': 'خطأ في تحديث الملف الشخصي'
     }
   }
 };

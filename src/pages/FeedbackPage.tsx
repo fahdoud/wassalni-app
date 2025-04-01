@@ -247,35 +247,35 @@ const FeedbackPage = () => {
               <TabsList className={`grid ${isMobile ? 'grid-cols-2 gap-1 mb-4' : 'md:grid-cols-8 gap-2 mb-8'} overflow-x-auto max-w-full`}>
                 <TabsTrigger value="general" className="flex flex-col items-center gap-1 py-2 px-1">
                   <MessageSquare size={16} />
-                  <span className="text-xs">General</span>
+                  <span className="text-xs">{t('feedback.types.general')}</span>
                 </TabsTrigger>
                 <TabsTrigger value="suggestion" className="flex flex-col items-center gap-1 py-2 px-1">
                   <ThumbsUp size={16} />
-                  <span className="text-xs">Suggestions</span>
+                  <span className="text-xs">{t('feedback.types.suggestions')}</span>
                 </TabsTrigger>
                 <TabsTrigger value="complaint" className="flex flex-col items-center gap-1 py-2 px-1">
                   <AlertTriangle size={16} />
-                  <span className="text-xs">Complaints</span>
+                  <span className="text-xs">{t('feedback.types.complaints')}</span>
                 </TabsTrigger>
                 <TabsTrigger value="reclamation" className="flex flex-col items-center gap-1 py-2 px-1">
                   <Flag size={16} />
-                  <span className="text-xs">Réclamation</span>
+                  <span className="text-xs">{t('feedback.types.reclamation')}</span>
                 </TabsTrigger>
                 <TabsTrigger value="issue" className="flex flex-col items-center gap-1 py-2 px-1">
                   <HelpCircle size={16} />
-                  <span className="text-xs">Issues</span>
+                  <span className="text-xs">{t('feedback.types.issues')}</span>
                 </TabsTrigger>
                 <TabsTrigger value="problems" className="flex flex-col items-center gap-1 py-2 px-1">
                   <AlertTriangle size={16} />
-                  <span className="text-xs">Problèmes</span>
+                  <span className="text-xs">{t('feedback.types.problems')}</span>
                 </TabsTrigger>
                 <TabsTrigger value="other" className="flex flex-col items-center gap-1 py-2 px-1">
                   <MessageSquare size={16} />
-                  <span className="text-xs">Other</span>
+                  <span className="text-xs">{t('feedback.types.other')}</span>
                 </TabsTrigger>
                 <TabsTrigger value="rating" className="flex flex-col items-center gap-1 py-2 px-1">
                   <Star size={16} />
-                  <span className="text-xs">Rate Driver</span>
+                  <span className="text-xs">{t('feedback.types.rateDriver')}</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -315,7 +315,7 @@ const FeedbackPage = () => {
                   {isLoggedIn && drivers.length > 0 && (
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Select Driver
+                        {t('feedback.selectDriver')}
                       </label>
                       <select
                         className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
@@ -323,7 +323,7 @@ const FeedbackPage = () => {
                         onChange={(e) => setToUserId(e.target.value)}
                         required
                       >
-                        <option value="">Select a driver</option>
+                        <option value="">{t('feedback.selectDriverOption')}</option>
                         {drivers.map((driver) => (
                           <option key={driver.id} value={driver.id}>
                             {driver.name}
@@ -336,17 +336,17 @@ const FeedbackPage = () => {
                   {isLoggedIn && trips.length > 0 && (
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Select Trip (Optional)
+                        {t('feedback.selectTrip')}
                       </label>
                       <select
                         className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
                         value={tripId || ""}
                         onChange={(e) => setTripId(e.target.value)}
                       >
-                        <option value="">Select a trip</option>
+                        <option value="">{t('feedback.selectTripOption')}</option>
                         {trips.map((trip) => (
                           <option key={trip.id} value={trip.id}>
-                            {trip.origin} to {trip.destination} - {new Date(trip.departure_time).toLocaleDateString()}
+                            {trip.origin} {t('feedback.to')} {trip.destination} - {new Date(trip.departure_time).toLocaleDateString()}
                           </option>
                         ))}
                       </select>
@@ -389,7 +389,7 @@ const FeedbackPage = () => {
                   feedbackType === "problems" ||
                   feedbackType === "other") && (
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium mb-2">Example suggestions:</h4>
+                    <h4 className="text-sm font-medium mb-2">{t('feedback.exampleSuggestions')}:</h4>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {exampleSuggestions.slice(0, isMobile ? 2 : 3).map((suggestion, index) => (
                         <button
@@ -413,7 +413,7 @@ const FeedbackPage = () => {
                     id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Write your feedback here..."
+                    placeholder={t('feedback.writeFeedbackPlaceholder')}
                     className="w-full dark:bg-gray-900"
                     required
                   />
@@ -426,7 +426,7 @@ const FeedbackPage = () => {
                     size="lg"
                     disabled={loading}
                   >
-                    {loading ? "Submitting..." : t('feedback.submit')}
+                    {loading ? t('feedback.submitting') : t('feedback.submit')}
                     <Send size={18} />
                   </Button>
                 </div>
