@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -35,8 +36,8 @@ const PassengerSignUp = () => {
     if (!agreeTerms) {
       uiToast({
         variant: "destructive",
-        title: t('auth.errorTitle'),
-        description: t('auth.errorTerms'),
+        title: "Error",
+        description: "You must agree to the terms of service to create an account",
       });
       setIsLoading(false);
       return;
@@ -45,8 +46,8 @@ const PassengerSignUp = () => {
     if (password !== confirmPassword) {
       uiToast({
         variant: "destructive",
-        title: t('auth.errorTitle'),
-        description: t('auth.errorPasswordMatch'),
+        title: "Error",
+        description: "Passwords do not match",
       });
       setIsLoading(false);
       return;
@@ -55,8 +56,8 @@ const PassengerSignUp = () => {
     if (!fullName || !email || !phone || !password) {
       uiToast({
         variant: "destructive",
-        title: t('auth.errorTitle'),
-        description: t('auth.errorFields'),
+        title: "Error",
+        description: "Please fill in all fields",
       });
       setIsLoading(false);
       return;
@@ -95,7 +96,7 @@ const PassengerSignUp = () => {
           console.log("Sending email verification to:", email);
           const emailResult = await sendEmailVerification(data.user.id, email);
           console.log("Email verification result:", emailResult);
-          toast.success(t('auth.verificationEmailSent'));
+          toast.success("Verification email sent");
         } catch (verificationError) {
           console.error("Failed to send verification email:", verificationError);
           toast.error("Failed to send verification email. Please try again later.");
@@ -126,17 +127,17 @@ const PassengerSignUp = () => {
           console.log("Sending welcome SMS to:", formattedPhone);
           const smsResult = await sendSMSNotification(data.user.id, formattedPhone, welcomeMessage);
           console.log("Welcome SMS result:", smsResult);
-          toast.success(t('auth.welcomeSmsSent'));
+          toast.success("Welcome SMS sent successfully");
         } catch (smsError) {
           console.error("Failed to send welcome SMS:", smsError);
-          toast.error(t('auth.smsError'));
+          toast.error("Failed to send SMS. Please try again later.");
         }
         
         setShowVerificationDialog(true);
       }
     } catch (error: any) {
       console.error("Signup error:", error);
-      toast.error(error.message || t('auth.errorGeneric'));
+      toast.error(error.message || "An error occurred during sign up");
       setIsLoading(false);
     }
   };
@@ -166,14 +167,14 @@ const PassengerSignUp = () => {
               driverLink="/driver-signup" 
             />
             
-            <h2 className="text-3xl font-bold mb-2">{t('auth.createAccount')}</h2>
+            <h2 className="text-3xl font-bold mb-2">Create Account</h2>
             <p className="text-gray-600 mb-8 dark:text-gray-300">
-              {t('auth.passengerSignUpDesc')}
+              Sign up as a passenger to book rides, track your journeys, and enjoy convenient transportation.
             </p>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('auth.fullName')}</label>
+                <label className="text-sm font-medium">Full Name</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <User size={18} className="text-gray-400" />
@@ -183,13 +184,13 @@ const PassengerSignUp = () => {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('auth.fullNamePlaceholder')}
+                    placeholder="Enter your full name"
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('auth.email')}</label>
+                <label className="text-sm font-medium">Email</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Mail size={18} className="text-gray-400" />
@@ -199,13 +200,13 @@ const PassengerSignUp = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('auth.emailPlaceholder')}
+                    placeholder="Enter your email address"
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('auth.phone')}</label>
+                <label className="text-sm font-medium">Phone Number</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Phone size={18} className="text-gray-400" />
@@ -215,14 +216,14 @@ const PassengerSignUp = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('auth.phonePlaceholder')}
+                    placeholder="Enter your phone number"
                   />
                 </div>
                 <p className="text-xs text-gray-500">Include country code for international format (e.g., +213...)</p>
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('auth.password')}</label>
+                <label className="text-sm font-medium">Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Lock size={18} className="text-gray-400" />
@@ -232,7 +233,7 @@ const PassengerSignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-10 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('auth.passwordPlaceholder')}
+                    placeholder="Create a password"
                   />
                   <button
                     type="button"
@@ -249,7 +250,7 @@ const PassengerSignUp = () => {
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('auth.confirmPassword')}</label>
+                <label className="text-sm font-medium">Confirm Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Lock size={18} className="text-gray-400" />
@@ -259,7 +260,7 @@ const PassengerSignUp = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('auth.confirmPasswordPlaceholder')}
+                    placeholder="Confirm your password"
                   />
                 </div>
               </div>
@@ -273,19 +274,19 @@ const PassengerSignUp = () => {
                   className="h-4 w-4 text-wassalni-green focus:ring-wassalni-green border-gray-300 rounded"
                 />
                 <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                  {t('auth.agreeTerms')} <a href="#" className="text-wassalni-green hover:text-wassalni-lightGreen">Terms of Service</a>
+                  I agree to the <a href="#" className="text-wassalni-green hover:text-wassalni-lightGreen">Terms of Service</a>
                 </label>
               </div>
               
               <Button type="submit" className="w-full mt-2" disabled={isLoading}>
-                {isLoading ? t('auth.signingUp') : t('auth.signUp')}
+                {isLoading ? "Signing up..." : "Sign Up"}
               </Button>
               
               <div className="text-center mt-6">
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {t('auth.alreadyAccount')}{' '}
+                  Already have an account?{' '}
                   <Link to="/passenger-signin" className="text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
-                    {t('auth.signIn')}
+                    Sign In
                   </Link>
                 </p>
               </div>
@@ -297,9 +298,9 @@ const PassengerSignUp = () => {
           <div className="absolute inset-0 bg-pattern opacity-10"></div>
           <div className="relative z-10 flex flex-col justify-center items-center text-wassalni-dark p-16">
             <Logo size="lg" />
-            <h2 className="text-3xl font-bold mt-8 mb-4 text-center">{t('auth.joinAsPassenger')}</h2>
+            <h2 className="text-3xl font-bold mt-8 mb-4 text-center">Join as a Passenger</h2>
             <p className="text-center max-w-md">
-              {t('auth.passengerBenefits')}
+              Enjoy convenient, affordable, and safe rides across the city. Connect with trusted drivers and experience hassle-free transportation.
             </p>
           </div>
         </div>
@@ -308,19 +309,19 @@ const PassengerSignUp = () => {
       <Dialog open={showVerificationDialog} onOpenChange={setShowVerificationDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('auth.verifyYourEmail')}</DialogTitle>
+            <DialogTitle>Verify Your Email</DialogTitle>
             <DialogDescription>
-              {t('auth.verificationEmailSentDesc')}
+              We've sent a verification email to your inbox. Please check your email and click the verification link to complete your registration.
             </DialogDescription>
           </DialogHeader>
           
           <div className="flex flex-col space-y-4 py-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t('auth.verificationNote')}
+              If you don't receive the email within a few minutes, please check your spam folder or request a new verification link.
             </p>
             
             <div className="grid gap-2">
-              <Label htmlFor="user-id">{t('auth.yourUserId')}</Label>
+              <Label htmlFor="user-id">Your User ID</Label>
               <div className="flex items-center space-x-2">
                 <Input 
                   id="user-id" 
@@ -333,21 +334,21 @@ const PassengerSignUp = () => {
                   size="sm"
                   onClick={() => {
                     navigator.clipboard.writeText(userId);
-                    toast.success(t('auth.copiedToClipboard'));
+                    toast.success("Copied to clipboard");
                   }}
                 >
-                  {t('auth.copy')}
+                  Copy
                 </Button>
               </div>
               <p className="text-xs text-gray-500">
-                {t('auth.userIdHelp')}
+                Save this ID for reference. You may need it if you contact customer support.
               </p>
             </div>
           </div>
           
           <DialogFooter>
             <Button onClick={handleDialogClose}>
-              {t('auth.gotIt')}
+              Got It
             </Button>
           </DialogFooter>
         </DialogContent>

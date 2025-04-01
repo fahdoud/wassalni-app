@@ -32,7 +32,7 @@ const RoleSwitcher = ({
         )}
       >
         <User size={16} />
-        <span>{isProfile ? t("profile.passengerProfile") : t("auth.asPassenger")}</span>
+        <span>{isProfile ? "Passenger Profile" : "As Passenger"}</span>
       </Link>
       <Link
         to={driverLink}
@@ -44,7 +44,7 @@ const RoleSwitcher = ({
         )}
       >
         <Car size={16} />
-        <span>{isProfile ? t("profile.driverProfile") : t("auth.asDriver")}</span>
+        <span>{isProfile ? "Driver Profile" : "As Driver"}</span>
       </Link>
     </div>
   );

@@ -26,8 +26,8 @@ const DriverSignIn = () => {
     if (!email || !password) {
       toast({
         variant: "destructive",
-        title: t('auth.errorTitle'),
-        description: t('auth.errorFields'),
+        title: "Error",
+        description: "Please fill in all fields",
       });
       setIsLoading(false);
       return;
@@ -44,8 +44,8 @@ const DriverSignIn = () => {
       }
       
       toast({
-        title: t('auth.successTitle'),
-        description: t('auth.successSignIn'),
+        title: "Success",
+        description: "You have successfully signed in",
       });
       
       // Redirect to home page after successful login
@@ -53,8 +53,8 @@ const DriverSignIn = () => {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: t('auth.errorTitle'),
-        description: error.message || t('auth.errorGeneric'),
+        title: "Error",
+        description: error.message || "An error occurred while signing in",
       });
     } finally {
       setIsLoading(false);
@@ -69,9 +69,9 @@ const DriverSignIn = () => {
           <div className="absolute inset-0 bg-pattern opacity-10"></div>
           <div className="relative z-10 flex flex-col justify-center items-center text-wassalni-dark p-16">
             <Logo size="lg" />
-            <h2 className="text-3xl font-bold mt-8 mb-4 text-center">{t('auth.joinAsDriver')}</h2>
+            <h2 className="text-3xl font-bold mt-8 mb-4 text-center">Join as a Driver</h2>
             <p className="text-center max-w-md">
-              {t('auth.driverBenefits')}
+              Earn extra income by offering rides at your convenience. Join our community of drivers and connect with passengers in your area.
             </p>
           </div>
         </div>
@@ -92,14 +92,14 @@ const DriverSignIn = () => {
               driverLink="/driver-signin" 
             />
             
-            <h2 className="text-3xl font-bold mb-2">{t('auth.welcomeBackDriver')}</h2>
+            <h2 className="text-3xl font-bold mb-2">Welcome Back, Driver</h2>
             <p className="text-gray-600 mb-8 dark:text-gray-300">
-              {t('auth.driverSignInDesc')}
+              Sign in to your driver account to manage your trips, check your earnings, and connect with passengers.
             </p>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('auth.email')}</label>
+                <label className="text-sm font-medium">Email</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Mail size={18} className="text-gray-400" />
@@ -109,13 +109,13 @@ const DriverSignIn = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('auth.emailPlaceholder')}
+                    placeholder="Enter your email address"
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('auth.password')}</label>
+                <label className="text-sm font-medium">Password</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Lock size={18} className="text-gray-400" />
@@ -125,7 +125,7 @@ const DriverSignIn = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-10 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('auth.passwordPlaceholder')}
+                    placeholder="Enter your password"
                   />
                   <button
                     type="button"
@@ -149,24 +149,24 @@ const DriverSignIn = () => {
                     className="h-4 w-4 text-wassalni-green focus:ring-wassalni-green border-gray-300 rounded"
                   />
                   <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                    {t('auth.rememberMe')}
+                    Remember me
                   </label>
                 </div>
                 
                 <a href="#" className="text-sm text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
-                  {t('auth.forgotPassword')}
+                  Forgot password?
                 </a>
               </div>
               
               <Button type="submit" className="w-full mt-2" disabled={isLoading}>
-                {isLoading ? t('auth.signingIn') : t('auth.signIn')}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
               
               <div className="text-center mt-6">
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {t('auth.noAccount')}{' '}
+                  Don't have an account?{' '}
                   <Link to="/driver-signup" className="text-wassalni-green hover:text-wassalni-lightGreen dark:text-wassalni-lightGreen">
-                    {t('auth.createDriverAccount')}
+                    Create a driver account
                   </Link>
                 </p>
               </div>
