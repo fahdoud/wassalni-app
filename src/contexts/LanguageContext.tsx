@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 import { translations as simplifiedTranslations } from './translations';
 
@@ -18,6 +19,10 @@ const LanguageContext = createContext<LanguageContextType>({
 interface LanguageProviderProps {
   children: ReactNode;
 }
+
+// Define a recursive type for nested translations
+type TranslationValue = string | { [key: string]: TranslationValue };
+type TranslationsType = { [key: string]: TranslationValue };
 
 // Our translations object
 const translations = {
@@ -292,12 +297,33 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     localStorage.setItem('wassalni_language', language);
   }, [language, dir]);
 
+  // Helper function to get nested translation values
+  const getNestedValue = (obj: any, path: string): string => {
+    const keys = path.split('.');
+    let result = obj;
+    
+    for (const key of keys) {
+      if (result === undefined || result === null) return path;
+      result = result[key];
+    }
+    
+    return typeof result === 'string' ? result : path;
+  };
+
   const t = (key: string): string => {
     if (!translations[language as keyof typeof translations]) {
       return key;
     }
     
-    return (translations[language as keyof typeof translations] as Record<string, string>)[key] || key;
+    // Handle nested keys with dot notation (e.g., 'hero.tagline')
+    if (key.includes('.')) {
+      return getNestedValue(translations[language as keyof typeof translations], key);
+    }
+    
+    const translationObj = translations[language as keyof typeof translations];
+    const value = (translationObj as any)[key];
+    
+    return typeof value === 'string' ? value : key;
   };
 
   return (
