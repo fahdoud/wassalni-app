@@ -2,6 +2,10 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 import { translations as simplifiedTranslations } from './translations';
 
+// Define a recursive type for nested translations
+type TranslationValue = string | { [key: string]: TranslationValue };
+type TranslationsType = { [key: string]: TranslationValue };
+
 interface LanguageContextType {
   language: string;
   setLanguage: (lang: string) => void;
@@ -19,10 +23,6 @@ const LanguageContext = createContext<LanguageContextType>({
 interface LanguageProviderProps {
   children: ReactNode;
 }
-
-// Define a recursive type for nested translations
-type TranslationValue = string | { [key: string]: TranslationValue };
-type TranslationsType = { [key: string]: TranslationValue };
 
 // Our translations object
 const translations = {
@@ -109,6 +109,23 @@ const translations = {
     "loginToConfirm": "Login to confirm",
     "back": "Back",
     "error": "An error occurred. Please try again.",
+    // Authentication related translations
+    "welcomeBack": "Welcome Back",
+    "passengerSignInDesc": "Sign in to your passenger account to book rides, manage your reservations, and more.",
+    "enterEmailPlaceholder": "Enter your email address",
+    "password": "Password",
+    "enterPasswordPlaceholder": "Enter your password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signingIn": "Signing in...",
+    "signIn": "Sign In",
+    "dontHaveAccount": "Don't have an account?",
+    "createAccount": "Create an account",
+    "joinAsPassenger": "Join as a Passenger",
+    "joinPassengerDesc": "Enjoy convenient, affordable, and safe rides across the city. Connect with trusted drivers and experience hassle-free transportation.",
+    "fillAllFields": "Please fill in all fields",
+    "successSignIn": "You have successfully signed in",
+    "errorSignIn": "An error occurred while signing in",
     ...simplifiedTranslations.en
   },
   fr: {
@@ -194,6 +211,23 @@ const translations = {
     "loginToConfirm": "Connectez-vous pour confirmer",
     "back": "Retour",
     "error": "Une erreur s'est produite. Veuillez réessayer.",
+    // Authentication related translations
+    "welcomeBack": "Bienvenue",
+    "passengerSignInDesc": "Connectez-vous à votre compte passager pour réserver des trajets, gérer vos réservations et plus encore.",
+    "enterEmailPlaceholder": "Entrez votre adresse e-mail",
+    "password": "Mot de passe",
+    "enterPasswordPlaceholder": "Entrez votre mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié?",
+    "signingIn": "Connexion en cours...",
+    "signIn": "Se connecter",
+    "dontHaveAccount": "Vous n'avez pas de compte?",
+    "createAccount": "Créer un compte",
+    "joinAsPassenger": "Rejoignez-nous en tant que passager",
+    "joinPassengerDesc": "Profitez de trajets pratiques, abordables et sûrs dans toute la ville. Connectez-vous avec des chauffeurs de confiance et vivez une expérience de transport sans tracas.",
+    "fillAllFields": "Veuillez remplir tous les champs",
+    "successSignIn": "Vous vous êtes connecté avec succès",
+    "errorSignIn": "Une erreur s'est produite lors de la connexion",
     ...simplifiedTranslations.fr
   },
   ar: {
@@ -279,6 +313,23 @@ const translations = {
     "loginToConfirm": "سجل الدخول للتأكيد",
     "back": "رجوع",
     "error": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    // Authentication related translations
+    "welcomeBack": "مرحباً بعودتك",
+    "passengerSignInDesc": "سجل الدخول إلى حسابك كراكب لحجز الرحلات وإدارة حجوزاتك والمزيد.",
+    "enterEmailPlaceholder": "أدخل عنوان بريدك الإلكتروني",
+    "password": "كلمة المرور",
+    "enterPasswordPlaceholder": "أدخل كلمة المرور الخاصة بك",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "signingIn": "جاري تسجيل الدخول...",
+    "signIn": "تسجيل الدخول",
+    "dontHaveAccount": "ليس لديك حساب؟",
+    "createAccount": "إنشاء حساب",
+    "joinAsPassenger": "انضم كراكب",
+    "joinPassengerDesc": "استمتع برحلات مريحة وبأسعار معقولة وآمنة في جميع أنحاء المدينة. تواصل مع سائقين موثوقين واستمتع بتجربة نقل خالية من المتاعب.",
+    "fillAllFields": "يرجى ملء جميع الحقول",
+    "successSignIn": "لقد قمت بتسجيل الدخول بنجاح",
+    "errorSignIn": "حدث خطأ أثناء تسجيل الدخول",
     ...simplifiedTranslations.ar
   }
 };
