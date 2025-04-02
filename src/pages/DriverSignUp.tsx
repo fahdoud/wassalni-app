@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -11,6 +10,7 @@ import RoleSwitcher from "@/components/ui-components/RoleSwitcher";
 import { supabase, sendEmailVerification, sendSMSNotification } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { sendCustomNotification } from "@/services/notifications/notificationService";
+import LanguageSwitcher from "@/components/ui-components/LanguageSwitcher";
 
 const DriverSignUp = () => {
   const { t } = useLanguage();
@@ -242,6 +242,9 @@ const DriverSignUp = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <div className="flex justify-end p-4">
+        <LanguageSwitcher />
+      </div>
       <div className="flex-1 flex flex-col md:flex-row-reverse">
         <div className="hidden md:w-2/5 md:flex bg-gradient-primary relative">
           <div className="absolute inset-0 bg-pattern opacity-10"></div>
@@ -282,7 +285,7 @@ const DriverSignUp = () => {
                     <div className="flex flex-col items-center space-y-4">
                       <div className="relative w-40 h-40 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden border-2 border-wassalni-green">
                         {profilePhotoPreview ? (
-                          <img src={profilePhotoPreview} alt="Profile Preview" className="w-full h-full object-cover" />
+                          <img src={profilePhotoPreview} alt={t('auth.profilePreview')} className="w-full h-full object-cover" />
                         ) : (
                           <Camera size={32} className="text-gray-400" />
                         )}
@@ -307,7 +310,7 @@ const DriverSignUp = () => {
                     <div className="flex flex-col items-center space-y-4">
                       <div className="relative w-40 h-40 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden border-2 border-wassalni-green">
                         {vehiclePhotoPreview ? (
-                          <img src={vehiclePhotoPreview} alt="Vehicle Preview" className="w-full h-full object-cover" />
+                          <img src={vehiclePhotoPreview} alt={t('auth.vehiclePreview')} className="w-full h-full object-cover" />
                         ) : (
                           <Car size={32} className="text-gray-400" />
                         )}
@@ -495,12 +498,12 @@ const DriverSignUp = () => {
                   className="h-4 w-4 text-wassalni-green focus:ring-wassalni-green border-gray-300 rounded"
                 />
                 <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                  {t('auth.agreeTerms')} <a href="#" className="text-wassalni-green hover:text-wassalni-lightGreen">Terms of Service</a>
+                  {t('auth.agreeTerms')} <a href="#" className="text-wassalni-green hover:text-wassalni-lightGreen">{t('auth.termsOfService')}</a>
                 </label>
               </div>
               
-              <Button type="submit" className="w-full mt-4">
-                {t('auth.signUp')}
+              <Button type="submit" disabled={isLoading} className="w-full mt-4">
+                {isLoading ? t('auth.signingUp') : t('auth.signUp')}
               </Button>
               
               <div className="text-center mt-6">
