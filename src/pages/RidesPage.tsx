@@ -1,9 +1,10 @@
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getRides } from "@/services/rides";
 import { Ride } from "@/services/rides/types";
@@ -196,12 +197,27 @@ const RidesPage = () => {
     navigate(`/reservation/${rideId}`);
   };
 
+  // Filter rides based on selected wilaya
+  const filteredRidesByWilaya = useMemo(() => {
+    if (selectedWilaya === "alger") {
+      return rides.filter(ride => 
+        communesAlger.includes(ride.from) || communesAlger.includes(ride.to)
+      );
+    } else {
+      return rides.filter(ride => 
+        constantineAreas.includes(ride.from) || constantineAreas.includes(ride.to) || 
+        ride.from === "Constantine" || ride.to === "Constantine"
+      );
+    }
+  }, [rides, selectedWilaya]);
+
+  // Apply user's text filter on top of wilaya filter
   const filteredRides = filter 
-    ? rides.filter(ride => 
+    ? filteredRidesByWilaya.filter(ride => 
         ride.from.toLowerCase().includes(filter.toLowerCase()) || 
         ride.to.toLowerCase().includes(filter.toLowerCase())
       )
-    : rides;
+    : filteredRidesByWilaya;
 
   // Déterminer les zones à afficher en fonction de la wilaya sélectionnée
   const areasToDisplay = selectedWilaya === "alger" ? communesAlger : constantineAreas;

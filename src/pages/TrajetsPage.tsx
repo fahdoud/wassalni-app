@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Button from "@/components/Button";
 import GradientText from "@/components/ui-components/GradientText";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { getTrajets } from "@/services/trajets/trajetsService";
 import { Trajet, communesAlger } from "@/services/trajets/types";
@@ -78,12 +78,27 @@ const TrajetsPage = () => {
     }
   }, [location]);
 
+  // Filter trajets based on selected wilaya
+  const filteredTrajetsByWilaya = useMemo(() => {
+    if (selectedWilaya === "alger") {
+      return trajets.filter(trajet => 
+        communesAlger.includes(trajet.origine) || communesAlger.includes(trajet.destination)
+      );
+    } else {
+      return trajets.filter(trajet => 
+        constantineAreas.includes(trajet.origine) || constantineAreas.includes(trajet.destination) || 
+        trajet.origine === "Constantine" || trajet.destination === "Constantine"
+      );
+    }
+  }, [trajets, selectedWilaya]);
+
+  // Apply user text filter on top of wilaya filter
   const filteredTrajets = filter 
-    ? trajets.filter(trajet => 
+    ? filteredTrajetsByWilaya.filter(trajet => 
         trajet.origine.toLowerCase().includes(filter.toLowerCase()) || 
         trajet.destination.toLowerCase().includes(filter.toLowerCase())
       )
-    : trajets;
+    : filteredTrajetsByWilaya;
 
   // Déterminer les zones à afficher en fonction de la wilaya sélectionnée
   const areasToDisplay = selectedWilaya === "alger" ? communesAlger : constantineAreas;
