@@ -1,3 +1,4 @@
+
 // Main export file for the ride services
 
 // Export types
@@ -7,7 +8,7 @@ export type { Ride, ReservationStatus, Reservation } from './types';
 export { getMockRides, getAlgerMockRides } from './mockRides';
 
 // Export ride query services
-export { getRides, getRideById } from './rideQueries';
+export { getRideById } from './rideQueries';
 
 // Export reservation service
 export { createReservation, getUserReservations } from './reservationService';
@@ -20,6 +21,7 @@ export { createProposedTrip, getProposedTrips, updateProposedTripStatus } from '
 
 import { Ride } from "./types";
 import { supabase } from "@/integrations/supabase/client";
+import { getMockRides, getAlgerMockRides } from "./mockRides";
 
 export const getRides = async (): Promise<Ride[]> => {
   try {
