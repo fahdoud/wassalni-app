@@ -117,14 +117,12 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
       </TabsList>
 
       <TabsContent value="ride-details">
-        {ride && (
-          <RideDetails 
-            ride={ride} 
-            seats={seats} 
-            setSeats={setSeats} 
-            goToPayment={() => handleTabChange('payment')} 
-          />
-        )}
+        <RideDetails 
+          ride={ride} 
+          seats={seats} 
+          setSeats={setSeats} 
+          goToPayment={() => handleTabChange('payment')} 
+        />
       </TabsContent>
       
       <TabsContent value="payment">
@@ -142,7 +140,7 @@ const ReservationTabs: React.FC<ReservationTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="confirmation">
-        <ConfirmationDetails ride={ride!} seats={seats} />
+        {ride && <ConfirmationDetails ride={ride} seats={seats} />}
       </TabsContent>
       
       {showChatTab && (

@@ -97,7 +97,7 @@ const ReservationPage = () => {
         </div>
 
         <ReservationSidebar 
-          ride={ride!} 
+          ride={ride} 
           seats={seats} 
           price={price} 
           reservationSuccess={reservationSuccess} 

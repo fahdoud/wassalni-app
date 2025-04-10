@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 
 interface ReservationSidebarProps {
-  ride: Ride;
+  ride: Ride | null;
   step?: number;
   passengerCount?: number;
   seats?: number;
@@ -15,6 +15,24 @@ interface ReservationSidebarProps {
 
 const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: externalPrice, reservationSuccess }: ReservationSidebarProps) => {
   const { language } = useLanguage();
+  
+  // If ride is null, show a loading state
+  if (!ride) {
+    return (
+      <div className="lg:w-80">
+        <div className="glass-card p-6 rounded-xl sticky top-28 animate-pulse">
+          <div className="h-6 bg-gray-200 rounded dark:bg-gray-700 mb-4"></div>
+          <div className="space-y-4">
+            <div className="h-10 bg-gray-200 rounded dark:bg-gray-700"></div>
+            <div className="h-10 bg-gray-200 rounded dark:bg-gray-700"></div>
+            <div className="h-10 bg-gray-200 rounded dark:bg-gray-700"></div>
+            <div className="h-10 bg-gray-200 rounded dark:bg-gray-700"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   const [availableSeats, setAvailableSeats] = useState(ride.seats);
   
   // Use either seats or passengerCount for backward compatibility

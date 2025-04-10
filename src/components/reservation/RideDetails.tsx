@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { subscribeToRideUpdates } from "@/services/rides/rideQueries";
 
 interface RideDetailsProps {
-  ride: Ride;
+  ride: Ride | null;
   seats?: number;
   setSeats?: (seats: number) => void;
   goToPayment?: () => void;
@@ -16,7 +16,28 @@ interface RideDetailsProps {
 
 const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDetailsProps) => {
   const { language } = useLanguage();
-  const [availableSeats, setAvailableSeats] = useState(ride.seats);
+  const [availableSeats, setAvailableSeats] = useState(0);
+  
+  // If ride is null, show a loading state
+  if (!ride) {
+    return (
+      <div className="glass-card p-8 rounded-xl mb-6 animate-pulse">
+        <div className="h-7 bg-gray-200 w-1/3 rounded dark:bg-gray-700 mb-6"></div>
+        <div className="space-y-6">
+          <div className="h-12 bg-gray-200 rounded dark:bg-gray-700"></div>
+          <div className="h-20 bg-gray-200 rounded dark:bg-gray-700"></div>
+          <div className="h-20 bg-gray-200 rounded dark:bg-gray-700"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Initialize availableSeats when ride is loaded
+  useEffect(() => {
+    if (ride) {
+      setAvailableSeats(ride.seats);
+    }
+  }, [ride]);
   
   // Handle both onContinue and goToPayment for backward compatibility
   const handleContinue = () => {
