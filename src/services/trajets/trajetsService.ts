@@ -1,6 +1,74 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Trajet, StatutReservation } from "./types";
+import { Trajet, StatutReservation, communesAlger } from "./types";
 import { getMockRides } from "@/services/rides/mockRides";
+
+// Fonction pour générer des trajets simulés pour Alger
+const getAlgerMockTrajets = (): Trajet[] => {
+  const algerTrajets = [
+    {
+      id: "alger1",
+      chauffeur: "Karim Benzema",
+      origine: "Sidi Yahia",
+      destination: "Hydra",
+      date: new Date().toISOString().split('T')[0],
+      heure: "08:30",
+      prix: 300,
+      places_dispo: 3,
+      note: 4.8,
+      est_mock: true
+    },
+    {
+      id: "alger2",
+      chauffeur: "Mohamed Salah",
+      origine: "Hydra",
+      destination: "Bir Mourad Raïs",
+      date: new Date().toISOString().split('T')[0],
+      heure: "09:15",
+      prix: 250,
+      places_dispo: 2,
+      note: 4.6,
+      est_mock: true
+    },
+    {
+      id: "alger3",
+      chauffeur: "Sofiane Feghouli",
+      origine: "Bab Ezzouar",
+      destination: "Alger Centre",
+      date: new Date().toISOString().split('T')[0],
+      heure: "10:00",
+      prix: 350,
+      places_dispo: 4,
+      note: 4.7,
+      est_mock: true
+    },
+    {
+      id: "alger4",
+      chauffeur: "Riyad Mahrez",
+      origine: "Kouba",
+      destination: "El Biar",
+      date: new Date().toISOString().split('T')[0],
+      heure: "11:30",
+      prix: 280,
+      places_dispo: 1,
+      note: 4.9,
+      est_mock: true
+    },
+    {
+      id: "alger5",
+      chauffeur: "Islam Slimani",
+      origine: "Bordj El Kiffan",
+      destination: "Dar El Beïda",
+      date: new Date().toISOString().split('T')[0],
+      heure: "14:00",
+      prix: 320,
+      places_dispo: 3,
+      note: 4.5,
+      est_mock: true
+    },
+  ];
+  
+  return algerTrajets;
+};
 
 // Obtenir tous les trajets disponibles
 export const getTrajets = async (): Promise<Trajet[]> => {
@@ -55,12 +123,15 @@ export const getTrajets = async (): Promise<Trajet[]> => {
       });
 
       console.log("Données des trajets transformées:", ridesTransformed);
-      return ridesTransformed;
+      
+      // Ajouter également des trajets simulés pour Alger
+      const algerMockTrajets = getAlgerMockTrajets();
+      return [...ridesTransformed, ...algerMockTrajets];
     }
     
-    // Si aucun trajet réel dans la base de données, retourner des trajets simulés
-    const mockRides = getMockRides();
-    return mockRides.map(ride => ({
+    // Si aucun trajet réel dans la base de données, retourner des trajets simulés pour Constantine et Alger
+    const constantineMockRides = getMockRides();
+    const constantineTrajets = constantineMockRides.map(ride => ({
       id: ride.id,
       chauffeur: ride.driver,
       origine: ride.from,
@@ -72,10 +143,16 @@ export const getTrajets = async (): Promise<Trajet[]> => {
       note: ride.rating,
       est_mock: true
     }));
+    
+    const algerTrajets = getAlgerMockTrajets();
+    
+    return [...constantineTrajets, ...algerTrajets];
   } catch (error) {
     console.error("Échec de la récupération des trajets:", error);
-    const mockRides = getMockRides();
-    return mockRides.map(ride => ({
+    
+    // En cas d'erreur, retourner des trajets simulés pour Constantine et Alger
+    const constantineMockRides = getMockRides();
+    const constantineTrajets = constantineMockRides.map(ride => ({
       id: ride.id,
       chauffeur: ride.driver,
       origine: ride.from,
@@ -87,6 +164,10 @@ export const getTrajets = async (): Promise<Trajet[]> => {
       note: ride.rating,
       est_mock: true
     }));
+    
+    const algerTrajets = getAlgerMockTrajets();
+    
+    return [...constantineTrajets, ...algerTrajets];
   }
 };
 
