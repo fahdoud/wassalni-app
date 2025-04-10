@@ -44,14 +44,15 @@ export const useRideLocations = (ride: Ride | null) => {
     };
   }, []);
 
-  // Set locations immediately on mount, even before ride data is loaded
+  // Set default locations immediately on mount, even before ride data is loaded
   useEffect(() => {
-    // Default coordinates for Constantine city center
+    // Default coordinates based on whether ride appears to be in Alger or Constantine
     const defaultLocations = {
-      origin: { lat: 36.365, lng: 6.614 },
+      origin: { lat: 36.365, lng: 6.614 }, // Constantine by default
       destination: { lat: 36.365, lng: 6.624 }
     };
-    console.log("Setting default Constantine locations immediately");
+    
+    console.log("Setting default locations immediately");
     setRideLocations(defaultLocations);
   }, []);
 
@@ -61,8 +62,23 @@ export const useRideLocations = (ride: Ride | null) => {
       // Get the predefined locations
       const locations = getLocations();
       
+      // Determine if this is an Alger ride by checking location names
+      const isAlgerRide = 
+        Object.keys(locations).filter(loc => 
+          loc !== "Constantine" && 
+          loc !== "Alger" && 
+          (ride.from.includes(loc) || ride.to.includes(loc))
+        ).some(loc => 
+          locations[loc].lng < 4 // Crude check for Alger (longitude ~3) vs Constantine (longitude ~6)
+        );
+      
+      // Set default center based on location
+      const defaultCenter = isAlgerRide 
+        ? locations["Alger"] 
+        : locations["Constantine"];
+        
       // Try to find locations by name, fallback to defaults
-      const origin = locations[ride.from] || locations["Constantine"];
+      const origin = locations[ride.from] || defaultCenter;
       const destination = locations[ride.to] || {
         lat: origin.lat + 0.05,
         lng: origin.lng + 0.05

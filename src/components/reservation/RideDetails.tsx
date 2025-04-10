@@ -36,6 +36,15 @@ const RideDetails = ({ ride, seats, setSeats, goToPayment, onContinue }: RideDet
   useEffect(() => {
     if (ride) {
       setAvailableSeats(ride.seats);
+      
+      // For debugging
+      console.log("Ride details loaded:", {
+        id: ride.id,
+        from: ride.from,
+        to: ride.to,
+        seats: ride.seats,
+        price: ride.price
+      });
     }
   }, [ride]);
   

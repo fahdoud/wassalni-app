@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Ride } from './types';
-import { getMockRides } from './mockRides';
+import { getMockRides, getAlgerMockRides } from './mockRides';
 
 // Get all available rides
 export const getRides = async (): Promise<Ride[]> => {
@@ -73,7 +73,15 @@ export const getRideById = async (rideId: string): Promise<Ride | null> => {
   if (/^\d+$/.test(rideId)) {
     console.log("Using mock ride with ID:", rideId);
     const mockRides = getMockRides();
-    const mockRide = mockRides.find(ride => ride.id === rideId);
+    // First check Constantine rides
+    let mockRide = mockRides.find(ride => ride.id === rideId);
+    
+    // If not found in Constantine rides, check Alger rides
+    if (!mockRide) {
+      const algerRides = getAlgerMockRides();
+      mockRide = algerRides.find(ride => ride.id === rideId);
+    }
+    
     return mockRide || null;
   }
   

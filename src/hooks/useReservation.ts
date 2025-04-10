@@ -50,9 +50,13 @@ export const useReservation = (rideId: string) => {
       setIsLoading(true);
       
       try {
+        // Try to get ride details, with enhanced logging
+        console.log(`Fetching ride details for ID: ${rideId}`);
         const ride = await getRideById(rideId);
         
         if (ride) {
+          console.log("Ride details retrieved successfully:", ride);
+          
           // Ensure the driver is displayed as male
           if (ride.driver) {
             // Keep the driver name but ensure they are treated as male in the UI
@@ -61,9 +65,13 @@ export const useReservation = (rideId: string) => {
           
           setRide(ride);
           setPrice(ride.price);
+        } else {
+          console.error("Ride not found with ID:", rideId);
+          toast.error("Trajet non trouvé");
         }
       } catch (error) {
         console.error("Error fetching ride:", error);
+        toast.error("Erreur lors du chargement du trajet");
       } finally {
         setIsLoading(false);
       }
