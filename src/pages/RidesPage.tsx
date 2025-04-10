@@ -1,4 +1,3 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,7 +10,9 @@ import { Ride } from "@/services/rides/types";
 import { getMockRides } from "@/services/rides/mockRides";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { communesAlger } from "@/services/trajets/types";
 
+// Garder les zones de Constantine également
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
 const RidesPage = () => {
@@ -20,6 +21,7 @@ const RidesPage = () => {
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
   const [liveSeats, setLiveSeats] = useState<Record<string, number>>({});
+  const [selectedWilaya, setSelectedWilaya] = useState<string>("constantine");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -201,6 +203,9 @@ const RidesPage = () => {
       )
     : rides;
 
+  // Déterminer les zones à afficher en fonction de la wilaya sélectionnée
+  const areasToDisplay = selectedWilaya === "alger" ? communesAlger : constantineAreas;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -208,11 +213,36 @@ const RidesPage = () => {
         <section className="section">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h1 className="mb-4">
-              <GradientText>Constantine</GradientText> {ridesTitle}
+              <GradientText>{selectedWilaya === "alger" ? "Alger" : "Constantine"}</GradientText> {ridesTitle}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               {ridesSubtitle}
             </p>
+          </div>
+
+          <div className="mb-6">
+            <div className="flex justify-center gap-4 mb-4">
+              <button 
+                onClick={() => setSelectedWilaya("constantine")}
+                className={`px-4 py-2 rounded-lg transition ${
+                  selectedWilaya === "constantine" 
+                    ? "bg-wassalni-green text-white" 
+                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Constantine
+              </button>
+              <button 
+                onClick={() => setSelectedWilaya("alger")}
+                className={`px-4 py-2 rounded-lg transition ${
+                  selectedWilaya === "alger" 
+                    ? "bg-wassalni-green text-white" 
+                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Alger
+              </button>
+            </div>
           </div>
 
           <div className="mb-10 bg-gray-50 p-6 rounded-xl dark:bg-gray-800/50">
@@ -223,7 +253,7 @@ const RidesPage = () => {
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="">{selectLocationText}</option>
-                  {constantineAreas.map(area => (
+                  {areasToDisplay.map(area => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
@@ -234,7 +264,7 @@ const RidesPage = () => {
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="">{selectLocationText}</option>
-                  {constantineAreas.map(area => (
+                  {areasToDisplay.map(area => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>

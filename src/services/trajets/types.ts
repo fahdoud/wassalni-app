@@ -35,3 +35,9 @@ export interface ReservationTrajet {
     };
   };
 }
+
+export const communesAlger = [
+  "Sidi Yahia", "Hydra", "Bir Mourad Raïs", "Bab Ezzouar", "Bab El Oued", 
+  "El Biar", "Kouba", "Hussein Dey", "El Harrach", "Bologhine", 
+  "Dar El Beïda", "Alger Centre", "Bordj El Kiffan", "Dély Ibrahim", "Chéraga"
+];

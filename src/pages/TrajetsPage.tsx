@@ -7,10 +7,11 @@ import GradientText from "@/components/ui-components/GradientText";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getTrajets } from "@/services/trajets/trajetsService";
-import { Trajet } from "@/services/trajets/types";
+import { Trajet, communesAlger } from "@/services/trajets/types";
 import { Loader2 } from "lucide-react";
 import TrajetList from "@/components/trajets/TrajetList";
 
+// Ajout des communes de Constantine également pour garder l'option
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
 const TrajetsPage = () => {
@@ -18,6 +19,7 @@ const TrajetsPage = () => {
   const [filter, setFilter] = useState("");
   const [trajets, setTrajets] = useState<Trajet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedWilaya, setSelectedWilaya] = useState<string>("constantine");
   const location = useLocation();
 
   const fetchTrajets = async (forceRefresh = false) => {
@@ -83,6 +85,9 @@ const TrajetsPage = () => {
       )
     : trajets;
 
+  // Déterminer les zones à afficher en fonction de la wilaya sélectionnée
+  const areasToDisplay = selectedWilaya === "alger" ? communesAlger : constantineAreas;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -90,11 +95,36 @@ const TrajetsPage = () => {
         <section className="section">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h1 className="mb-4">
-              <GradientText>Constantine</GradientText> {t('rides.title')}
+              <GradientText>{selectedWilaya === "alger" ? "Alger" : "Constantine"}</GradientText> {t('rides.title')}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               {t('rides.subtitle')}
             </p>
+          </div>
+
+          <div className="mb-6">
+            <div className="flex justify-center gap-4 mb-4">
+              <button 
+                onClick={() => setSelectedWilaya("constantine")}
+                className={`px-4 py-2 rounded-lg transition ${
+                  selectedWilaya === "constantine" 
+                    ? "bg-wassalni-green text-white" 
+                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Constantine
+              </button>
+              <button 
+                onClick={() => setSelectedWilaya("alger")}
+                className={`px-4 py-2 rounded-lg transition ${
+                  selectedWilaya === "alger" 
+                    ? "bg-wassalni-green text-white" 
+                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Alger
+              </button>
+            </div>
           </div>
 
           <div className="mb-10 bg-gray-50 p-6 rounded-xl dark:bg-gray-800/50">
@@ -105,7 +135,7 @@ const TrajetsPage = () => {
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="">{t('form.selectLocation')}</option>
-                  {constantineAreas.map(area => (
+                  {areasToDisplay.map(area => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
@@ -116,7 +146,7 @@ const TrajetsPage = () => {
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="">{t('form.selectLocation')}</option>
-                  {constantineAreas.map(area => (
+                  {areasToDisplay.map(area => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
