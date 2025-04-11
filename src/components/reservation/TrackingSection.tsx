@@ -21,7 +21,32 @@ const TrackingSection: React.FC<TrackingSectionProps> = ({
   rideId, 
   rideLocations 
 }) => {
-  const { t } = useLanguage();
+  const { language } = useLanguage();
+  
+  // Définir les textes en fonction de la langue
+  const liveTrackingText = language === 'en' ? 'Live Tracking' : 
+                            language === 'fr' ? 'Suivi en Direct' : 
+                            'تتبع مباشر';
+  
+  const trackingDescriptionText = language === 'en' ? 'Track your ride in real-time and see the estimated arrival time.' : 
+                                  language === 'fr' ? 'Suivez votre trajet en temps réel et consultez l\'heure d\'arrivée estimée.' : 
+                                  'تتبع رحلتك في الوقت الفعلي ومعرفة وقت الوصول المقدر.';
+  
+  const infoText = language === 'en' ? 'Driver Info' : 
+                   language === 'fr' ? 'Info Conducteur' : 
+                   'معلومات السائق';
+  
+  const pickupText = language === 'en' ? 'Pick up' : 
+                     language === 'fr' ? 'Départ' : 
+                     'نقطة الانطلاق';
+  
+  const dropoffText = language === 'en' ? 'Drop off' : 
+                      language === 'fr' ? 'Arrivée' : 
+                      'نقطة الوصول';
+  
+  const estimatedArrivalText = language === 'en' ? 'Est. arrival: 30-45 min' : 
+                               language === 'fr' ? 'Arrivée est.: 30-45 min' : 
+                               'الوصول المقدر: 30-45 دقيقة';
 
   return (
     <div className="space-y-6">
@@ -29,12 +54,12 @@ const TrackingSection: React.FC<TrackingSectionProps> = ({
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Car className="h-5 w-5 text-wassalni-green" />
-            {t('reservation.liveTracking')}
+            {liveTrackingText}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-            {t('reservation.trackingDescription')}
+            {trackingDescriptionText}
           </p>
           
           {rideLocations ? (
@@ -56,7 +81,7 @@ const TrackingSection: React.FC<TrackingSectionProps> = ({
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <MapPin className="h-5 w-5 text-wassalni-green" />
-            {t('reservation.driverInfo')}
+            {infoText}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -77,18 +102,18 @@ const TrackingSection: React.FC<TrackingSectionProps> = ({
             <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
               <div className="space-y-1">
                 <p className="font-medium text-gray-600 dark:text-gray-300">
-                  {t('reservation.pickup')}
+                  {pickupText}
                 </p>
                 <p className="whitespace-normal break-words">{ride?.from}</p>
                 <p className="text-xs text-gray-500">{ride?.time}</p>
               </div>
               <div className="space-y-1">
                 <p className="font-medium text-gray-600 dark:text-gray-300">
-                  {t('reservation.dropoff')}
+                  {dropoffText}
                 </p>
                 <p className="whitespace-normal break-words">{ride?.to}</p>
                 <p className="text-xs text-gray-500">
-                  {t('reservation.estimatedArrival')}
+                  {estimatedArrivalText}
                 </p>
               </div>
             </div>
