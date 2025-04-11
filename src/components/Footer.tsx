@@ -17,7 +17,7 @@ const Footer = () => {
             </h2>
           </Link>
           <p className="text-gray-600 mb-6 text-center max-w-md dark:text-gray-300">
-            {t('footer.description')}
+            Your trusted ride-sharing service for safe and affordable travels across the city.
           </p>
           <div className="flex space-x-6">
             <a href="#" className="text-gray-600 hover:text-wassalni-blue dark:text-gray-400 dark:hover:text-wassalni-lightBlue">
