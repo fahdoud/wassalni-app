@@ -88,7 +88,12 @@ const PaymentDetails = ({
   
   // Calculate displayed price based on what's available
   const displayPrice = price || (ride ? ride.price : 0);
-  const totalPrice = displayPrice * currentSeats;
+  
+  // For the base fare always show the ride's original price
+  const baseFare = ride ? ride.price : displayPrice;
+  
+  // Calculate total price (base price * number of seats)
+  const totalPrice = baseFare * currentSeats;
 
   // Text translations based on language
   const paymentText = language === 'en' ? 'Payment Details' : language === 'fr' ? 'Détails du Paiement' : 'تفاصيل الدفع';
@@ -213,7 +218,7 @@ const PaymentDetails = ({
       <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
         <div className="flex justify-between mb-2">
           <span className="text-gray-600 dark:text-gray-300">{baseFareText}</span>
-          <span>{displayPrice} DZD</span>
+          <span>{baseFare} DZD</span>
         </div>
         <div className="flex justify-between mb-2">
           <span className="text-gray-600 dark:text-gray-300">{passengersText} × {currentSeats}</span>

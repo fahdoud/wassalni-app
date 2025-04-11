@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ReservationStatus } from "./types";
 import { getUserDisplayInfo } from "./chatService";
-import { getMockRides } from "./mockRides";
+import { getMockRides, getAlgerMockRides } from "./mockRides";
 
 // Create a reservation
 export const createReservation = async (
@@ -32,13 +32,22 @@ export const createReservation = async (
       const { data: { user } } = await supabase.auth.getUser();
       const userEmail = user?.email || '';
       
-      // Get the mock ride details
-      const mockRides = getMockRides();
-      const mockRide = mockRides.find(ride => ride.id === tripId);
+      // Get the mock ride details - check in both Constantine and Alger rides
+      let mockRides = getMockRides();
+      let mockRide = mockRides.find(ride => ride.id === tripId);
+      
+      // If not found in Constantine rides, check Alger rides
+      if (!mockRide) {
+        mockRides = getAlgerMockRides();
+        mockRide = mockRides.find(ride => ride.id === tripId);
+      }
       
       if (!mockRide) {
+        console.error(`Mock ride not found with ID: ${tripId}`);
         throw new Error('Mock ride not found');
       }
+      
+      console.log("Found mock ride:", mockRide);
       
       try {
         // Create a reservation entry for mock trips with a generated UUID

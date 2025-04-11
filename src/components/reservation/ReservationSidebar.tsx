@@ -16,7 +16,7 @@ interface ReservationSidebarProps {
 const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: externalPrice, reservationSuccess }: ReservationSidebarProps) => {
   const { language } = useLanguage();
   
-  // If ride is null, show a loading state
+  // Si ride est null, affichez un état de chargement
   if (!ride) {
     return (
       <div className="lg:w-80">
@@ -35,16 +35,17 @@ const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: exte
   
   const [availableSeats, setAvailableSeats] = useState(ride.seats);
   
-  // Use either seats or passengerCount for backward compatibility
+  // Utilisez seats ou passengerCount pour la compatibilité
   const currentSeats = seats || passengerCount || 1;
   
-  // Use provided price or calculate from ride
-  const price = externalPrice || ride.price;
+  // Utilisez le prix fourni ou calculez à partir du trajet
+  const baseFare = ride.price;
+  const price = externalPrice || (baseFare * currentSeats);
   
-  // Determine which step we're on
+  // Déterminez quelle étape nous sommes
   const currentStep = step === 2 || reservationSuccess ? 2 : 1;
 
-  // Text translations
+  // Traductions de texte
   const reservationTitle = language === 'en' ? 'Ride Reservation' : 
                            language === 'fr' ? 'Réservation de Trajet' : 
                            'حجز رحلة';
@@ -82,11 +83,13 @@ const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: exte
                     language === 'fr' ? 'Total' : 
                     'المجموع';
 
-  // Update availableSeats whenever ride.seats changes
+  // Mettez à jour availableSeats lorsque ride.seats change
   useEffect(() => {
-    console.log("Ride seats updated in sidebar:", ride.seats);
-    setAvailableSeats(ride.seats);
-  }, [ride.seats]);
+    if (ride) {
+      console.log("Ride seats updated in sidebar:", ride.seats);
+      setAvailableSeats(ride.seats);
+    }
+  }, [ride?.seats]);
 
   return (
     <div className="lg:w-80">
@@ -146,7 +149,7 @@ const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: exte
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-between mb-2">
             <span className="text-gray-600 dark:text-gray-300">{priceText}</span>
-            <span className="font-medium">{price} DZD</span>
+            <span className="font-medium">{baseFare} DZD</span>
           </div>
           {currentStep === 2 && (
             <div className="flex justify-between mb-2">
@@ -157,7 +160,7 @@ const ReservationSidebar = ({ ride, step = 1, passengerCount, seats, price: exte
           <div className="flex justify-between mt-2 pt-2 border-t border-gray-200 font-medium dark:border-gray-700">
             <span>{totalText}</span>
             <span className="text-wassalni-green dark:text-wassalni-lightGreen">
-              {currentStep === 1 ? price : price * currentSeats} DZD
+              {currentStep === 1 ? baseFare : baseFare * currentSeats} DZD
             </span>
           </div>
         </div>
