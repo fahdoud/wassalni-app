@@ -75,7 +75,7 @@ export const getAlgerMockRides = (): Ride[] => {
   return [
     {
       id: "6",
-      driver: "Karim Benzema",
+      driver: "Farid Mebarki",
       from: "Sidi Yahia",
       to: "Hydra",
       date: new Date().toISOString().split('T')[0],
@@ -88,7 +88,7 @@ export const getAlgerMockRides = (): Ride[] => {
     },
     {
       id: "7",
-      driver: "Mohamed Salah",
+      driver: "Noureddine Boudiaf",
       from: "Hydra",
       to: "Bir Mourad Raïs",
       date: new Date().toISOString().split('T')[0],
@@ -101,7 +101,7 @@ export const getAlgerMockRides = (): Ride[] => {
     },
     {
       id: "8",
-      driver: "Sofiane Feghouli",
+      driver: "Kamel Dahmani",
       from: "Bab Ezzouar",
       to: "Alger Centre",
       date: new Date().toISOString().split('T')[0],
@@ -114,7 +114,7 @@ export const getAlgerMockRides = (): Ride[] => {
     },
     {
       id: "9",
-      driver: "Riyad Mahrez",
+      driver: "Rachid Hamidi",
       from: "Kouba",
       to: "El Biar",
       date: new Date().toISOString().split('T')[0],
@@ -127,7 +127,7 @@ export const getAlgerMockRides = (): Ride[] => {
     },
     {
       id: "10",
-      driver: "Islam Slimani",
+      driver: "Hamid Berrahma",
       from: "Bordj El Kiffan",
       to: "Dar El Beïda",
       date: new Date().toISOString().split('T')[0],
