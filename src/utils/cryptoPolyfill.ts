@@ -2,15 +2,7 @@
 // This file polyfills crypto.randomUUID for older browsers and platforms
 // that don't support it natively
 
-interface ExtendedCrypto extends Omit<Crypto, 'randomUUID'> {
-  randomUUID?: () => string;
-}
-
-declare global {
-  interface Window {
-    crypto: ExtendedCrypto;
-  }
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 
 export function ensureCryptoPolyfill(): void {
   if (typeof crypto !== 'undefined' && !crypto.randomUUID) {
