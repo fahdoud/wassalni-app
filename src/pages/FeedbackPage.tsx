@@ -229,10 +229,8 @@ const FeedbackPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pt-20">
-      <Navbar />
-
-      <div className="container mx-auto px-4 py-12 flex-grow">
+    <div className="pb-20 pt-16">
+      <div className="px-4 max-w-lg mx-auto py-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
             <h1 className="text-3xl font-bold mb-3">{t('feedback.title')}</h1>
