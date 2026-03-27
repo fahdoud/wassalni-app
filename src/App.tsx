@@ -82,6 +82,7 @@ function App() {
                         <Route path="/my-reservations" element={<MyReservationsPage />} />
                         <Route path="/offer-ride" element={<OfferRidePage />} />
                         <Route path="/feedback" element={<FeedbackPage />} />
+                        <Route path="/contact" element={<ContactPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/ride/:rideId" element={<ReservationPage />} />
                         <Route path="/reservation/:rideId" element={<ReservationPage />} />
