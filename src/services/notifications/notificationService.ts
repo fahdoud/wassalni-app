@@ -17,7 +17,7 @@ export const sendTripNotification = async (
     
     switch (type) {
       case 'reservation_confirmed':
-        message = `Your reservation for trip ID ${tripId} has been confirmed. Thank you for using Wassalni!`;
+        message = `Your reservation for trip ID ${tripId} has been confirmed. Thank you for using Wasslink!`;
         break;
       case 'reservation_cancelled':
         message = `Your reservation for trip ID ${tripId} has been cancelled. If you didn't request this, please contact support.`;
@@ -26,7 +26,7 @@ export const sendTripNotification = async (
         message = `There's been an update to your trip (ID: ${tripId}). Please check the app for details.`;
         break;
       case 'payment_received':
-        message = `Payment received for trip ID ${tripId}. Thank you for using Wassalni!`;
+        message = `Payment received for trip ID ${tripId}. Thank you for using Wasslink!`;
         break;
       default:
         throw new Error("Invalid notification type");

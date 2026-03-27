@@ -26,7 +26,7 @@ const OnboardingPage = () => {
 
   const slides = [
     {
-      title: "Welcome to Wassalni",
+      title: "Welcome to Wasslink",
       description: "Your premium carpooling platform in Constantine offering a smarter way to commute together with comfort and convenience",
       image: "/lovable-uploads/0ed09104-7848-4012-8db2-6ee6006b35af.png",
     },
@@ -115,7 +115,7 @@ const OnboardingPage = () => {
               <div className="flex justify-center mb-6">
                 <img 
                   src={slides[currentSlide].image} 
-                  alt="Wassalni" 
+                  alt="Wasslink" 
                   className="w-32 h-32 object-contain"
                 />
               </div>

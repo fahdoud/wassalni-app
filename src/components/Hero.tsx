@@ -17,8 +17,8 @@ const Hero = () => {
                 language === 'fr' ? 'Votre Service de Covoiturage Premium à' : 
                 'خدمة مشاركة الركوب المميزة في';
                 
-  const description = language === 'en' ? 'Wassalni connects drivers and passengers in Constantine for affordable, convenient and eco-friendly carpooling services.' : 
-                      language === 'fr' ? 'Wassalni connecte conducteurs et passagers à Constantine pour des services de covoiturage abordables, pratiques et écologiques.' : 
+  const description = language === 'en' ? 'Wasslink connects drivers and passengers in Constantine for affordable, convenient and eco-friendly carpooling services.' : 
+                      language === 'fr' ? 'Wasslink connecte conducteurs et passagers à Constantine pour des services de covoiturage abordables, pratiques et écologiques.' : 
                       'وصلني يربط السائقين والركاب في قسنطينة لخدمات مشاركة السيارات بأسعار معقولة ومريحة وصديقة للبيئة.';
                       
   const findRide = language === 'en' ? 'Find a Ride' : 
@@ -75,7 +75,7 @@ const Hero = () => {
             <h1 className="animate-slide-up">
               {title}
               <br />
-              <GradientText>Wassalni</GradientText>
+              <GradientText>Wasslink</GradientText>
             </h1>
             <p className="text-lg text-gray-600 md:text-xl max-w-2xl mx-auto lg:mx-0 animate-slide-up dark:text-gray-300 mt-6" style={{ animationDelay: "0.2s" }}>
               {description}

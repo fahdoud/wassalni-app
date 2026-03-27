@@ -123,7 +123,7 @@ const PassengerSignUp = () => {
         }
         
         try {
-          const welcomeMessage = `Welcome to Wassalni, ${fullName}! Thank you for registering. Please verify your email to complete your account setup.`;
+          const welcomeMessage = `Welcome to Wasslink, ${fullName}! Thank you for registering. Please verify your email to complete your account setup.`;
           console.log("Sending welcome SMS to:", formattedPhone);
           const smsResult = await sendSMSNotification(data.user.id, formattedPhone, welcomeMessage);
           console.log("Welcome SMS result:", smsResult);
@@ -157,7 +157,7 @@ const PassengerSignUp = () => {
             <Link to="/" className="flex items-center gap-2 mb-8">
               <Logo size="sm" />
               <h1 className="text-2xl font-bold tracking-tight">
-                <GradientText>Wassalni</GradientText>
+                <GradientText>Wasslink</GradientText>
               </h1>
             </Link>
             

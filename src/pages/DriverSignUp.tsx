@@ -196,7 +196,7 @@ const DriverSignUp = () => {
         
         // Send welcome SMS notification
         try {
-          const welcomeMessage = `Welcome to Wassalni, ${fullName}! Thank you for registering as a driver. Please verify your email to complete your account setup.`;
+          const welcomeMessage = `Welcome to Wasslink, ${fullName}! Thank you for registering as a driver. Please verify your email to complete your account setup.`;
           await sendSMSNotification(userId, phone, welcomeMessage);
           toast.success(t('auth.welcomeSmsSent'));
         } catch (smsError) {
@@ -262,7 +262,7 @@ const DriverSignUp = () => {
             <Link to="/" className="flex items-center gap-2 mb-8">
               <Logo size="sm" />
               <h1 className="text-2xl font-bold tracking-tight">
-                <GradientText>Wassalni</GradientText>
+                <GradientText>Wasslink</GradientText>
               </h1>
             </Link>
             

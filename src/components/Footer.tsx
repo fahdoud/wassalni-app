@@ -13,7 +13,7 @@ const Footer = () => {
         <div className="flex flex-col items-center mb-8">
           <Link to="/" className="inline-block mb-4">
             <h2 className="text-2xl font-bold">
-              <GradientText>Wassalni</GradientText>
+              <GradientText>Wasslink</GradientText>
             </h2>
           </Link>
           <p className="text-gray-600 mb-6 text-center max-w-md dark:text-gray-300">
@@ -66,7 +66,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
           <p className="text-gray-500 text-center text-sm dark:text-gray-400">
-            &copy; {currentYear} Wassalni
+            &copy; {currentYear} Wasslink
           </p>
         </div>
       </div>

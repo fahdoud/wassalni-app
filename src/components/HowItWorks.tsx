@@ -61,7 +61,7 @@ const HowItWorks = () => {
     <section id="how-it-works" className="section bg-gradient-to-b from-white to-blue-50/50 dark:from-gray-900 dark:to-gray-800/50">
       <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
         <h2 className="mb-4">
-          {t('how.title')} <GradientText>Wassalni</GradientText> {t('nav.howItWorks')}
+          {t('how.title')} <GradientText>Wasslink</GradientText> {t('nav.howItWorks')}
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300">
           {t('how.subtitle')}
