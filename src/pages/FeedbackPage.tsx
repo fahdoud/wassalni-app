@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { MessageSquare, Star, Send, ThumbsUp, AlertTriangle, Flag, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/Button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
