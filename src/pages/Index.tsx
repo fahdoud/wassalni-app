@@ -48,17 +48,13 @@ const Index = () => {
   const greeting = language === 'fr' ? 'Bonjour 👋' : language === 'ar' ? 'مرحبا 👋' : 'Hello 👋';
   const whereToGo = language === 'fr' ? 'Où allez-vous ?' : language === 'ar' ? 'إلى أين تذهب؟' : 'Where are you going?';
   const searchPlaceholder = language === 'fr' ? 'Rechercher une destination...' : language === 'ar' ? '...ابحث عن وجهة' : 'Search a destination...';
-  const loginTxt = language === 'fr' ? 'Connexion' : language === 'ar' ? 'تسجيل الدخول' : 'Sign In';
-  const signupTxt = language === 'fr' ? 'Inscription' : language === 'ar' ? 'إنشاء حساب' : 'Sign Up';
-  const loginDesc = language === 'fr' ? 'Accédez à votre compte' : language === 'ar' ? 'الوصول إلى حسابك' : 'Access your account';
-  const signupDesc = language === 'fr' ? 'Créez un nouveau compte' : language === 'ar' ? 'إنشاء حساب جديد' : 'Create a new account';
-  const popularTitle = language === 'fr' ? 'Trajets populaires' : language === 'ar' ? 'الرحلات الشائعة' : 'Popular Rides';
-  const seeAll = language === 'fr' ? 'Voir tout' : language === 'ar' ? 'عرض الكل' : 'See All';
-  const seatLabel = language === 'fr' ? 'places' : language === 'ar' ? 'مقاعد' : 'seats';
-  const whyTitle = language === 'fr' ? 'Pourquoi Wasslink ?' : language === 'ar' ? 'لماذا Wasslink؟' : 'Why Wasslink?';
-  const safeTxt = language === 'fr' ? 'Sécurisé' : language === 'ar' ? 'آمن' : 'Safe';
-  const fastTxt = language === 'fr' ? 'Rapide' : language === 'ar' ? 'سريع' : 'Fast';
-  const communityTxt = language === 'fr' ? 'Communauté' : language === 'ar' ? 'مجتمع' : 'Community';
+  const actionsTxt = language === 'fr' ? 'Actions rapides' : language === 'ar' ? 'إجراءات سريعة' : 'Quick Actions';
+  const contactTxt = language === 'fr' ? 'Contactez-nous' : language === 'ar' ? 'اتصل بنا' : 'Contact Us';
+  const visitSite = language === 'fr' ? 'Visiter le site' : language === 'ar' ? 'زيارة الموقع' : 'Visit Website';
+  const offerRide = language === 'fr' ? 'Proposer un trajet' : language === 'ar' ? 'عرض رحلة' : 'Offer a Ride';
+  const authTxt = language === 'fr' ? 'Connexion' : language === 'ar' ? 'تسجيل الدخول' : 'Sign In';
+  const loginTxt = authTxt;
+  const loginDesc = language === 'fr' ? 'Connexion ou inscription' : language === 'ar' ? 'تسجيل الدخول أو التسجيل' : 'Login or register';
 
   const container = {
     hidden: { opacity: 0 },
