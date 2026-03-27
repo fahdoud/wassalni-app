@@ -48,7 +48,7 @@ const FEEDBACK_EXAMPLES = {
     "I can't contact my driver through the app."
   ],
   other: [
-    "How can I become a driver for Wassalni?",
+    "How can I become a driver for Wasslink?",
     "Is there a corporate account option available?",
     "Do you offer services for events or group transportation?"
   ]

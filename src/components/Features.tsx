@@ -69,7 +69,7 @@ const Features = () => {
     <section id="features" className="section">
       <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
         <h2 className="mb-4">
-          {t('features.title')} <GradientText>Wassalni</GradientText>
+          {t('features.title')} <GradientText>Wasslink</GradientText>
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300">
           {t('features.subtitle')}

@@ -73,7 +73,7 @@ const PassengerSignIn = () => {
               <Link to="/" className="flex items-center gap-2">
                 <Logo size="sm" />
                 <h1 className="text-2xl font-bold tracking-tight">
-                  <GradientText>Wassalni</GradientText>
+                  <GradientText>Wasslink</GradientText>
                 </h1>
               </Link>
               <LanguageSwitcher />

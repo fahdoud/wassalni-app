@@ -33,7 +33,7 @@ export const translations = {
     'hero': {
       'tagline': 'Experience Better Carpooling',
       'title': 'Your Premium Ridesharing Service in',
-      'description': 'Wassalni connects drivers and passengers in Constantine for affordable, convenient and eco-friendly carpooling services.',
+      'description': 'Wasslink connects drivers and passengers in Constantine for affordable, convenient and eco-friendly carpooling services.',
       'findRide': 'Find a Ride',
       'offerRide': 'Offer a Ride'
     },
@@ -41,7 +41,7 @@ export const translations = {
     // Features section
     'features': {
       'title': 'Why Choose',
-      'subtitle': 'Discover the features that make Wassalni the preferred ridesharing platform in Constantine.',
+      'subtitle': 'Discover the features that make Wasslink the preferred ridesharing platform in Constantine.',
       'convenience': 'Convenient Booking',
       'convenienceDesc': 'Book rides with just a few taps on your smartphone, anytime and anywhere.',
       'cost': 'Cost-Effective',
@@ -229,7 +229,7 @@ export const translations = {
     'hero': {
       'tagline': 'Covoiturage Amélioré',
       'title': 'Votre Service de Covoiturage Premium à',
-      'description': 'Wassalni connecte conducteurs et passagers à Constantine pour des services de covoiturage abordables, pratiques et écologiques.',
+      'description': 'Wasslink connecte conducteurs et passagers à Constantine pour des services de covoiturage abordables, pratiques et écologiques.',
       'findRide': 'Trouver un Trajet',
       'offerRide': 'Proposer un Trajet'
     },
@@ -237,7 +237,7 @@ export const translations = {
     // Features section
     'features': {
       'title': 'Pourquoi Choisir',
-      'subtitle': 'Découvrez les fonctionnalités qui font de Wassalni la plateforme de covoiturage préférée à Constantine.',
+      'subtitle': 'Découvrez les fonctionnalités qui font de Wasslink la plateforme de covoiturage préférée à Constantine.',
       'convenience': 'Réservation Pratique',
       'convenienceDesc': 'Réservez des trajets en quelques clics sur votre smartphone, n\'importe quand et n\'importe où.',
       'cost': 'Économique',
