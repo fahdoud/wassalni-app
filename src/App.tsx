@@ -12,6 +12,7 @@ import MyTripsPage from "@/pages/MyTripsPage";
 import MyReservationsPage from "@/pages/MyReservationsPage";
 import OfferRidePage from "@/pages/OfferRidePage";
 import FeedbackPage from "@/pages/FeedbackPage";
+import ContactPage from "@/pages/ContactPage";
 import ReservationPage from "@/pages/ReservationPage";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";

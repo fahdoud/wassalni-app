@@ -44,7 +44,7 @@ const Index = () => {
   const quickActions = [
     { label: t('Proposer un trajet', 'عرض رحلة', 'Offer a Ride'), icon: Car, path: '/offer-ride', color: 'bg-primary/10', iconColor: 'text-primary' },
     { label: t('Connexion / Inscription', 'تسجيل الدخول', 'Sign In / Register'), icon: LogIn, path: '/auth', color: 'bg-secondary/10', iconColor: 'text-secondary', hideWhenLoggedIn: true },
-    { label: t('Contactez-nous', 'اتصل بنا', 'Contact Us'), icon: MessageSquare, path: '/feedback', color: 'bg-orange-500/10', iconColor: 'text-orange-500' },
+    { label: t('Contactez-nous', 'اتصل بنا', 'Contact Us'), icon: MessageSquare, path: '/contact', color: 'bg-orange-500/10', iconColor: 'text-orange-500' },
     { label: t('Visiter le site', 'زيارة الموقع', 'Visit Website'), icon: Globe, href: 'https://wassalni-app.lovable.app', color: 'bg-violet-500/10', iconColor: 'text-violet-500' },
   ];
 
