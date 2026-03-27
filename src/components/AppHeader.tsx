@@ -25,7 +25,7 @@ const AppHeader = () => {
   }, []);
 
   // Hide on auth/onboarding pages
-  const hiddenPaths = ['/passenger-signin', '/driver-signin', '/passenger-signup', '/driver-signup', '/onboarding', '/verify-email', '/verify-phone'];
+  const hiddenPaths = ['/passenger-signin', '/driver-signin', '/passenger-signup', '/driver-signup', '/onboarding', '/verify-email', '/verify-phone', '/auth'];
   if (hiddenPaths.some(p => location.pathname.startsWith(p))) return null;
   if (location.pathname.startsWith('/reservation/') || location.pathname.startsWith('/ride/')) return null;
 
