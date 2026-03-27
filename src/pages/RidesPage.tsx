@@ -1,23 +1,18 @@
-
 import { useLanguage } from "@/contexts/LanguageContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import Button from "@/components/Button";
-import GradientText from "@/components/ui-components/GradientText";
 import { useEffect, useState, useMemo } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getRides } from "@/services/rides";
 import { Ride } from "@/services/rides/types";
 import { getMockRides } from "@/services/rides/mockRides";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, ArrowRight, Star, ChevronLeft, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { communesAlger } from "@/services/trajets/types";
+import { motion } from "framer-motion";
 
-// Garder les zones de Constantine également
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
 
 const RidesPage = () => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const [filter, setFilter] = useState("");
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,371 +21,181 @@ const RidesPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Define text strings directly to avoid using translation keys
-  const ridesTitle = language === 'en' ? 'Available Rides' : 
-                    language === 'fr' ? 'Trajets Disponibles' : 
-                    'الرحلات المتاحة';
-                    
-  const ridesSubtitle = language === 'en' ? 'Find and book rides in Constantine and surrounding areas' : 
-                       language === 'fr' ? 'Trouvez et réservez des trajets à Constantine et dans les environs' : 
-                       'ابحث واحجز رحلات في قسنطينة والمناطق المحيطة بها';
-                       
-  const fromText = language === 'en' ? 'From' : 
-                 language === 'fr' ? 'De' : 
-                 'من';
-                 
-  const toText = language === 'en' ? 'To' : 
-               language === 'fr' ? 'À' : 
-               'إلى';
-               
-  const dateText = language === 'en' ? 'Date' : 
-                 language === 'fr' ? 'Date' : 
-                 'تاريخ';
-                 
-  const searchText = language === 'en' ? 'Search' : 
-                   language === 'fr' ? 'Rechercher' : 
-                   'بحث';
-                   
-  const selectLocationText = language === 'en' ? 'Select location' : 
-                           language === 'fr' ? 'Sélectionner un lieu' : 
-                           'اختر موقعا';
-                           
-  const seatText = language === 'en' ? 'seat' : 
-                 language === 'fr' ? 'place' : 
-                 'مقعد';
-                 
-  const seatsText = language === 'en' ? 'seats' : 
-                  language === 'fr' ? 'places' : 
-                  'مقاعد';
-                  
-  const fullText = language === 'en' ? 'Full' : 
-                 language === 'fr' ? 'Complet' : 
-                 'ممتلئ';
-                 
-  const reserveText = language === 'en' ? 'Reserve' : 
-                    language === 'fr' ? 'Réserver' : 
-                    'حجز';
-                    
-  const loadingText = language === 'en' ? 'Loading rides...' : 
-                    language === 'fr' ? 'Chargement des trajets...' : 
-                    '... تحميل الرحلات';
-                    
-  const noRidesText = language === 'en' ? 'No rides found' : 
-                    language === 'fr' ? 'Aucun trajet trouvé' : 
-                    'لم يتم العثور على رحلات';
+  const txt = {
+    title: language === 'fr' ? 'Trajets disponibles' : language === 'ar' ? 'الرحلات المتاحة' : 'Available Rides',
+    search: language === 'fr' ? 'Rechercher un trajet...' : language === 'ar' ? '...ابحث عن رحلة' : 'Search a ride...',
+    seats: language === 'fr' ? 'places' : language === 'ar' ? 'مقاعد' : 'seats',
+    full: language === 'fr' ? 'Complet' : language === 'ar' ? 'ممتلئ' : 'Full',
+    reserve: language === 'fr' ? 'Réserver' : language === 'ar' ? 'حجز' : 'Reserve',
+    loading: language === 'fr' ? 'Chargement...' : language === 'ar' ? '...تحميل' : 'Loading...',
+    noRides: language === 'fr' ? 'Aucun trajet trouvé' : language === 'ar' ? 'لم يتم العثور على رحلات' : 'No rides found',
+    noRidesDesc: language === 'fr' ? 'Essayez une autre destination' : language === 'ar' ? 'جرب وجهة أخرى' : 'Try another destination',
+  };
 
   const fetchRides = async (forceRefresh = false) => {
     setLoading(true);
     try {
-      console.log("Fetching rides, forceRefresh:", forceRefresh);
-      
-      if (forceRefresh) {
-        setRides([]);
-      }
-      
-      const fetchedRides = await getRides();
-      if (fetchedRides && fetchedRides.length > 0) {
-        console.log("Fetched rides:", fetchedRides);
-        
-        const ridesWithMaleDrivers = fetchedRides.map(ride => ({
-          ...ride,
-          driverGender: 'male' as 'male'
-        }));
-        
-        setRides(ridesWithMaleDrivers);
+      if (forceRefresh) setRides([]);
+      const fetched = await getRides();
+      if (fetched && fetched.length > 0) {
+        setRides(fetched.map(r => ({ ...r, driverGender: 'male' as 'male' })));
       } else {
-        console.log("No rides found, using mock rides");
-        const mockRides = getMockRides().map(ride => ({
-          ...ride,
-          driverGender: 'male' as 'male'
-        }));
-        setRides(mockRides);
+        setRides(getMockRides().map(r => ({ ...r, driverGender: 'male' as 'male' })));
       }
-    } catch (error) {
-      console.error("Error fetching rides:", error);
-      const mockRides = getMockRides().map(ride => ({
-        ...ride,
-        driverGender: 'male' as 'male'
-      }));
-      setRides(mockRides);
+    } catch {
+      setRides(getMockRides().map(r => ({ ...r, driverGender: 'male' as 'male' })));
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchRides(true);
-    
-    const handleBeforeUnload = () => {
-      localStorage.setItem('ridesPageReloaded', 'true');
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    const handleFocus = () => {
-      fetchRides(true);
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, []);
-
+  useEffect(() => { fetchRides(true); }, []);
   useEffect(() => {
     if (location.pathname === '/rides') {
-      const fromReservation = sessionStorage.getItem('fromReservation');
-      
-      if (fromReservation === 'true') {
-        console.log("Returning from reservation page, force refreshing rides");
-        fetchRides(true);
-        sessionStorage.removeItem('fromReservation');
-      } else {
-        fetchRides();
-      }
+      const fromRes = sessionStorage.getItem('fromReservation');
+      if (fromRes === 'true') { fetchRides(true); sessionStorage.removeItem('fromReservation'); }
     }
   }, [location]);
 
   useEffect(() => {
-    if (rides.length === 0) return;
-    
+    if (!rides.length) return;
     const channels: any[] = [];
-    
     rides.forEach(ride => {
       if (ride.trip_id && !/^\d+$/.test(ride.id)) {
-        const channel = supabase
-          .channel(`ride-${ride.id}`)
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'trips',
-              filter: `id=eq.${ride.trip_id}`
-            },
+        const ch = supabase.channel(`ride-${ride.id}`)
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'trips', filter: `id=eq.${ride.trip_id}` },
             (payload) => {
-              console.log("Received real-time seat update:", payload);
               if (payload.new && 'available_seats' in payload.new) {
-                setLiveSeats(prev => ({
-                  ...prev,
-                  [ride.id]: payload.new.available_seats
-                }));
+                setLiveSeats(prev => ({ ...prev, [ride.id]: payload.new.available_seats }));
               }
-            }
-          )
-          .subscribe();
-          
-        channels.push(channel);
+            }).subscribe();
+        channels.push(ch);
       }
     });
-    
-    return () => {
-      channels.forEach(channel => {
-        supabase.removeChannel(channel);
-      });
-    };
+    return () => { channels.forEach(ch => supabase.removeChannel(ch)); };
   }, [rides]);
 
-  const handleReserveClick = (rideId: string | number) => {
-    navigate(`/reservation/${rideId}`);
-  };
-
-  // Filter rides based on selected wilaya
   const filteredRidesByWilaya = useMemo(() => {
     if (selectedWilaya === "alger") {
-      return rides.filter(ride => 
-        communesAlger.includes(ride.from) || communesAlger.includes(ride.to)
-      );
-    } else {
-      return rides.filter(ride => 
-        constantineAreas.includes(ride.from) || constantineAreas.includes(ride.to) || 
-        ride.from === "Constantine" || ride.to === "Constantine"
-      );
+      return rides.filter(r => communesAlger.includes(r.from) || communesAlger.includes(r.to));
     }
+    return rides.filter(r => constantineAreas.includes(r.from) || constantineAreas.includes(r.to) || r.from === "Constantine" || r.to === "Constantine");
   }, [rides, selectedWilaya]);
 
-  // Apply user's text filter on top of wilaya filter
-  const filteredRides = filter 
-    ? filteredRidesByWilaya.filter(ride => 
-        ride.from.toLowerCase().includes(filter.toLowerCase()) || 
-        ride.to.toLowerCase().includes(filter.toLowerCase())
-      )
+  const filteredRides = filter
+    ? filteredRidesByWilaya.filter(r => r.from.toLowerCase().includes(filter.toLowerCase()) || r.to.toLowerCase().includes(filter.toLowerCase()))
     : filteredRidesByWilaya;
 
-  // Déterminer les zones à afficher en fonction de la wilaya sélectionnée
-  const areasToDisplay = selectedWilaya === "alger" ? communesAlger : constantineAreas;
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow pt-28 pb-16">
-        <section className="section">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h1 className="mb-4">
-              <GradientText>{selectedWilaya === "alger" ? "Alger" : "Constantine"}</GradientText> {ridesTitle}
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              {ridesSubtitle}
-            </p>
-          </div>
+    <div className="pb-20 pt-16">
+      <div className="px-4 max-w-lg mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-3 py-4">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
+            <ChevronLeft className="w-5 h-5 text-foreground" />
+          </button>
+          <h1 className="text-xl font-bold text-foreground flex-1">{txt.title}</h1>
+        </div>
 
-          <div className="mb-6">
-            <div className="flex justify-center gap-4 mb-4">
-              <button 
-                onClick={() => setSelectedWilaya("constantine")}
-                className={`px-4 py-2 rounded-lg transition ${
-                  selectedWilaya === "constantine" 
-                    ? "bg-wassalni-green text-white" 
-                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                }`}
-              >
-                Constantine
-              </button>
-              <button 
-                onClick={() => setSelectedWilaya("alger")}
-                className={`px-4 py-2 rounded-lg transition ${
-                  selectedWilaya === "alger" 
-                    ? "bg-wassalni-green text-white" 
-                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                }`}
-              >
-                Alger
-              </button>
-            </div>
-          </div>
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder={txt.search}
+            className="w-full pl-10 pr-4 py-3 bg-muted/60 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-[#00A693]/30 transition-all"
+          />
+        </div>
 
-          <div className="mb-10 bg-gray-50 p-6 rounded-xl dark:bg-gray-800/50">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{fromText}</label>
-                <select 
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        {/* Wilaya Toggle */}
+        <div className="flex gap-2 mb-5">
+          {['constantine', 'alger'].map((w) => (
+            <button
+              key={w}
+              onClick={() => setSelectedWilaya(w)}
+              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                selectedWilaya === w
+                  ? 'bg-[#00A693] text-white shadow-sm shadow-[#00A693]/20'
+                  : 'bg-muted text-muted-foreground'
+              }`}
+            >
+              {w === 'constantine' ? 'Constantine' : 'Alger'}
+            </button>
+          ))}
+        </div>
+
+        {/* Rides List */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-[#00A693]" />
+            <p className="text-sm text-muted-foreground">{txt.loading}</p>
+          </div>
+        ) : filteredRides.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-2">
+            <Search className="w-12 h-12 text-muted-foreground/30" />
+            <p className="text-base font-medium text-foreground">{txt.noRides}</p>
+            <p className="text-sm text-muted-foreground">{txt.noRidesDesc}</p>
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-3 pb-4"
+          >
+            {filteredRides.map((ride, i) => {
+              const seats = ride.id in liveSeats ? liveSeats[ride.id] : ride.seats;
+              return (
+                <motion.button
+                  key={ride.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate(`/reservation/${ride.id}`)}
+                  className="w-full bg-card border border-border rounded-2xl p-4 shadow-sm hover:shadow-md transition-all text-left"
                 >
-                  <option value="">{selectLocationText}</option>
-                  {areasToDisplay.map(area => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{toText}</label>
-                <select 
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="">{selectLocationText}</option>
-                  {areasToDisplay.map(area => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{dateText}</label>
-                <input 
-                  type="date" 
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-            </div>
-            <div className="mt-4 flex justify-center">
-              <Button className="px-8">{searchText}</Button>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-wassalni-green" />
-              <span className="ml-2 text-gray-600 dark:text-gray-300">{loadingText}</span>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6">
-              {filteredRides.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-gray-500 dark:text-gray-400">{noRidesText}</p>
-                </div>
-              ) : (
-                filteredRides.map((ride) => {
-                  const currentSeats = ride.id in liveSeats ? liveSeats[ride.id] : ride.seats;
-                  
-                  return (
-                    <div 
-                      key={ride.id}
-                      className="glass-card p-6 rounded-xl flex flex-col md:flex-row justify-between items-center gap-6"
-                    >
-                      <div className="flex-grow">
-                        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-                              {ride.driver.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-medium">{ride.driver}</p>
-                              <div className="flex items-center text-yellow-500 text-sm">
-                                {'★'.repeat(Math.floor(ride.rating))}
-                                <span className="text-gray-400 ml-1">{ride.rating}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex-grow flex flex-col md:flex-row gap-4 md:items-center">
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-wassalni-green"></div>
-                              <p className="text-gray-700 dark:text-gray-300">{ride.from}</p>
-                            </div>
-                            <div className="h-px w-10 bg-gray-300 hidden md:block"></div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-wassalni-blue"></div>
-                              <p className="text-gray-700 dark:text-gray-300">{ride.to}</p>
-                            </div>
-                          </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#C7FFD6] to-[#94C5FF] flex items-center justify-center text-sm font-bold text-[#1F2937] shrink-0 mt-0.5">
+                      {ride.driver.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-foreground truncate">{ride.driver}</p>
+                        <p className="text-base font-bold text-[#00A693]">{ride.price} <span className="text-xs font-normal">DZD</span></p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0">
+                          <div className="w-2 h-2 rounded-full bg-[#00A693] shrink-0" />
+                          <span className="truncate">{ride.from}</span>
                         </div>
-                        <div className="flex flex-wrap gap-4 text-sm">
-                          <div className="px-3 py-1 bg-gray-100 rounded-full dark:bg-gray-700">
-                            {new Date(ride.date).toLocaleDateString('fr-FR', {
-                              month: 'short',
-                              day: 'numeric',
-                            })}
-                          </div>
-                          <div className="px-3 py-1 bg-gray-100 rounded-full dark:bg-gray-700">
-                            {ride.time}
-                          </div>
-                          <div className={`px-3 py-1 rounded-full ${
-                            currentSeats > 0 
-                              ? "bg-gray-100 dark:bg-gray-700" 
-                              : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                          }`}>
-                            {currentSeats > 0 
-                              ? `${currentSeats} ${currentSeats === 1 ? seatText : seatsText}` 
-                              : fullText}
-                          </div>
+                        <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0">
+                          <div className="w-2 h-2 rounded-full bg-[#94C5FF] shrink-0" />
+                          <span className="truncate">{ride.to}</span>
                         </div>
                       </div>
-                      <div className="flex flex-col items-center md:items-end gap-4">
-                        <p className="text-2xl font-bold text-wassalni-green dark:text-wassalni-lightGreen">
-                          {ride.price} <span className="text-sm">DZD</span>
-                        </p>
-                        {currentSeats > 0 ? (
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleReserveClick(ride.id)}
-                          >
-                            {reserveText}
-                          </Button>
-                        ) : (
-                          <Button size="sm" variant="outlined" disabled>
-                            {fullText}
-                          </Button>
-                        )}
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
+                          {new Date(ride.date).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' })}
+                        </span>
+                        <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{ride.time}</span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${seats > 0 ? 'bg-[#00A693]/10 text-[#00A693]' : 'bg-destructive/10 text-destructive'}`}>
+                          {seats > 0 ? `${seats} ${txt.seats}` : txt.full}
+                        </span>
+                        <div className="flex items-center gap-0.5 text-[10px] text-yellow-500">
+                          <Star className="w-3 h-3 fill-current" />
+                          {ride.rating}
+                        </div>
                       </div>
                     </div>
-                  );
-                })
-              )}
-            </div>
-          )}
-        </section>
-      </main>
-      <Footer />
+                  </div>
+                </motion.button>
+              );
+            })}
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 };
