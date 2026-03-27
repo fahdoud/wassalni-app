@@ -227,10 +227,8 @@ const OfferRidePage = () => {
               </form>
             </Form>
           </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+        </div>
+      </div>
   );
 };
 

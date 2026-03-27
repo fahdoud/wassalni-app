@@ -166,9 +166,7 @@ const MyTripsPage = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
-      <Footer />
-    </div>
+      </div>
   );
 };
 

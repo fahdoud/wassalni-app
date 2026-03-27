@@ -149,9 +149,7 @@ const MyReservationsPage = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
-      <Footer />
-    </div>
+      </div>
   );
 };
 
