@@ -1,465 +1,232 @@
-
 import { useState, useEffect } from "react";
 import { MessageSquare, Star, Send, ThumbsUp, AlertTriangle, Flag, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import Button from "@/components/Button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { submitFeedback } from "@/services/rides/index";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { useIsMobileSimple } from "@/hooks/use-mobile";
+import { motion, AnimatePresence } from "framer-motion";
 
-const FEEDBACK_EXAMPLES = {
-  general: [
-    "I really enjoy using this service for my daily commute.",
-    "The app is very intuitive and easy to use.",
-    "I appreciate the quick response from customer service."
-  ],
-  suggestion: [
-    "It would be great if you could add a feature to save favorite routes.",
-    "Consider adding a loyalty program for frequent riders.",
-    "Please add a dark mode option for the app."
-  ],
-  complaint: [
-    "I had an issue with a driver cancelling at the last minute.",
-    "The payment system failed to process my transaction.",
-    "The pickup location was difficult to find.",
-    "My driver was late and didn't apologize."
-  ],
-  reclamation: [
-    "I was charged incorrectly for my last ride.",
-    "I want a refund for my cancelled trip.",
-    "The driver took a longer route to increase the fare.",
-    "I lost an item in the car and need assistance."
-  ],
-  issue: [
-    "The app crashes when I try to book a ride during peak hours.",
-    "I'm unable to update my profile information.",
-    "The notification system isn't working properly."
-  ],
-  problems: [
-    "I can't see available trips in my area.",
-    "The map doesn't show my current location correctly.",
-    "My payment method keeps getting declined.",
-    "I can't contact my driver through the app."
-  ],
-  other: [
-    "How can I become a driver for Wasslink?",
-    "Is there a corporate account option available?",
-    "Do you offer services for events or group transportation?"
-  ]
-};
+const FEEDBACK_TYPES = [
+  { key: "general", icon: MessageSquare },
+  { key: "suggestion", icon: ThumbsUp },
+  { key: "complaint", icon: AlertTriangle },
+  { key: "reclamation", icon: Flag },
+  { key: "issue", icon: HelpCircle },
+  { key: "rating", icon: Star },
+] as const;
+
+type FeedbackType = typeof FEEDBACK_TYPES[number]["key"];
 
 const FeedbackPage = () => {
-  const { t } = useLanguage();
-  const isMobile = useIsMobileSimple();
-  const [feedbackType, setFeedbackType] = useState<
-    "general" | "suggestion" | "complaint" | "reclamation" | "issue" | "problems" | "other" | "rating"
-  >("general");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const { language } = useLanguage();
+  const [feedbackType, setFeedbackType] = useState<FeedbackType>("general");
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [tripId, setTripId] = useState<string | undefined>(undefined);
-  const [toUserId, setToUserId] = useState<string | undefined>(undefined);
-  const [trips, setTrips] = useState<any[]>([]);
-  const [drivers, setDrivers] = useState<any[]>([]);
-  const [exampleSuggestions, setExampleSuggestions] = useState<string[]>(FEEDBACK_EXAMPLES.general);
-  
-  useEffect(() => {
-    switch (feedbackType) {
-      case "general":
-        setExampleSuggestions(FEEDBACK_EXAMPLES.general);
-        break;
-      case "suggestion":
-        setExampleSuggestions(FEEDBACK_EXAMPLES.suggestion);
-        break;
-      case "complaint":
-        setExampleSuggestions(FEEDBACK_EXAMPLES.complaint);
-        break;
-      case "reclamation":
-        setExampleSuggestions(FEEDBACK_EXAMPLES.reclamation);
-        break;
-      case "issue":
-        setExampleSuggestions(FEEDBACK_EXAMPLES.issue);
-        break;
-      case "problems":
-        setExampleSuggestions(FEEDBACK_EXAMPLES.problems);
-        break;
-      case "other":
-        setExampleSuggestions(FEEDBACK_EXAMPLES.other);
-        break;
-      default:
-        setExampleSuggestions([]);
-    }
-  }, [feedbackType]);
+  const [submitted, setSubmitted] = useState(false);
+
+  const txt = {
+    title: language === 'fr' ? 'Votre avis compte' : language === 'ar' ? 'رأيك يهمنا' : 'Your feedback matters',
+    subtitle: language === 'fr' ? 'Aidez-nous à améliorer votre expérience' : language === 'ar' ? 'ساعدنا في تحسين تجربتك' : 'Help us improve your experience',
+    general: language === 'fr' ? 'Général' : language === 'ar' ? 'عام' : 'General',
+    suggestion: language === 'fr' ? 'Suggestion' : language === 'ar' ? 'اقتراح' : 'Suggestion',
+    complaint: language === 'fr' ? 'Plainte' : language === 'ar' ? 'شكوى' : 'Complaint',
+    reclamation: language === 'fr' ? 'Réclamation' : language === 'ar' ? 'مطالبة' : 'Claim',
+    issue: language === 'fr' ? 'Problème' : language === 'ar' ? 'مشكلة' : 'Issue',
+    rating: language === 'fr' ? 'Évaluation' : language === 'ar' ? 'تقييم' : 'Rating',
+    rateExp: language === 'fr' ? 'Comment évaluez-vous votre expérience ?' : language === 'ar' ? 'كيف تقيم تجربتك؟' : 'How would you rate your experience?',
+    placeholder: language === 'fr' ? 'Décrivez votre expérience...' : language === 'ar' ? 'صف تجربتك...' : 'Describe your experience...',
+    send: language === 'fr' ? 'Envoyer' : language === 'ar' ? 'إرسال' : 'Send',
+    sending: language === 'fr' ? 'Envoi...' : language === 'ar' ? '...إرسال' : 'Sending...',
+    thanks: language === 'fr' ? 'Merci pour votre avis !' : language === 'ar' ? 'شكراً لتقييمك!' : 'Thanks for your feedback!',
+    thanksDesc: language === 'fr' ? 'Nous avons bien reçu votre message' : language === 'ar' ? 'لقد تلقينا رسالتك' : 'We received your message',
+    another: language === 'fr' ? 'Envoyer un autre' : language === 'ar' ? 'إرسال آخر' : 'Send another',
+    yourMsg: language === 'fr' ? 'Votre message' : language === 'ar' ? 'رسالتك' : 'Your message',
+    contact: language === 'fr' ? 'Ou contactez-nous' : language === 'ar' ? 'أو تواصل معنا' : 'Or contact us',
+  };
+
+  const typeLabels: Record<FeedbackType, string> = {
+    general: txt.general, suggestion: txt.suggestion, complaint: txt.complaint,
+    reclamation: txt.reclamation, issue: txt.issue, rating: txt.rating,
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
       setIsLoggedIn(!!data.user);
-      
-      if (data.user) {
-        const { data: reservations, error } = await supabase
-          .from("reservations")
-          .select(`
-            trip_id,
-            trip:trips(
-              id,
-              origin,
-              destination,
-              departure_time,
-              driver_id,
-              driver:profiles!driver_id(full_name)
-            )
-          `)
-          .eq("passenger_id", data.user.id)
-          .eq("status", "completed");
-        
-        if (error) {
-          console.error("Error loading trips:", error);
-        } else if (reservations && reservations.length > 0) {
-          const uniqueTrips = reservations.filter((r: any) => r.trip !== null);
-          setTrips(uniqueTrips.map((r: any) => r.trip));
-          
-          const uniqueDrivers = Array.from(
-            new Map(
-              uniqueTrips
-                .filter((r: any) => r.trip.driver_id)
-                .map((r: any) => [
-                  r.trip.driver_id, 
-                  { id: r.trip.driver_id, name: r.trip.driver?.full_name || "Driver" }
-                ])
-            ).values()
-          );
-          setDrivers(uniqueDrivers);
-        }
-      }
     };
-    
     checkAuth();
   }, []);
 
-  const useSuggestion = (suggestion: string) => {
-    setMessage(suggestion);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!message && feedbackType !== "rating") return;
+    if (feedbackType === "rating" && rating === 0) return;
     setLoading(true);
-    
+
     try {
       if (isLoggedIn) {
-        if (feedbackType === "rating" && (!toUserId || rating === 0)) {
-          toast.error("Please select a driver and rating");
-          setLoading(false);
-          return;
-        }
-        
-        if (feedbackType === "rating") {
-          await submitFeedback({
-            toUserId: toUserId!,
-            rating,
-            comment: message,
-            tripId,
-            feedbackType: "rating"
-          });
-        } else {
-          const { data: adminData } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("role", "admin")
-            .limit(1);
-          
-          const adminId = adminData && adminData.length > 0 
-            ? adminData[0].id 
-            : null;
-          
-          const feedbackRating = feedbackType === "general" ? 0 : 
-                               feedbackType === "suggestion" ? 4 : 
-                               feedbackType === "complaint" ? 2 : 
-                               feedbackType === "reclamation" ? 1 :
-                               feedbackType === "issue" ? 1 : 
-                               feedbackType === "problems" ? 1 : 3;
-          
-          await submitFeedback({
-            toUserId: adminId,
-            rating: feedbackRating,
-            comment: message,
-            feedbackType: feedbackType
-          });
-        }
-        
-        toast.success(t('feedback.successTitle'));
-        
-        setName("");
-        setEmail("");
-        setMessage("");
-        setRating(0);
-        setTripId(undefined);
-        setToUserId(undefined);
-      } else {
-        console.log({
+        const feedbackRating = feedbackType === "rating" ? rating :
+          feedbackType === "general" ? 0 : feedbackType === "suggestion" ? 4 :
+          feedbackType === "complaint" ? 2 : 1;
+
+        await submitFeedback({
+          toUserId: null,
+          rating: feedbackRating,
+          comment: message,
           feedbackType,
-          name,
-          email,
-          message,
-          rating: feedbackType === "rating" ? rating : undefined,
         });
-        
-        toast.success(t('feedback.successTitle'));
-        
-        setName("");
-        setEmail("");
-        setMessage("");
-        setRating(0);
       }
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-      toast.error("Failed to submit feedback. Please try again.");
+      setSubmitted(true);
+      toast.success(txt.thanks);
+    } catch {
+      toast.error(language === 'fr' ? 'Erreur lors de l\'envoi' : 'Failed to submit');
     } finally {
       setLoading(false);
     }
   };
 
+  const resetForm = () => {
+    setMessage("");
+    setRating(0);
+    setFeedbackType("general");
+    setSubmitted(false);
+  };
+
   return (
     <div className="pb-20 pt-16">
-      <div className="px-4 max-w-lg mx-auto py-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold mb-3">{t('feedback.title')}</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              {t('feedback.subtitle')}
-            </p>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="px-4 max-w-lg mx-auto py-4"
+      >
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+            <MessageSquare className="w-7 h-7 text-primary" />
           </div>
+          <h1 className="text-xl font-bold text-foreground">{txt.title}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{txt.subtitle}</p>
+        </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 md:p-8 mb-10">
-            <Tabs defaultValue="general" onValueChange={(value) => setFeedbackType(value as any)}>
-              <TabsList className={`grid ${isMobile ? 'grid-cols-2 gap-1 mb-4' : 'md:grid-cols-8 gap-2 mb-8'} overflow-x-auto max-w-full`}>
-                <TabsTrigger value="general" className="flex flex-col items-center gap-1 py-2 px-1">
-                  <MessageSquare size={16} />
-                  <span className="text-xs">{t('feedback.types.general')}</span>
-                </TabsTrigger>
-                <TabsTrigger value="suggestion" className="flex flex-col items-center gap-1 py-2 px-1">
-                  <ThumbsUp size={16} />
-                  <span className="text-xs">{t('feedback.types.suggestions')}</span>
-                </TabsTrigger>
-                <TabsTrigger value="complaint" className="flex flex-col items-center gap-1 py-2 px-1">
-                  <AlertTriangle size={16} />
-                  <span className="text-xs">{t('feedback.types.complaints')}</span>
-                </TabsTrigger>
-                <TabsTrigger value="reclamation" className="flex flex-col items-center gap-1 py-2 px-1">
-                  <Flag size={16} />
-                  <span className="text-xs">{t('feedback.types.reclamation')}</span>
-                </TabsTrigger>
-                <TabsTrigger value="issue" className="flex flex-col items-center gap-1 py-2 px-1">
-                  <HelpCircle size={16} />
-                  <span className="text-xs">{t('feedback.types.issues')}</span>
-                </TabsTrigger>
-                <TabsTrigger value="problems" className="flex flex-col items-center gap-1 py-2 px-1">
-                  <AlertTriangle size={16} />
-                  <span className="text-xs">{t('feedback.types.problems')}</span>
-                </TabsTrigger>
-                <TabsTrigger value="other" className="flex flex-col items-center gap-1 py-2 px-1">
-                  <MessageSquare size={16} />
-                  <span className="text-xs">{t('feedback.types.other')}</span>
-                </TabsTrigger>
-                <TabsTrigger value="rating" className="flex flex-col items-center gap-1 py-2 px-1">
-                  <Star size={16} />
-                  <span className="text-xs">{t('feedback.types.rateDriver')}</span>
-                </TabsTrigger>
-              </TabsList>
+        <AnimatePresence mode="wait">
+          {submitted ? (
+            <motion.div
+              key="success"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-card border border-border rounded-2xl p-8 shadow-sm text-center"
+            >
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Star className="w-8 h-8 text-primary fill-primary" />
+              </div>
+              <h2 className="text-lg font-bold text-foreground">{txt.thanks}</h2>
+              <p className="text-sm text-muted-foreground mt-2">{txt.thanksDesc}</p>
+              <button
+                onClick={resetForm}
+                className="mt-6 px-6 py-2.5 rounded-2xl bg-primary text-primary-foreground text-sm font-medium"
+              >
+                {txt.another}
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              {/* Type selector */}
+              <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+                {FEEDBACK_TYPES.map(({ key, icon: Icon }) => (
+                  <button
+                    key={key}
+                    onClick={() => setFeedbackType(key)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                      feedbackType === key
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {typeLabels[key]}
+                  </button>
+                ))}
+              </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {!isLoggedIn && (
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-2">
-                        {t('feedback.name')}
-                      </label>
-                      <Input
-                        id="name"
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-2">
-                        {t('feedback.email')}
-                      </label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full"
-                        required
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <TabsContent value="rating" className="space-y-6 mt-4">
-                  {isLoggedIn && drivers.length > 0 && (
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        {t('feedback.selectDriver')}
-                      </label>
-                      <select
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
-                        value={toUserId || ""}
-                        onChange={(e) => setToUserId(e.target.value)}
-                        required
-                      >
-                        <option value="">{t('feedback.selectDriverOption')}</option>
-                        {drivers.map((driver) => (
-                          <option key={driver.id} value={driver.id}>
-                            {driver.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {isLoggedIn && trips.length > 0 && (
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        {t('feedback.selectTrip')}
-                      </label>
-                      <select
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-wassalni-green dark:focus:ring-wassalni-lightGreen"
-                        value={tripId || ""}
-                        onChange={(e) => setTripId(e.target.value)}
-                      >
-                        <option value="">{t('feedback.selectTripOption')}</option>
-                        {trips.map((trip) => (
-                          <option key={trip.id} value={trip.id}>
-                            {trip.origin} {t('feedback.to')} {trip.destination} - {new Date(trip.departure_time).toLocaleDateString()}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-sm font-medium mb-3">
-                      {t('feedback.rateExperience')}
-                    </label>
-                    <div className="flex items-center justify-center gap-2">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Star Rating */}
+                {feedbackType === "rating" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-card border border-border rounded-2xl p-6 shadow-sm text-center"
+                  >
+                    <p className="text-sm font-medium text-foreground mb-4">{txt.rateExp}</p>
+                    <div className="flex items-center justify-center gap-3">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <button
+                        <motion.button
                           key={star}
                           type="button"
-                          className="focus:outline-none"
+                          whileTap={{ scale: 1.2 }}
                           onClick={() => setRating(star)}
                           onMouseEnter={() => setHoveredRating(star)}
                           onMouseLeave={() => setHoveredRating(0)}
                         >
                           <Star
-                            size={32}
-                            className={`${
+                            className={`w-10 h-10 transition-colors ${
                               star <= (hoveredRating || rating)
                                 ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300 dark:text-gray-600"
-                            } transition-colors`}
+                                : "text-muted-foreground/30"
+                            }`}
                           />
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
-                  </div>
-                </TabsContent>
-
-                {(feedbackType === "general" || 
-                  feedbackType === "suggestion" || 
-                  feedbackType === "complaint" || 
-                  feedbackType === "reclamation" ||
-                  feedbackType === "issue" || 
-                  feedbackType === "problems" ||
-                  feedbackType === "other") && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium mb-2">{t('feedback.exampleSuggestions')}:</h4>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {exampleSuggestions.slice(0, isMobile ? 2 : 3).map((suggestion, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => useSuggestion(suggestion)}
-                          className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full px-3 py-1 transition-colors"
-                        >
-                          {suggestion.length > (isMobile ? 30 : 40) ? suggestion.substring(0, isMobile ? 27 : 37) + '...' : suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  </motion.div>
                 )}
 
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium mb-2">
-                    {t('feedback.yourFeedback')}
-                  </label>
+                {/* Message */}
+                <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+                  <label className="text-sm font-medium text-foreground mb-2 block">{txt.yourMsg}</label>
                   <Textarea
-                    id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder={t('feedback.writeFeedbackPlaceholder')}
-                    className="w-full dark:bg-gray-900"
-                    required
+                    placeholder={txt.placeholder}
+                    className="border-0 bg-muted/40 rounded-xl resize-none min-h-[120px] focus-visible:ring-1 focus-visible:ring-primary/30"
+                    required={feedbackType !== "rating"}
                   />
                 </div>
 
-                <div className="flex justify-center pt-4">
-                  <Button
-                    type="submit"
-                    className="px-8 py-3 flex items-center gap-2 bg-gradient-to-r from-blue-400 to-green-400 text-white rounded-full"
-                    size="lg"
-                    disabled={loading}
-                  >
-                    {loading ? t('feedback.submitting') : t('feedback.submit')}
-                    <Send size={18} />
-                  </Button>
-                </div>
-              </form>
-            </Tabs>
-          </div>
-
-          <div className="glass-card p-6 rounded-xl">
-            <h3 className="text-xl font-semibold mb-4">{t('feedback.otherWaysTitle')}</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
-                <h4 className="text-lg font-medium mb-2">{t('feedback.emailUs')}</h4>
-                <p className="text-gray-600 dark:text-gray-400 mb-3">
-                  {t('feedback.emailDescription')}
-                </p>
-                <a
-                  href="mailto:feedback@wassalni.com"
-                  className="text-wassalni-green dark:text-wassalni-lightGreen hover:underline font-medium"
+                {/* Submit */}
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-md shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-60"
                 >
-                  feedback@wassalni.com
-                </a>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
-                <h4 className="text-lg font-medium mb-2">{t('feedback.socialMedia')}</h4>
-                <p className="text-gray-600 dark:text-gray-400 mb-3">
-                  {t('feedback.socialDescription')}
-                </p>
-                <div className="flex gap-4">
-                  <a href="#" className="text-wassalni-green dark:text-wassalni-lightGreen hover:underline font-medium">Twitter</a>
-                  <a href="#" className="text-wassalni-green dark:text-wassalni-lightGreen hover:underline font-medium">Facebook</a>
-                  <a href="#" className="text-wassalni-green dark:text-wassalni-lightGreen hover:underline font-medium">Instagram</a>
+                  {loading ? txt.sending : txt.send}
+                  <Send className="w-4 h-4" />
+                </motion.button>
+              </form>
+
+              {/* Contact */}
+              <div className="mt-6 bg-card border border-border rounded-2xl p-4 shadow-sm">
+                <p className="text-xs font-medium text-muted-foreground mb-3">{txt.contact}</p>
+                <div className="flex gap-3">
+                  <a href="mailto:contact@wasslink.com" className="flex-1 py-2.5 rounded-xl bg-muted text-center text-xs font-medium text-foreground">
+                    Email
+                  </a>
+                  <a href="#" className="flex-1 py-2.5 rounded-xl bg-muted text-center text-xs font-medium text-foreground">
+                    Facebook
+                  </a>
+                  <a href="#" className="flex-1 py-2.5 rounded-xl bg-muted text-center text-xs font-medium text-foreground">
+                    Instagram
+                  </a>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };

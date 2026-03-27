@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from "@/pages/Index";
+import AuthPage from "@/pages/AuthPage";
 import PassengerSignIn from "@/pages/PassengerSignIn";
 import DriverSignIn from "@/pages/DriverSignIn";
 import PassengerSignUp from "@/pages/PassengerSignUp";
@@ -12,6 +13,7 @@ import MyReservationsPage from "@/pages/MyReservationsPage";
 import OfferRidePage from "@/pages/OfferRidePage";
 import FeedbackPage from "@/pages/FeedbackPage";
 import ReservationPage from "@/pages/ReservationPage";
+import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -66,6 +68,7 @@ function App() {
                       <Routes>
                         <Route path="/onboarding" element={<OnboardingPage />} />
                         <Route path="/" element={<Index />} />
+                        <Route path="/auth" element={<AuthPage />} />
                         <Route path="/passenger-signin" element={<PassengerSignIn />} />
                         <Route path="/driver-signin" element={<DriverSignIn />} />
                         <Route path="/passenger-signup" element={<PassengerSignUp />} />
@@ -78,6 +81,7 @@ function App() {
                         <Route path="/my-reservations" element={<MyReservationsPage />} />
                         <Route path="/offer-ride" element={<OfferRidePage />} />
                         <Route path="/feedback" element={<FeedbackPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/ride/:rideId" element={<ReservationPage />} />
                         <Route path="/reservation/:rideId" element={<ReservationPage />} />
                         <Route path="*" element={<NotFound />} />
