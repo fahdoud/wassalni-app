@@ -118,16 +118,10 @@ const OfferRidePage = () => {
   return (
     <div className="pb-20 pt-16">
       <div className="px-4 max-w-lg mx-auto py-4">
-      <main className="flex-grow pt-28 pb-16">
-        <section className="section">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h1 className="mb-4">
-              <GradientText>Offer a Ride</GradientText>
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Share your journey and help others while saving on travel costs
-            </p>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-foreground mb-1">Offer a Ride</h1>
+          <p className="text-sm text-muted-foreground">Share your journey and help others</p>
+        </div>
 
           <div className="max-w-2xl mx-auto">
             <Form {...form}>
