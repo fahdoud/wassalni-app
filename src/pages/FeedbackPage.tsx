@@ -461,8 +461,6 @@ const FeedbackPage = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };
