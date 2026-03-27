@@ -116,8 +116,8 @@ const OfferRidePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <div className="pb-20 pt-16">
+      <div className="px-4 max-w-lg mx-auto py-4">
       <main className="flex-grow pt-28 pb-16">
         <section className="section">
           <div className="text-center max-w-3xl mx-auto mb-12">

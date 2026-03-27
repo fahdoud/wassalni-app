@@ -82,33 +82,19 @@ const MyTripsPage = () => {
   const pastTrips = trips.filter(t => t.status !== 'active' || new Date(t.departure_time) < new Date());
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow pt-28 pb-16">
-        <div className="container max-w-4xl mx-auto px-4">
-          <Link
-            to="/"
-            className="inline-flex items-center text-gray-600 hover:text-wassalni-green mb-6 transition-colors dark:text-gray-300 dark:hover:text-wassalni-lightGreen"
-          >
-            <ChevronLeft size={18} />
-            <span>Home</span>
-          </Link>
-
-          <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">
-                <GradientText>My Trips</GradientText>
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                View and manage all your offered rides
-              </p>
-            </div>
-            <Link to="/offer-ride">
-              <Button className="bg-wassalni-green hover:bg-wassalni-green/90">
-                <Car className="mr-2 h-4 w-4" /> Offer New Ride
-              </Button>
-            </Link>
+    <div className="pb-20 pt-16">
+      <div className="px-4 max-w-lg mx-auto">
+        <div className="py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-bold text-foreground mb-1">My Trips</h1>
+            <p className="text-sm text-muted-foreground">Manage your offered rides</p>
           </div>
+          <Link to="/offer-ride">
+            <Button className="bg-[#00A693] hover:bg-[#00A693]/90 rounded-xl" size="sm">
+              <Car className="mr-1 h-4 w-4" /> New
+            </Button>
+          </Link>
+        </div>
 
           <Tabs defaultValue="active" className="w-full">
             <TabsList className="mb-6">
