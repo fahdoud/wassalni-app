@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
-import { Search, ArrowRight, Star, Shield, Clock, Users, LogIn, UserPlus } from "lucide-react";
+import { Search, ArrowRight, Star, Shield, Clock, Users, LogIn, Car, Globe, MessageSquare } from "lucide-react";
 import { getMockRides } from "@/services/rides/mockRides";
 import { getRides } from "@/services/rides";
 import { Ride } from "@/services/rides/types";
