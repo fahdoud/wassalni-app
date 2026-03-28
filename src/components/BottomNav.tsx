@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, MapPin, MessageSquare, User, Settings } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const BottomNav = () => {
@@ -22,9 +22,9 @@ const BottomNav = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
-      <div className="mx-3 mb-2">
-        <nav className="flex items-center justify-around h-[68px] max-w-lg mx-auto bg-card/90 backdrop-blur-2xl border border-border/60 rounded-[22px] shadow-[0_-4px_30px_-4px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_30px_-4px_rgba(0,0,0,0.4)] px-2">
-          {tabs.map((tab) => {
+      <div className="mx-4 mb-3">
+        <nav className="relative flex items-center justify-around h-[72px] max-w-md mx-auto bg-card/80 backdrop-blur-3xl border border-border/40 rounded-[28px] shadow-[0_8px_40px_-8px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_40px_-8px_rgba(0,0,0,0.5)] dark:bg-card/60 px-1">
+          {tabs.map((tab, index) => {
             const isActive = location.pathname === tab.path;
             const Icon = tab.icon;
 
@@ -32,37 +32,67 @@ const BottomNav = () => {
               <motion.button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                whileTap={{ scale: 0.85 }}
-                className="relative flex flex-col items-center justify-center gap-[3px] flex-1 py-2"
+                whileTap={{ scale: 0.88 }}
+                className="relative flex flex-col items-center justify-center flex-1 h-full py-1 group"
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="navPill"
-                    className="absolute inset-x-2 -top-[1px] h-[3px] bg-gradient-to-r from-primary to-primary/60 rounded-full"
-                    transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-                  />
-                )}
+                {/* Active background blob */}
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+                      className="absolute inset-x-1 top-1 bottom-1 bg-primary/12 dark:bg-primary/20 rounded-[22px]"
+                    />
+                  )}
+                </AnimatePresence>
+
+                {/* Icon container */}
                 <motion.div
-                  animate={isActive ? { scale: 1, y: -2 } : { scale: 1, y: 0 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                  className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors duration-200 ${
-                    isActive ? 'bg-primary/12' : ''
-                  }`}
+                  animate={isActive 
+                    ? { y: -1, scale: 1.1 } 
+                    : { y: 0, scale: 1 }
+                  }
+                  transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                  className="relative z-10 flex items-center justify-center w-9 h-9"
                 >
                   <Icon
-                    className={`w-[22px] h-[22px] transition-all duration-200 ${
-                      isActive ? 'text-primary stroke-[2.5]' : 'text-muted-foreground stroke-[1.8]'
+                    className={`w-[21px] h-[21px] transition-all duration-300 ${
+                      isActive 
+                        ? 'text-primary stroke-[2.4] drop-shadow-[0_0_6px_hsl(var(--primary)/0.4)]' 
+                        : 'text-muted-foreground stroke-[1.7] group-hover:text-foreground/70'
                     }`}
                   />
                 </motion.div>
+
+                {/* Label */}
                 <motion.span
-                  animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0.7, y: 0 }}
-                  className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                  animate={isActive 
+                    ? { opacity: 1, y: 0, scale: 1 } 
+                    : { opacity: 0.55, y: 1, scale: 0.95 }
+                  }
+                  transition={{ duration: 0.2 }}
+                  className={`relative z-10 text-[9.5px] font-bold tracking-wider uppercase transition-colors duration-300 ${
+                    isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground/70'
                   }`}
                 >
                   {tab.label}
                 </motion.span>
+
+                {/* Active dot indicator */}
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ delay: 0.1, type: 'spring', stiffness: 500 }}
+                      className="absolute -top-[2px] w-5 h-[3px] bg-gradient-to-r from-primary/60 via-primary to-primary/60 rounded-full"
+                    />
+                  )}
+                </AnimatePresence>
               </motion.button>
             );
           })}
