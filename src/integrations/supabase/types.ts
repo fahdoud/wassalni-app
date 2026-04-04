@@ -7,457 +7,448 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.4"
+  }
   public: {
     Tables: {
       drivers: {
         Row: {
-          avatar_url: string | null
-          car_model: string | null
-          car_year: string | null
-          created_at: string
-          email: string | null
-          full_name: string | null
-          id: string
-          license_number: string | null
-          phone: string | null
-          registration_number: string | null
-          updated_at: string
-          user_id: string
-          vehicle_photo_url: string | null
-          verification_status: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          car_model?: string | null
-          car_year?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
-          id?: string
-          license_number?: string | null
-          phone?: string | null
-          registration_number?: string | null
-          updated_at?: string
-          user_id: string
-          vehicle_photo_url?: string | null
-          verification_status?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          car_model?: string | null
-          car_year?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
-          id?: string
-          license_number?: string | null
-          phone?: string | null
-          registration_number?: string | null
-          updated_at?: string
-          user_id?: string
-          vehicle_photo_url?: string | null
-          verification_status?: string | null
-        }
-        Relationships: []
-      }
-      feedback: {
-        Row: {
-          comment: string | null
           created_at: string | null
-          feedback_type: string | null
-          from_user_id: string | null
+          date_expiration_permis: string | null
           id: string
-          rating: number
-          to_user_id: string | null
-          trip_id: string | null
-          updated_at: string | null
+          note_moyenne: number | null
+          numero_permis: string | null
+          user_id: string | null
+          verifie: boolean | null
         }
         Insert: {
-          comment?: string | null
           created_at?: string | null
-          feedback_type?: string | null
-          from_user_id?: string | null
+          date_expiration_permis?: string | null
           id?: string
-          rating: number
-          to_user_id?: string | null
-          trip_id?: string | null
-          updated_at?: string | null
+          note_moyenne?: number | null
+          numero_permis?: string | null
+          user_id?: string | null
+          verifie?: boolean | null
         }
         Update: {
-          comment?: string | null
           created_at?: string | null
-          feedback_type?: string | null
-          from_user_id?: string | null
+          date_expiration_permis?: string | null
           id?: string
-          rating?: number
-          to_user_id?: string | null
-          trip_id?: string | null
-          updated_at?: string | null
+          note_moyenne?: number | null
+          numero_permis?: string | null
+          user_id?: string | null
+          verifie?: boolean | null
         }
         Relationships: [
           {
-            foreignKeyName: "feedback_from_user_id_fkey"
-            columns: ["from_user_id"]
+            foreignKeyName: "drivers_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      feedbacks: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string | null
+          statut: string | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          statut?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          statut?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "feedback_to_user_id_fkey"
-            columns: ["to_user_id"]
+            foreignKeyName: "feedbacks_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
       }
       notifications: {
         Row: {
-          created_at: string
-          id: string
-          message: string
-          phone: string
-          read_at: string | null
-          sent_at: string
-          type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message: string
-          phone: string
-          read_at?: string | null
-          sent_at?: string
-          type: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string
-          phone?: string
-          read_at?: string | null
-          sent_at?: string
-          type?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      passengers: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
-          email: string | null
-          full_name: string | null
-          id: string
-          phone: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
-          id?: string
-          phone?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
-          id?: string
-          phone?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          avatar_url: string | null
           created_at: string | null
-          full_name: string | null
           id: string
-          phone: string | null
-          role: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id: string
-          phone?: string | null
-          role?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string
-          phone?: string | null
-          role?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      reservations: {
-        Row: {
-          created_at: string | null
-          departure_point: string | null
-          destination: string | null
-          destination_point: string | null
-          id: string
-          origin: string | null
-          passenger_email: string | null
-          passenger_first_name: string | null
-          passenger_id: string | null
-          passenger_last_name: string | null
-          passenger_name: string | null
-          price: number | null
-          reservation_date: string | null
-          seats_reserved: number
-          status: string | null
-          trip_id: string | null
-          updated_at: string | null
+          lu: boolean | null
+          message: string | null
+          titre: string | null
+          type: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
-          departure_point?: string | null
-          destination?: string | null
-          destination_point?: string | null
           id?: string
-          origin?: string | null
-          passenger_email?: string | null
-          passenger_first_name?: string | null
-          passenger_id?: string | null
-          passenger_last_name?: string | null
-          passenger_name?: string | null
-          price?: number | null
-          reservation_date?: string | null
-          seats_reserved: number
-          status?: string | null
-          trip_id?: string | null
-          updated_at?: string | null
+          lu?: boolean | null
+          message?: string | null
+          titre?: string | null
+          type?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
-          departure_point?: string | null
-          destination?: string | null
-          destination_point?: string | null
           id?: string
-          origin?: string | null
-          passenger_email?: string | null
-          passenger_first_name?: string | null
-          passenger_id?: string | null
-          passenger_last_name?: string | null
-          passenger_name?: string | null
-          price?: number | null
-          reservation_date?: string | null
-          seats_reserved?: number
-          status?: string | null
-          trip_id?: string | null
-          updated_at?: string | null
+          lu?: boolean | null
+          message?: string | null
+          titre?: string | null
+          type?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "reservations_passenger_id_fkey"
-            columns: ["passenger_id"]
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
       }
-      ride_messages: {
-        Row: {
-          content: string
-          created_at: string | null
-          id: string
-          ride_id: string
-          sender_id: string
-          sender_name: string
-        }
-        Insert: {
-          content: string
-          created_at?: string | null
-          id?: string
-          ride_id: string
-          sender_id: string
-          sender_name: string
-        }
-        Update: {
-          content?: string
-          created_at?: string | null
-          id?: string
-          ride_id?: string
-          sender_id?: string
-          sender_name?: string
-        }
-        Relationships: []
-      }
-      seat_availability: {
+      payments: {
         Row: {
           created_at: string | null
           id: string
-          remaining_seats: number
-          seats_available: boolean
-          total_seats: number
-          trip_id: string | null
-          updated_at: string | null
+          methode: string | null
+          montant: number | null
+          reservation_id: string | null
+          statut: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
-          remaining_seats?: number
-          seats_available?: boolean
-          total_seats?: number
-          trip_id?: string | null
-          updated_at?: string | null
+          methode?: string | null
+          montant?: number | null
+          reservation_id?: string | null
+          statut?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
-          remaining_seats?: number
-          seats_available?: boolean
-          total_seats?: number
-          trip_id?: string | null
-          updated_at?: string | null
+          methode?: string | null
+          montant?: number | null
+          reservation_id?: string | null
+          statut?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "seat_availability_trip_id_fkey"
+            foreignKeyName: "payments_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ratings: {
+        Row: {
+          commentaire: string | null
+          created_at: string | null
+          from_user_id: string | null
+          id: string
+          note: number | null
+          to_driver_id: string | null
+          trip_id: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string | null
+          from_user_id?: string | null
+          id?: string
+          note?: number | null
+          to_driver_id?: string | null
+          trip_id?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string | null
+          from_user_id?: string | null
+          id?: string
+          note?: number | null
+          to_driver_id?: string | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_to_driver_id_fkey"
+            columns: ["to_driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_trip_id_fkey"
             columns: ["trip_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
         ]
       }
-      trajets: {
+      reservations: {
         Row: {
-          chauffeur_id: string
           created_at: string | null
-          date_depart: string
-          destination: string
+          heure_proposee: string | null
           id: string
-          origine: string
-          places_dispo: number
-          prix: number
+          nombre_places_reservees: number | null
+          point_arrivee_propose: string | null
+          point_depart_propose: string | null
           statut: string | null
-          updated_at: string | null
+          trip_id: string | null
+          user_id: string | null
         }
         Insert: {
-          chauffeur_id: string
           created_at?: string | null
-          date_depart: string
-          destination: string
+          heure_proposee?: string | null
           id?: string
-          origine: string
-          places_dispo?: number
-          prix: number
+          nombre_places_reservees?: number | null
+          point_arrivee_propose?: string | null
+          point_depart_propose?: string | null
           statut?: string | null
-          updated_at?: string | null
+          trip_id?: string | null
+          user_id?: string | null
         }
         Update: {
-          chauffeur_id?: string
           created_at?: string | null
-          date_depart?: string
-          destination?: string
+          heure_proposee?: string | null
           id?: string
-          origine?: string
-          places_dispo?: number
-          prix?: number
+          nombre_places_reservees?: number | null
+          point_arrivee_propose?: string | null
+          point_depart_propose?: string | null
           statut?: string | null
-          updated_at?: string | null
+          trip_id?: string | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reservations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount_total: number | null
+          commission_amount: number | null
+          created_at: string | null
+          driver_amount: number | null
+          driver_id: string | null
+          id: string
+          rider_id: string | null
+          trip_id: string | null
+          type: string | null
+        }
+        Insert: {
+          amount_total?: number | null
+          commission_amount?: number | null
+          created_at?: string | null
+          driver_amount?: number | null
+          driver_id?: string | null
+          id?: string
+          rider_id?: string | null
+          trip_id?: string | null
+          type?: string | null
+        }
+        Update: {
+          amount_total?: number | null
+          commission_amount?: number | null
+          created_at?: string | null
+          driver_amount?: number | null
+          driver_id?: string | null
+          id?: string
+          rider_id?: string | null
+          trip_id?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trips: {
         Row: {
-          available_seats: number
           created_at: string | null
-          departure_time: string
-          description: string | null
-          destination: string
-          driver_id: string
+          date_heure: string | null
+          driver_id: string | null
           id: string
-          origin: string
-          price: number
-          status: string | null
-          updated_at: string | null
+          lieu_arrivee: string | null
+          lieu_depart: string | null
+          places_disponibles: number | null
+          prix: number | null
+          statut: string | null
+          vehicle_id: string | null
         }
         Insert: {
-          available_seats: number
           created_at?: string | null
-          departure_time: string
-          description?: string | null
-          destination: string
-          driver_id: string
+          date_heure?: string | null
+          driver_id?: string | null
           id?: string
-          origin: string
-          price: number
-          status?: string | null
-          updated_at?: string | null
+          lieu_arrivee?: string | null
+          lieu_depart?: string | null
+          places_disponibles?: number | null
+          prix?: number | null
+          statut?: string | null
+          vehicle_id?: string | null
         }
         Update: {
-          available_seats?: number
           created_at?: string | null
-          departure_time?: string
-          description?: string | null
-          destination?: string
-          driver_id?: string
+          date_heure?: string | null
+          driver_id?: string | null
           id?: string
-          origin?: string
-          price?: number
-          status?: string | null
-          updated_at?: string | null
+          lieu_arrivee?: string | null
+          lieu_depart?: string | null
+          places_disponibles?: number | null
+          prix?: number | null
+          statut?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          mot_de_passe: string | null
+          nom: string | null
+          statut: string | null
+          telephone: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          mot_de_passe?: string | null
+          nom?: string | null
+          statut?: string | null
+          telephone?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          mot_de_passe?: string | null
+          nom?: string | null
+          statut?: string | null
+          telephone?: string | null
         }
         Relationships: []
       }
-      vehicle_photos: {
+      vehicles: {
         Row: {
           created_at: string | null
-          driver_id: string
+          driver_id: string | null
           id: string
-          photo_url: string
-          updated_at: string | null
+          immatriculation: string | null
+          marque: string | null
+          modele: string | null
+          nombre_places_total: number | null
         }
         Insert: {
           created_at?: string | null
-          driver_id: string
+          driver_id?: string | null
           id?: string
-          photo_url: string
-          updated_at?: string | null
+          immatriculation?: string | null
+          marque?: string | null
+          modele?: string | null
+          nombre_places_total?: number | null
         }
         Update: {
           created_at?: string | null
-          driver_id?: string
+          driver_id?: string | null
           id?: string
-          photo_url?: string
-          updated_at?: string | null
+          immatriculation?: string | null
+          marque?: string | null
+          modele?: string | null
+          nombre_places_total?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      decrease_available_seats: {
-        Args: { trip_id: string; seats_count: number }
-        Returns: undefined
-      }
-      decrease_seat_availability: {
-        Args: { p_trip_id: string; p_seats_count: number }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
@@ -468,21 +459,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -500,14 +495,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -523,14 +520,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -546,14 +545,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -561,14 +562,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
