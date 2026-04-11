@@ -3,150 +3,88 @@ import { supabase } from "@/integrations/supabase/client";
 import { Reservation, ReservationStatus } from './types';
 import { toast } from "sonner";
 
-// Get all reservations for the current user
 export const getUserReservations = async (): Promise<Reservation[]> => {
   try {
-    // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
     
-    if (!user) {
-      console.error("User not authenticated");
-      return [];
-    }
-    
-    // Fetch the user's reservations
     const { data: reservations, error } = await supabase
       .from('reservations')
-      .select(`
-        id,
-        seats_reserved,
-        status,
-        created_at,
-        trip_id,
-        trip:trips(
-          id,
-          origin,
-          destination,
-          departure_time,
-          price,
-          available_seats,
-          driver_id,
-          driver:profiles(full_name)
-        )
-      `)
-      .eq('passenger_id', user.id)
+      .select('id, nombre_places_reservees, statut, created_at, trip_id, user_id, point_depart_propose, point_arrivee_propose')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-      
-    if (error) {
-      console.error("Error fetching user reservations:", error);
-      return [];
+    if (error) return [];
+    
+    // Fetch related trips
+    const tripIds = (reservations || []).filter(r => r.trip_id).map(r => r.trip_id!);
+    let tripMap = new Map<string, any>();
+    
+    if (tripIds.length > 0) {
+      const { data: tripsData } = await supabase
+        .from('trips')
+        .select('id, lieu_depart, lieu_arrivee, date_heure, prix, driver_id')
+        .in('id', tripIds);
+      if (tripsData) {
+        tripsData.forEach(t => tripMap.set(t.id, t));
+      }
     }
     
-    console.log("Raw reservations data:", reservations);
-    
-    // Transform the data to match our Reservation interface
-    const formattedReservations: Reservation[] = reservations.map(res => {
-      // Safely access nested trip data
-      let trip = undefined;
-      
-      if (res.trip) {
-        // The trip property should be the first (and only) item in the array
-        const tripData = Array.isArray(res.trip) && res.trip.length > 0 ? res.trip[0] : null;
-        
-        if (tripData) {
-          // Handle driver name safely
-          let driverName = 'Unknown Driver';
-          
-          if (tripData.driver && Array.isArray(tripData.driver) && tripData.driver.length > 0) {
-            const driverProfile = tripData.driver[0];
-            if (driverProfile && driverProfile.full_name) {
-              driverName = driverProfile.full_name;
-            }
-          }
-            
-          trip = {
-            id: tripData.id,
-            origin: tripData.origin,
-            destination: tripData.destination,
-            departure_time: tripData.departure_time,
-            price: tripData.price,
-            driver_id: tripData.driver_id,
-            profiles: {
-              full_name: driverName
-            }
-          };
-        }
-      }
-
+    return (reservations || []).map(res => {
+      const tripData = res.trip_id ? tripMap.get(res.trip_id) : null;
       return {
         id: res.id,
         trip_id: res.trip_id,
         passenger_id: user.id,
-        seats_reserved: res.seats_reserved,
-        status: res.status as ReservationStatus,
+        seats_reserved: res.nombre_places_reservees,
+        status: res.statut as ReservationStatus,
         created_at: res.created_at,
         updated_at: res.created_at,
-        trip
+        trip: tripData ? {
+          id: tripData.id,
+          origin: tripData.lieu_depart,
+          destination: tripData.lieu_arrivee,
+          departure_time: tripData.date_heure,
+          price: tripData.prix,
+          driver_id: tripData.driver_id,
+          profiles: { full_name: 'Driver' }
+        } : undefined
       };
     });
-    
-    console.log("Formatted reservations:", formattedReservations);
-    return formattedReservations;
-  } catch (error) {
-    console.error("Failed to get user reservations:", error);
+  } catch {
     return [];
   }
 };
 
-// Cancel a reservation
 export const cancelReservation = async (reservationId: string): Promise<boolean> => {
   try {
-    // First get the reservation to get the trip ID and seats
     const { data: reservation, error: fetchError } = await supabase
       .from('reservations')
-      .select('trip_id, seats_reserved')
+      .select('trip_id, nombre_places_reservees')
       .eq('id', reservationId)
       .single();
-      
-    if (fetchError) {
-      console.error("Error fetching reservation:", fetchError);
-      return false;
-    }
+    if (fetchError) return false;
     
-    // Update the reservation status
     const { error: updateError } = await supabase
       .from('reservations')
-      .update({ status: 'cancelled' as ReservationStatus })
+      .update({ statut: 'cancelled' })
       .eq('id', reservationId);
-      
-    if (updateError) {
-      console.error("Error cancelling reservation:", updateError);
-      return false;
-    }
+    if (updateError) return false;
     
-    // Update the available seats in the trip
     if (reservation.trip_id) {
-      // First get current available seats
-      const { data: tripData, error: tripFetchError } = await supabase
+      const { data: tripData } = await supabase
         .from('trips')
-        .select('available_seats')
+        .select('places_disponibles')
         .eq('id', reservation.trip_id)
         .single();
-        
-      if (!tripFetchError && tripData) {
-        // Update available seats
-        const newSeats = tripData.available_seats + reservation.seats_reserved;
-        await supabase
-          .from('trips')
-          .update({ available_seats: newSeats })
-          .eq('id', reservation.trip_id);
+      if (tripData) {
+        const newSeats = (tripData.places_disponibles || 0) + (reservation.nombre_places_reservees || 0);
+        await supabase.from('trips').update({ places_disponibles: newSeats }).eq('id', reservation.trip_id);
       }
     }
     
     toast.success("Reservation cancelled successfully");
     return true;
-  } catch (error) {
-    console.error("Failed to cancel reservation:", error);
+  } catch {
     toast.error("Failed to cancel reservation");
     return false;
   }

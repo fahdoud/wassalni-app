@@ -1,8 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
-// Get user info for chat display
 export const getUserDisplayInfo = async (userId: string) => {
   try {
     const { data, error } = await supabase
@@ -10,84 +8,49 @@ export const getUserDisplayInfo = async (userId: string) => {
       .select('full_name')
       .eq('id', userId)
       .single();
-      
     if (error) throw error;
-    
-    return {
-      id: userId,
-      name: data.full_name || "Unknown User"
-    };
-  } catch (error) {
-    console.error("Error fetching user info:", error);
-    return {
-      id: userId,
-      name: "Unknown User"
-    };
+    return { id: userId, name: data.full_name || "Unknown User" };
+  } catch {
+    return { id: userId, name: "Unknown User" };
   }
 };
 
-// Get all participants in a ride (driver + passengers)
 export const getRideParticipants = async (rideId: string) => {
   try {
-    // First get the ride to get the driver
     const { data: ride, error: rideError } = await supabase
       .from('trips')
       .select('driver_id')
       .eq('id', rideId)
       .single();
-      
     if (rideError) throw rideError;
     
-    // Then get all passengers from reservations
     const { data: reservations, error: resError } = await supabase
       .from('reservations')
-      .select('passenger_id')
+      .select('user_id')
       .eq('trip_id', rideId)
-      .eq('status', 'confirmed');
-      
+      .eq('statut', 'confirmed');
     if (resError) throw resError;
     
-    // Combine driver and passengers
-    const participantIds = [
-      ride.driver_id,
-      ...reservations.map(r => r.passenger_id)
-    ].filter(Boolean); // Remove any null/undefined
-    
-    return participantIds;
-  } catch (error) {
-    console.error("Error fetching ride participants:", error);
+    return [ride.driver_id, ...(reservations || []).map(r => r.user_id)].filter(Boolean) as string[];
+  } catch {
     return [];
   }
 };
 
-// Send notification to all participants when a new message is added
-export const notifyRideParticipants = async (
-  rideId: string, 
-  senderId: string, 
-  messageContent: string
-) => {
+export const notifyRideParticipants = async (rideId: string, senderId: string, messageContent: string) => {
   try {
-    // Get all participants
     const participants = await getRideParticipants(rideId);
-    
-    // Get sender info
     const { name: senderName } = await getUserDisplayInfo(senderId);
+    const msg = `New message from ${senderName}: ${messageContent.substring(0, 30)}${messageContent.length > 30 ? '...' : ''}`;
     
-    // Create notification message
-    const notificationMessage = `New message in ride chat from ${senderName}: ${messageContent.substring(0, 30)}${messageContent.length > 30 ? '...' : ''}`;
-    
-    // Send notification to all participants except sender
     for (const participantId of participants) {
       if (participantId !== senderId) {
-        // Insert in-app notification
-        await supabase
-          .from('notifications')
-          .insert({
-            user_id: participantId,
-            message: notificationMessage,
-            type: 'chat',
-            phone: '' // Required by the schema but not used for in-app notifications
-          });
+        await supabase.from('notifications').insert({
+          user_id: participantId,
+          message: msg,
+          type: 'chat',
+          titre: 'New Chat Message'
+        });
       }
     }
   } catch (error) {
