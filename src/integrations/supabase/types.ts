@@ -160,6 +160,36 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ratings: {
         Row: {
           commentaire: string | null
@@ -262,6 +292,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ride_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          ride_id: string
+          sender_id: string
+          sender_name: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          ride_id: string
+          sender_id: string
+          sender_name: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          ride_id?: string
+          sender_id?: string
+          sender_name?: string
+        }
+        Relationships: []
       }
       transactions: {
         Row: {
