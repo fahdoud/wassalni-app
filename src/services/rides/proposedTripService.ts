@@ -2,96 +2,57 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Create a proposed trip
 export const createProposedTrip = async (
-  driverId: string,
-  origin: string,
-  destination: string,
-  departureTime: string,
-  price: number,
-  availableSeats: number,
-  description?: string
+  driverId: string, origin: string, destination: string,
+  departureTime: string, price: number, availableSeats: number, description?: string
 ) => {
   try {
     const { data, error } = await supabase
-      .from('proposed_trips')
+      .from('trips')
       .insert({
         driver_id: driverId,
-        origin,
-        destination,
-        departure_time: departureTime,
-        price,
-        available_seats: availableSeats,
-        description,
-        status: 'pending'
+        lieu_depart: origin,
+        lieu_arrivee: destination,
+        date_heure: departureTime,
+        prix: price,
+        places_disponibles: availableSeats,
+        statut: 'active'
       })
       .select()
       .single();
-      
-    if (error) {
-      console.error("Error creating proposed trip:", error);
-      throw new Error(error.message);
-    }
-    
+    if (error) throw new Error(error.message);
     return data;
   } catch (error: any) {
-    console.error("Failed to create proposed trip:", error);
-    toast.error(error.message || "Failed to create proposed trip");
+    toast.error(error.message || "Failed to create trip");
     return null;
   }
 };
 
-// Get all proposed trips
 export const getProposedTrips = async () => {
   try {
     const { data, error } = await supabase
-      .from('proposed_trips')
-      .select(`
-        id,
-        origin,
-        destination,
-        departure_time,
-        price,
-        available_seats,
-        status,
-        description,
-        created_at,
-        driver_id,
-        profiles (full_name)
-      `)
-      .eq('status', 'pending')
-      .order('departure_time', { ascending: true });
-      
-    if (error) {
-      console.error("Error fetching proposed trips:", error);
-      throw new Error(error.message);
-    }
-    
+      .from('trips')
+      .select('id, lieu_depart, lieu_arrivee, date_heure, prix, places_disponibles, statut, created_at, driver_id')
+      .eq('statut', 'active')
+      .order('date_heure', { ascending: true });
+    if (error) throw new Error(error.message);
     return data;
-  } catch (error) {
-    console.error("Failed to get proposed trips:", error);
+  } catch {
     return [];
   }
 };
 
-// Update a proposed trip status
-export const updateProposedTripStatus = async (tripId: string, status: 'pending' | 'approved' | 'rejected') => {
+export const updateProposedTripStatus = async (tripId: string, status: string) => {
   try {
     const { data, error } = await supabase
-      .from('proposed_trips')
-      .update({ status })
+      .from('trips')
+      .update({ statut: status })
       .eq('id', tripId)
       .select()
       .single();
-      
-    if (error) {
-      console.error("Error updating proposed trip status:", error);
-      throw new Error(error.message);
-    }
-    
+    if (error) throw new Error(error.message);
     return data;
   } catch (error: any) {
-    console.error("Failed to update proposed trip status:", error);
     toast.error(error.message || "Failed to update trip status");
     return null;
   }

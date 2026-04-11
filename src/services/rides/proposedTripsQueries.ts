@@ -2,70 +2,45 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Get all trips offered by the current user
 export const getUserProposedTrips = async () => {
   try {
-    // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
     
-    if (!user) {
-      console.error("User not authenticated");
-      return [];
-    }
-    
-    // Fetch the user's trips
     const { data: trips, error } = await supabase
       .from('trips')
-      .select(`
-        id,
-        origin,
-        destination,
-        departure_time,
-        price,
-        available_seats,
-        status,
-        created_at,
-        reservations:id(
-          id,
-          passenger_id,
-          seats_reserved,
-          status,
-          profiles:passenger_id(full_name)
-        )
-      `)
+      .select('id, lieu_depart, lieu_arrivee, date_heure, prix, places_disponibles, statut, created_at')
       .eq('driver_id', user.id)
-      .order('departure_time', { ascending: true });
-      
-    if (error) {
-      console.error("Error fetching user trips:", error);
-      return [];
-    }
+      .order('date_heure', { ascending: true });
+    if (error) return [];
     
-    console.log("User proposed trips:", trips);
-    return trips;
-  } catch (error) {
-    console.error("Failed to get user trips:", error);
+    // Transform to expected format
+    return (trips || []).map(t => ({
+      id: t.id,
+      origin: t.lieu_depart,
+      destination: t.lieu_arrivee,
+      departure_time: t.date_heure,
+      price: t.prix,
+      available_seats: t.places_disponibles,
+      status: t.statut,
+      created_at: t.created_at,
+      reservations: []
+    }));
+  } catch {
     return [];
   }
 };
 
-// Cancel a trip
 export const cancelTrip = async (tripId: string) => {
   try {
     const { error } = await supabase
       .from('trips')
-      .update({ status: 'cancelled' })
+      .update({ statut: 'cancelled' })
       .eq('id', tripId);
-      
-    if (error) {
-      console.error("Error cancelling trip:", error);
-      throw new Error(error.message);
-    }
-    
+    if (error) throw error;
     toast.success("Trip cancelled successfully");
     return true;
-  } catch (error) {
-    console.error("Failed to cancel trip:", error);
+  } catch {
     toast.error("Failed to cancel trip");
     return false;
   }

@@ -3,180 +3,82 @@ import { supabase } from "@/integrations/supabase/client";
 import { Ride } from './types';
 import { getMockRides, getAlgerMockRides } from './mockRides';
 
-// Get all available rides
 export const getRides = async (): Promise<Ride[]> => {
   try {
-    console.log("Fetching rides with cache busting");
-    
-    // First try to get trips directly
     const { data: trips, error } = await supabase
       .from('trips')
-      .select(`
-        id,
-        origin,
-        destination,
-        departure_time,
-        price,
-        available_seats,
-        driver_id,
-        profiles:drivers(full_name)
-      `)
-      .eq('status', 'active');
+      .select('id, lieu_depart, lieu_arrivee, date_heure, prix, places_disponibles, driver_id, statut')
+      .eq('statut', 'active');
     
-    if (error) {
-      console.error("Error fetching rides:", error);
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
-    // If we successfully got trips, transform them to Ride objects
     if (trips && trips.length > 0) {
-      console.log("Trips fetched successfully:", trips);
-      
-      // Transform the data to match our Ride interface
-      const rides: Ride[] = trips.map(trip => {
-        // Get driver name from profiles join or use fallback
-        const driverName = trip.profiles && 
-          typeof trip.profiles === 'object' && 
-          'full_name' in trip.profiles ? 
-          String(trip.profiles.full_name || "Unknown Driver") : 
-          "Unknown Driver";
-
-        return {
-          id: trip.id,
-          driver: driverName,
-          from: trip.origin,
-          to: trip.destination,
-          date: new Date(trip.departure_time).toISOString().split('T')[0],
-          time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          price: trip.price,
-          seats: trip.available_seats,
-          rating: 4.7, // Default rating - in a real app would come from reviews
-          trip_id: trip.id
-        };
-      });
-
-      console.log("Transformed rides data:", rides);
+      const rides: Ride[] = trips.map(trip => ({
+        id: trip.id,
+        driver: "Driver",
+        from: trip.lieu_depart || '',
+        to: trip.lieu_arrivee || '',
+        date: trip.date_heure ? new Date(trip.date_heure).toISOString().split('T')[0] : '',
+        time: trip.date_heure ? new Date(trip.date_heure).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+        price: trip.prix || 0,
+        seats: trip.places_disponibles || 0,
+        rating: 4.7,
+        trip_id: trip.id
+      }));
       return rides;
     }
     
-    // If no actual database trips, return mock rides
     return getMockRides();
-  } catch (error) {
-    console.error("Failed to get rides:", error);
+  } catch {
     return getMockRides();
   }
 };
 
-// Get a specific ride by ID
 export const getRideById = async (rideId: string): Promise<Ride | null> => {
-  // Check if the ID is from a mock ride (simple numeric ID)
   if (/^\d+$/.test(rideId)) {
-    console.log("Using mock ride with ID:", rideId);
-    const mockRides = getMockRides();
-    // First check Constantine rides
-    let mockRide = mockRides.find(ride => ride.id === rideId);
-    
-    // If not found in Constantine rides, check Alger rides
-    if (!mockRide) {
-      const algerRides = getAlgerMockRides();
-      mockRide = algerRides.find(ride => ride.id === rideId);
-    }
-    
+    let mockRide = getMockRides().find(ride => ride.id === rideId);
+    if (!mockRide) mockRide = getAlgerMockRides().find(ride => ride.id === rideId);
     return mockRide || null;
   }
   
-  // Otherwise try to fetch from Supabase (UUID format)
   try {
-    console.log("Fetching real ride with ID:", rideId);
-    
-    // Fetch the trip data with driver join
     const { data: trip, error } = await supabase
       .from('trips')
-      .select(`
-        id,
-        origin,
-        destination,
-        departure_time,
-        price,
-        available_seats,
-        driver_id,
-        profiles:drivers(full_name)
-      `)
+      .select('id, lieu_depart, lieu_arrivee, date_heure, prix, places_disponibles, driver_id, statut')
       .eq('id', rideId)
       .single();
     
-    if (error) {
-      console.error("Error fetching ride:", error);
-      return null;
-    }
+    if (error) return null;
 
-    console.log("Trip data fetched:", trip);
-
-    // Get driver name from profiles join or use fallback
-    const driverName = trip.profiles && 
-      typeof trip.profiles === 'object' && 
-      'full_name' in trip.profiles ? 
-      String(trip.profiles.full_name || "Unknown Driver") : 
-      "Unknown Driver";
-
-    // Transform the trip data to our Ride interface
-    const ride: Ride = {
+    return {
       id: trip.id,
-      driver: driverName,
-      from: trip.origin,
-      to: trip.destination,
-      date: new Date(trip.departure_time).toISOString().split('T')[0],
-      time: new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      price: trip.price,
-      seats: trip.available_seats,
-      rating: 4.7, // Default rating - would come from reviews
+      driver: "Driver",
+      from: trip.lieu_depart || '',
+      to: trip.lieu_arrivee || '',
+      date: trip.date_heure ? new Date(trip.date_heure).toISOString().split('T')[0] : '',
+      time: trip.date_heure ? new Date(trip.date_heure).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+      price: trip.prix || 0,
+      seats: trip.places_disponibles || 0,
+      rating: 4.7,
       trip_id: trip.id
     };
-
-    console.log("Transformed ride data:", ride);
-    return ride;
-  } catch (error) {
-    console.error("Failed to get ride:", error);
+  } catch {
     return null;
   }
 };
 
-// Subscribe to changes for a specific ride
 export const subscribeToRideUpdates = (rideId: string, callback: (ride: Ride) => void) => {
-  if (/^\d+$/.test(rideId)) {
-    // Mock rides don't support real-time updates
-    console.log("Mock rides don't support real-time updates");
-    return { unsubscribe: () => {} };
-  }
+  if (/^\d+$/.test(rideId)) return { unsubscribe: () => {} };
 
-  console.log("Setting up real-time subscription for ride:", rideId);
-  
   const channel = supabase
     .channel(`ride-${rideId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'trips',
-        filter: `id=eq.${rideId}`
-      },
-      async (payload) => {
-        console.log("Received real-time update for ride:", payload);
-        
-        // Fetch the updated ride data
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'trips', filter: `id=eq.${rideId}` },
+      async () => {
         const updatedRide = await getRideById(rideId);
-        if (updatedRide) {
-          callback(updatedRide);
-        }
+        if (updatedRide) callback(updatedRide);
       }
     )
     .subscribe();
 
-  return {
-    unsubscribe: () => {
-      console.log("Unsubscribing from ride updates");
-      supabase.removeChannel(channel);
-    }
-  };
+  return { unsubscribe: () => { supabase.removeChannel(channel); } };
 };
