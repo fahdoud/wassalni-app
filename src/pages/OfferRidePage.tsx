@@ -1,16 +1,11 @@
 
 import { useLanguage } from "@/contexts/LanguageContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import Button from "@/components/Button";
-import GradientText from "@/components/ui-components/GradientText";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 
 const constantineAreas = ["Ain Abid", "Ali Mendjeli", "Bekira", "Boussouf", "Didouche Mourad", "El Khroub", "Hamma Bouziane", "Zighoud Youcef"];
@@ -21,95 +16,49 @@ const OfferRidePage = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   
-  // Create a form with react-hook-form
   const form = useForm({
-    defaultValues: {
-      from: "",
-      to: "",
-      date: "",
-      time: "",
-      seats: "1",
-      price: "150",
-      description: ""
-    }
+    defaultValues: { from: "", to: "", date: "", time: "", seats: "1", price: "150", description: "" }
   });
 
-  // Check if user is logged in
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        console.log("User is logged in:", session.user);
         setUser(session.user);
       } else {
         toast.error("Please login to offer a ride");
         navigate("/driver-signin");
       }
     };
-    
     checkAuth();
   }, [navigate]);
 
   const handleSubmit = async (formData: any) => {
-    if (!user) {
-      toast.error("You must be logged in to offer a ride");
-      return;
-    }
-    
+    if (!user) { toast.error("You must be logged in"); return; }
     setLoading(true);
     
     try {
-      console.log("Submitting ride offer:", formData);
+      const departureTime = new Date(`${formData.date}T${formData.time}:00`);
       
-      // Combine date and time for departure_time
-      const departureTimeStr = `${formData.date}T${formData.time}:00`;
-      const departureTime = new Date(departureTimeStr);
-      
-      // Create the trip in the database
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('trips')
-        .insert({
+        .insert([{
           driver_id: user.id,
-          origin: formData.from,
-          destination: formData.to,
-          departure_time: departureTime.toISOString(),
-          price: parseFloat(formData.price),
-          available_seats: parseInt(formData.seats),
-          description: formData.description,
-          status: 'active'
-        })
-        .select()
-        .single();
+          lieu_depart: formData.from,
+          lieu_arrivee: formData.to,
+          date_heure: departureTime.toISOString(),
+          prix: parseFloat(formData.price),
+          places_disponibles: parseInt(formData.seats),
+          statut: 'active'
+        }]);
       
-      if (error) {
-        console.error("Error creating trip:", error);
-        throw new Error(error.message);
-      }
+      if (error) throw new Error(error.message);
       
-      console.log("Trip created successfully:", data);
-      
-      // Show success toast
       toast.success("Ride offered successfully!");
-      
-      // Reset form
-      form.reset({
-        from: "",
-        to: "",
-        date: "",
-        time: "",
-        seats: "1",
-        price: "150",
-        description: ""
-      });
-      
-      // Redirect to rides page after a short delay
-      setTimeout(() => {
-        navigate("/rides");
-      }, 1500);
-      
+      form.reset();
+      setTimeout(() => navigate("/rides"), 1500);
     } catch (error: any) {
-      console.error("Failed to offer ride:", error);
-      toast.error(error.message || "Failed to offer ride. Please try again.");
+      toast.error(error.message || "Failed to offer ride.");
     } finally {
       setLoading(false);
     }
@@ -123,106 +72,65 @@ const OfferRidePage = () => {
           <p className="text-sm text-muted-foreground">Share your journey and help others</p>
         </div>
 
-          <div className="max-w-2xl mx-auto">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="glass-card p-8 rounded-xl">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">From</label>
-                      <select 
-                        {...form.register("from")}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        required
-                      >
-                        <option value="">Select pickup location</option>
-                        {constantineAreas.map(area => (
-                          <option key={area} value={area}>{area}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">To</label>
-                      <select 
-                        {...form.register("to")}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        required
-                      >
-                        <option value="">Select destination</option>
-                        {constantineAreas.map(area => (
-                          <option key={area} value={area}>{area}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Date</label>
-                      <input 
-                        type="date"
-                        {...form.register("date")}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Time</label>
-                      <input 
-                        type="time"
-                        {...form.register("time")}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Available Seats</label>
-                      <input 
-                        type="number"
-                        {...form.register("seats")}
-                        min="1"
-                        max="7"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Price per Seat (DZD)</label>
-                      <input 
-                        type="number"
-                        {...form.register("price")}
-                        min="50"
-                        step="10"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
+        <div className="max-w-2xl mx-auto">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="glass-card p-8 rounded-xl">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Additional Information</label>
-                    <textarea 
-                      {...form.register("description")}
-                      rows={4}
-                      placeholder="Add any details about your ride, such as meetup point, luggage space, etc."
-                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-wassalni-green/30 focus:border-wassalni-green outline-none transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    ></textarea>
+                    <label className="block text-sm font-medium text-foreground mb-1">From</label>
+                    <select {...form.register("from")} className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all" required>
+                      <option value="">Select pickup location</option>
+                      {constantineAreas.map(area => (<option key={area} value={area}>{area}</option>))}
+                    </select>
                   </div>
-
-                  <div className="flex justify-center">
-                    <Button type="submit" size="lg" isLoading={loading} disabled={loading}>
-                      {loading ? "Offering Ride..." : "Offer Ride"}
-                    </Button>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">To</label>
+                    <select {...form.register("to")} className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all" required>
+                      <option value="">Select destination</option>
+                      {constantineAreas.map(area => (<option key={area} value={area}>{area}</option>))}
+                    </select>
                   </div>
                 </div>
-              </form>
-            </Form>
-          </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Date</label>
+                    <input type="date" {...form.register("date")} className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Time</label>
+                    <input type="time" {...form.register("time")} className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all" required />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Available Seats</label>
+                    <input type="number" {...form.register("seats")} min="1" max="7" className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Price per Seat (DZD)</label>
+                    <input type="number" {...form.register("price")} min="50" step="10" className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all" required />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">Additional Information</label>
+                  <textarea {...form.register("description")} rows={4} placeholder="Add any details about your ride..." className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all"></textarea>
+                </div>
+
+                <div className="flex justify-center">
+                  <Button type="submit" size="lg" isLoading={loading} disabled={loading}>
+                    {loading ? "Offering Ride..." : "Offer Ride"}
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
+    </div>
   );
 };
 
